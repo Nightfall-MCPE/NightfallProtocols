@@ -7,6 +7,8 @@ use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
+use ReflectionException;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 final class CustomSessionStartPacketHandler extends PacketHandler{
@@ -15,10 +17,13 @@ final class CustomSessionStartPacketHandler extends PacketHandler{
      * @phpstan-param Closure() : void $onSuccess
      */
     public function __construct(
-        private NetworkSession $session,
+        private CustomNetworkSession $session,
         private Closure $onSuccess
     ){}
 
+    /**
+     * @throws ReflectionException
+     */
     public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
         $protocolVersion = $packet->getProtocolVersion();
         if(!$this->isCompatibleProtocol($protocolVersion)){
@@ -26,6 +31,8 @@ final class CustomSessionStartPacketHandler extends PacketHandler{
 
             return true;
         }
+
+        $this->session->setProtocol($protocolVersion);
 
         $this->session->sendDataPacket(NetworkSettingsPacket::create(
             NetworkSettingsPacket::COMPRESS_EVERYTHING,

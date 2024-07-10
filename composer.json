@@ -1,0 +1,15 @@
+{
+  "name": "nightfall-mcpe/nightfallprotocols",
+  "description": "Simple multi-version plugin for nightfall-mcpe",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "superomarking",
+      "email": "superomarking@outlook.com"
+    }
+  ],
+  "require": {
+    "pocketmine/pocketmine-mp": "*"
+  }
+}

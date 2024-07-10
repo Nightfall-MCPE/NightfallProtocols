@@ -9,6 +9,7 @@ use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\raklib\RakLibPacketSender;
 use pocketmine\Server;
 use ReflectionException;
+use Supero\NightfallProtocol\network\static\CustomPacketPool;
 use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class CustomRaklibInterface extends RakLibInterface
@@ -21,7 +22,7 @@ class CustomRaklibInterface extends RakLibInterface
         $session = new CustomNetworkSession(
             Server::getInstance(),
             ReflectionUtils::getProperty(RakLibInterface::class, $this, "network")->getSessionManager(),
-            PacketPool::getInstance(),
+            CustomPacketPool::getInstance(),
             new RakLibPacketSender($sessionId, $this),
             ReflectionUtils::getProperty(RakLibInterface::class, $this, "packetBroadcaster"),
             ReflectionUtils::getProperty(RakLibInterface::class, $this, "entityEventBroadcaster"),
