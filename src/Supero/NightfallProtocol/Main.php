@@ -15,19 +15,22 @@ use pocketmine\network\mcpe\StandardPacketBroadcaster;
 use pocketmine\network\query\DedicatedQueryNetworkInterface;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
-use pocketmine\utils\Filesystem;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
 
-define('DATA_FILES', dirname(__DIR__, 3) . "/resources/versions");
-
 class Main extends PluginBase
 {
+    public static function getProtocolDataFolder(): string
+    {
+        return dirname(__DIR__, 3) . "\\resources\\versions";
+    }
+
     /**
      * @throws ReflectionException
      */
     protected function onEnable(): void
     {
+
         $server = $this->getServer();
 
         $regInterface = function(Server $server, bool $ipv6){
@@ -66,10 +69,5 @@ class Main extends PluginBase
                 }
             }, EventPriority::NORMAL, $this);
         }
-    }
-
-    public static function getDataFilesPath() : string
-    {
-        return DATA_FILES;
     }
 }

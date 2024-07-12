@@ -2,6 +2,7 @@
 
 namespace Supero\NightfallProtocol\network\static;
 
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -33,7 +34,7 @@ class PacketConverter
         LevelSoundEventPacket::NETWORK_ID
     ];
 
-    public static function handleServerbound(ServerboundPacket $packet, CustomTypeConverter $converter) : ?ServerboundPacket
+    public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ?ServerboundPacket
     {
         if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return null;
         if ($packet instanceof LevelSoundEventPacket) {
@@ -46,7 +47,7 @@ class PacketConverter
         return null;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, CustomTypeConverter $converter) : ?ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter) : ?ClientboundPacket
     {
         if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return null;
         switch ($packet::NETWORK_ID) {

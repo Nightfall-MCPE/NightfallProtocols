@@ -7,6 +7,7 @@ use pocketmine\network\mcpe\protocol\serializer\ItemTypeDictionary;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Filesystem;
+use Supero\NightfallProtocol\Main;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class CustomItemTypeDictionaryFromDataHelper
@@ -21,7 +22,7 @@ class CustomItemTypeDictionaryFromDataHelper
         if($protocolId === CustomProtocolInfo::CURRENT_PROTOCOL){
             $path = BedrockDataFiles::REQUIRED_ITEM_LIST_JSON;
         } else {
-            $path = DATA_FILES;
+            $path = Main::getProtocolDataFolder() . '/required_item_list.json';
         }
         return self::loadFromString(Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId] . ".json", $path)));
     }

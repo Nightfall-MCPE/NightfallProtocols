@@ -12,6 +12,7 @@ use pocketmine\network\mcpe\convert\BlockStateDictionary;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Filesystem;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
+use Supero\NightfallProtocol\Main;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class CustomBlockTranslator
@@ -52,8 +53,8 @@ class CustomBlockTranslator
             $canonicalBlockStatesRaw = Filesystem::fileGetContents(str_replace(".nbt", self::PATHS[$protocolId][self::CANONICAL_BLOCK_STATES_PATH] . ".nbt", BedrockDataFiles::CANONICAL_BLOCK_STATES_NBT));
             $metaMappingRaw = Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId][self::BLOCK_STATE_META_MAP_PATH] . ".json", BedrockDataFiles::BLOCK_STATE_META_MAP_JSON));
         } else {
-            $canonicalBlockStatesRaw = Filesystem::fileGetContents(str_replace(".nbt", self::PATHS[$protocolId][self::CANONICAL_BLOCK_STATES_PATH] . ".nbt", DATA_FILES));
-            $metaMappingRaw = Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId][self::BLOCK_STATE_META_MAP_PATH] . ".json", DATA_FILES));
+            $canonicalBlockStatesRaw = Filesystem::fileGetContents(str_replace(".nbt", self::PATHS[$protocolId][self::CANONICAL_BLOCK_STATES_PATH] . ".nbt", Main::getProtocolDataFolder() . '/canonical_block_states.nbt'));
+            $metaMappingRaw = Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId][self::BLOCK_STATE_META_MAP_PATH] . ".json", Main::getProtocolDataFolder() . '/block_state_meta_map.json'));
         }
         return new self(
             BlockStateDictionary::loadFromString($canonicalBlockStatesRaw, $metaMappingRaw),

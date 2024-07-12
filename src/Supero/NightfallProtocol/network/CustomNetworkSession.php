@@ -252,8 +252,9 @@ class CustomNetworkSession extends NetworkSession
         if(!($packet instanceof ServerboundPacket)){
             throw new PacketHandlingException("Unexpected non-serverbound packet");
         }
-
-        $packet = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter")) ?? $packet;
+        //Ugly
+        $convertedPacket = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter")) ?? $packet;
+        $packet = $convertedPacket;
 
         $timings = Timings::getReceiveDataPacketTimings($packet);
         $timings->startTiming();
