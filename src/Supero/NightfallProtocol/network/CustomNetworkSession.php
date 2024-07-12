@@ -44,7 +44,9 @@ use ReflectionException;
 use Supero\NightfallProtocol\network\chunk\CustomChunkCache;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
+use Supero\NightfallProtocol\network\static\PacketConverter;
 use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class CustomNetworkSession extends NetworkSession
@@ -63,12 +65,12 @@ class CustomNetworkSession extends NetworkSession
     {
         $this->protocol = $protocol;
 
-        echo "SET PROTOCOL";
-
         $broadcaster = new CustomStandardPacketBroadcaster(Server::getInstance(), $protocol);
+        $typeConverter = CustomTypeConverter::getFakeInstance($protocol);
 
+        $this->setProperty("typeConverter", $typeConverter);
         $this->setProperty("broadcaster", $broadcaster);
-        $this->setProperty("entityEventBroadcaster", new StandardEntityEventBroadcaster($broadcaster, $this->getProperty("typeConverter")));
+        $this->setProperty("entityEventBroadcaster", new StandardEntityEventBroadcaster($broadcaster, $typeConverter));
     }
 
 
@@ -251,6 +253,8 @@ class CustomNetworkSession extends NetworkSession
             throw new PacketHandlingException("Unexpected non-serverbound packet");
         }
 
+        $packet = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter")) ?? $packet;
+
         $timings = Timings::getReceiveDataPacketTimings($packet);
         $timings->startTiming();
 
@@ -336,6 +340,7 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     public function sendDataPacket(ClientboundPacket $packet, bool $immediate = false) : bool{
+        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter")) ?? $packet;
         return $this->sendDataPacketInternal($packet, $immediate, null);
     }
 

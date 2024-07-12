@@ -13,6 +13,7 @@ use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\FastChunkSerializer;
 use Supero\NightfallProtocol\network\chunk\serializer\CustomChunkSerializer;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketBatch;
 
 class CustomChunkRequestTask extends AsyncTask{
@@ -49,12 +50,12 @@ class CustomChunkRequestTask extends AsyncTask{
         $dimensionId = $this->dimensionId;
 
         $subCount = CustomChunkSerializer::getSubChunkCount($chunk, $dimensionId);
-        $converter = TypeConverter::getInstance();
-        $payload = CustomChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->protocol, $this->tiles);
+        $converter = CustomTypeConverter::getFakeInstance($this->protocol);
+        $payload = CustomChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getCustomBlockTranslator(), $this->protocol, $this->tiles);
 
         $stream = new BinaryStream();
-        CustomPacketBatch::encodePackets($this->protocol, $stream, [LevelChunkPacket::create(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, $subCount, false, null, $payload)]);
 
+        CustomPacketBatch::encodePackets($this->protocol, $stream, [LevelChunkPacket::create(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, $subCount, false, null, $payload)]);
 
         $compressor = $this->compressor->deserialize();
         $this->setResult(chr($compressor->getNetworkId()) . $compressor->compress($stream->getBuffer()));

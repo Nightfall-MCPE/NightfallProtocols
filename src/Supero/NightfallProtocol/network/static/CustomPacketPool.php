@@ -13,6 +13,7 @@ use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 
+//This class isn't static but eh, it's whatever
 class CustomPacketPool extends PacketPool
 {
     protected static ?PacketPool $instance = null;

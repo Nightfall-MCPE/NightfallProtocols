@@ -6,7 +6,6 @@ use pocketmine\block\tile\Spawnable;
 use pocketmine\data\bedrock\BiomeIds;
 use pocketmine\data\bedrock\LegacyBiomeIdToStringIdMap;
 use pocketmine\nbt\TreeRoot;
-use pocketmine\network\mcpe\convert\BlockTranslator;
 use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
@@ -15,6 +14,7 @@ use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\SubChunk;
 use pocketmine\world\format\PalettedBlockArray;
+use Supero\NightfallProtocol\network\static\convert\CustomBlockTranslator;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 
 class CustomChunkSerializer
@@ -63,7 +63,7 @@ class CustomChunkSerializer
     /**
      * @phpstan-param DimensionIds::* $dimensionId
      */
-    public static function serializeFullChunk(Chunk $chunk, int $dimensionId, BlockTranslator $blockTranslator, int $protocol, ?string $tiles = null) : string{
+    public static function serializeFullChunk(Chunk $chunk, int $dimensionId, CustomBlockTranslator $blockTranslator, int $protocol, ?string $tiles = null) : string{
         $stream = CustomPacketSerializer::encoder();
         $stream->setProtocol($protocol);
 
@@ -92,7 +92,7 @@ class CustomChunkSerializer
         return $stream->getBuffer();
     }
 
-    public static function serializeSubChunk(SubChunk $subChunk, BlockTranslator $blockTranslator, PacketSerializer $stream, bool $persistentBlockStates) : void{
+    public static function serializeSubChunk(SubChunk $subChunk, CustomBlockTranslator $blockTranslator, PacketSerializer $stream, bool $persistentBlockStates) : void{
         $layers = $subChunk->getBlockLayers();
         $stream->putByte(8); //version
 

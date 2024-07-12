@@ -6,19 +6,20 @@ namespace Supero\NightfallProtocol;
 
 use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
-use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\mcpe\StandardPacketBroadcaster;
 use pocketmine\network\query\DedicatedQueryNetworkInterface;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
+use pocketmine\utils\Filesystem;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
+
+define('DATA_FILES', dirname(__DIR__, 3) . "/resources/versions");
 
 class Main extends PluginBase
 {
@@ -53,15 +54,22 @@ class Main extends PluginBase
                 return;
             }
 
-            $this->getLogger()->info("Prevented network interface " . get_class($interface) . " from being registered");
+            $this->getLogger()->debug("Prevented network interface " . get_class($interface) . " from being registered");
             $event->cancel();
         }, EventPriority::NORMAL, $this);
 
-        $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
-            $packet = $event->getPacket();
-            if($packet instanceof PacketViolationWarningPacket){
-                $this->getLogger()->warning("Received [{$packet->getType()}] Packet Violation message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
-            }
-        }, EventPriority::NORMAL, $this);
+        if($this->getConfig()->get("debug-mode")){
+            $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
+                $packet = $event->getPacket();
+                if($packet instanceof PacketViolationWarningPacket){
+                    $this->getLogger()->warning("Received [{$packet->getType()}] Packet Violation message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
+                }
+            }, EventPriority::NORMAL, $this);
+        }
+    }
+
+    public static function getDataFilesPath() : string
+    {
+        return DATA_FILES;
     }
 }
