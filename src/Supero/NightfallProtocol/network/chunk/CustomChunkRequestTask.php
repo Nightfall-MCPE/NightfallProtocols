@@ -50,7 +50,7 @@ class CustomChunkRequestTask extends AsyncTask{
         $dimensionId = $this->dimensionId;
 
         $subCount = CustomChunkSerializer::getSubChunkCount($chunk, $dimensionId);
-        $converter = CustomTypeConverter::getFakeInstance($this->protocol);
+        $converter = CustomTypeConverter::getProtocolInstance($this->protocol);
         $payload = CustomChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getCustomBlockTranslator(), $this->protocol, $this->tiles);
 
         $stream = new BinaryStream();

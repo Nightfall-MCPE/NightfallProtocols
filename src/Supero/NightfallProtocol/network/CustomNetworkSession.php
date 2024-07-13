@@ -16,7 +16,6 @@ use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\handler\HandshakePacketHandler;
-use pocketmine\network\mcpe\handler\LoginPacketHandler;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\handler\PreSpawnPacketHandler;
 use pocketmine\network\mcpe\handler\ResourcePacksPacketHandler;
@@ -42,6 +41,7 @@ use pocketmine\utils\TextFormat;
 use pocketmine\YmlServerProperties;
 use ReflectionException;
 use Supero\NightfallProtocol\network\chunk\CustomChunkCache;
+use Supero\NightfallProtocol\network\handlers\CustomLoginPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
@@ -66,7 +66,7 @@ class CustomNetworkSession extends NetworkSession
         $this->protocol = $protocol;
 
         $broadcaster = new CustomStandardPacketBroadcaster(Server::getInstance(), $protocol);
-        $typeConverter = CustomTypeConverter::getFakeInstance($protocol);
+        $typeConverter = CustomTypeConverter::getProtocolInstance($protocol);
 
         $this->setProperty("typeConverter", $typeConverter);
         $this->setProperty("broadcaster", $broadcaster);
@@ -110,7 +110,7 @@ class CustomNetworkSession extends NetworkSession
         $this->getProperty("logger")->debug("Session start handshake completed, awaiting login packet");
         ReflectionUtils::invoke(NetworkSession::class, $this, "flushSendBuffer", true);
         $this->setProperty("enableCompression", true);
-        $this->setHandler(new LoginPacketHandler(
+        $this->setHandler(new CustomLoginPacketHandler(
             Server::getInstance(),
             $this,
             function(PlayerInfo $info) : void{
@@ -341,7 +341,8 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     public function sendDataPacket(ClientboundPacket $packet, bool $immediate = false) : bool{
-        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter")) ?? $packet;
+        $convertedPacket = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter")) ?? $packet;
+        $packet = $convertedPacket;
         return $this->sendDataPacketInternal($packet, $immediate, null);
     }
 

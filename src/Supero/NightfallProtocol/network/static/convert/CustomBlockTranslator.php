@@ -8,7 +8,6 @@ use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\BlockStateSerializeException;
 use pocketmine\data\bedrock\block\BlockStateSerializer;
 use pocketmine\data\bedrock\block\BlockTypeNames;
-use pocketmine\network\mcpe\convert\BlockStateDictionary;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Filesystem;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
@@ -56,14 +55,15 @@ class CustomBlockTranslator
             $canonicalBlockStatesRaw = Filesystem::fileGetContents(str_replace(".nbt", self::PATHS[$protocolId][self::CANONICAL_BLOCK_STATES_PATH] . ".nbt", Main::getProtocolDataFolder() . '/canonical_block_states.nbt'));
             $metaMappingRaw = Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId][self::BLOCK_STATE_META_MAP_PATH] . ".json", Main::getProtocolDataFolder() . '/block_state_meta_map.json'));
         }
+
         return new self(
-            BlockStateDictionary::loadFromString($canonicalBlockStatesRaw, $metaMappingRaw),
+            CustomBlockStateDictionary::loadFromString($canonicalBlockStatesRaw, $metaMappingRaw),
             GlobalBlockStateHandlers::getSerializer(),
         );
     }
 
     public function __construct(
-        private BlockStateDictionary $blockStateDictionary,
+        private CustomBlockStateDictionary $blockStateDictionary,
         private BlockStateSerializer $blockStateSerializer
     ){
         $this->fallbackStateData = BlockStateData::current(BlockTypeNames::INFO_UPDATE, []);
@@ -91,7 +91,7 @@ class CustomBlockTranslator
     }
 
     /**
-     * Looks up the network state data associated with the given internal state ID.
+     * Looks up the network state data associated with the given internal state ID.1
      */
     public function internalIdToNetworkStateData(int $internalStateId) : BlockStateData{
         //we don't directly use the blockstate serializer here - we can't assume that the network blockstate NBT is the
@@ -102,7 +102,7 @@ class CustomBlockTranslator
         return $this->blockStateDictionary->generateDataFromStateId($networkRuntimeId) ?? throw new AssumptionFailedError("We just looked up this state ID, so it must exist");
     }
 
-    public function getBlockStateDictionary() : BlockStateDictionary{ return $this->blockStateDictionary; }
+    public function getBlockStateDictionary() : CustomBlockStateDictionary{ return $this->blockStateDictionary; }
 
     public function getFallbackStateData() : BlockStateData{ return $this->fallbackStateData; }
 

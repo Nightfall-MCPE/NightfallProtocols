@@ -10,10 +10,11 @@ use pocketmine\data\bedrock\item\ItemTypeSerializeException;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\item\Item;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\convert\BlockStateDictionary;
 use pocketmine\network\mcpe\convert\TypeConversionException;
 use pocketmine\network\mcpe\protocol\serializer\ItemTypeDictionary;
 use pocketmine\utils\AssumptionFailedError;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class CustomItemTranslator
 {
@@ -21,10 +22,11 @@ class CustomItemTranslator
 
     public function __construct(
         private ItemTypeDictionary $itemTypeDictionary,
-        private BlockStateDictionary $blockStateDictionary,
+        private CustomBlockStateDictionary $blockStateDictionary,
         private ItemSerializer $itemSerializer,
         private ItemDeserializer $itemDeserializer,
-        private BlockItemIdMap $blockItemIdMap
+        private BlockItemIdMap $blockItemIdMap,
+        private CustomItemIdMetaDowngrader $itemDataDowngrader,
     ){}
 
     /**
@@ -46,9 +48,16 @@ class CustomItemTranslator
      * @throws ItemTypeSerializeException
      */
     public function toNetworkId(Item $item) : array{
+        //TODO: we should probably come up with a cache for this
+
         $itemData = $this->itemSerializer->serializeType($item);
 
-        $numericId = $this->itemTypeDictionary->fromStringId($itemData->getName());
+        try {
+            $numericId = $this->itemTypeDictionary->fromStringId($itemData->getName());
+        } catch (\InvalidArgumentException) {
+            throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
+        }
+
         $blockStateData = $itemData->getBlock();
 
         if($blockStateData !== null){
@@ -67,7 +76,10 @@ class CustomItemTranslator
      * @throws ItemTypeSerializeException
      */
     public function toNetworkNbt(Item $item) : CompoundTag{
-        return $this->itemSerializer->serializeStack($item)->toNbt();
+        //TODO: this relies on the assumption that network item NBT is the same as disk item NBT, which may not always
+        //be true - if we stick on an older world version while updating network version, this could be a problem (and
+        //may be a problem for multi version implementations)
+        return $this->itemSerializer->serializeStack($item, null, $this->itemDataDowngrader)->toNbt();
     }
 
     /**
@@ -77,12 +89,13 @@ class CustomItemTranslator
         try{
             $stringId = $this->itemTypeDictionary->fromIntId($networkId);
         }catch(\InvalidArgumentException $e){
+            //TODO: a quiet version of fromIntId() would be better than catching InvalidArgumentException
             throw TypeConversionException::wrap($e, "Invalid network itemstack ID $networkId");
         }
 
         $blockStateData = null;
         if($this->blockItemIdMap->lookupBlockId($stringId) !== null){
-            $blockStateData = $this->blockStateDictionary->generateDataFromStateId($networkBlockRuntimeId);
+            $blockStateData = $this->blockStateDictionary->generateCurrentDataFromStateId($networkBlockRuntimeId);
             if($blockStateData === null){
                 throw new TypeConversionException("Blockstate runtimeID $networkBlockRuntimeId does not correspond to any known blockstate");
             }
@@ -90,10 +103,22 @@ class CustomItemTranslator
             throw new TypeConversionException("Item $stringId is not a blockitem, but runtime ID $networkBlockRuntimeId was provided");
         }
 
+        [$stringId, $networkMeta] = GlobalItemDataHandlers::getUpgrader()->getIdMetaUpgrader()->upgrade($stringId, $networkMeta);
+
         try{
             return $this->itemDeserializer->deserializeType(new SavedItemData($stringId, $networkMeta, $blockStateData));
         }catch(ItemTypeDeserializeException $e){
             throw TypeConversionException::wrap($e, "Invalid network itemstack data");
         }
+    }
+
+    public static function getItemSchemaId(int $protocolId) : int{
+        return match($protocolId){
+            CustomProtocolInfo::PROTOCOL_1_21_2,
+            CustomProtocolInfo::PROTOCOL_1_21_0 => 191,
+            CustomProtocolInfo::PROTOCOL_1_20_80 => 181,
+
+            default => throw new AssumptionFailedError("Unknown protocol ID $protocolId"),
+        };
     }
 }

@@ -9,6 +9,7 @@ use pocketmine\crafting\MetaWildcardRecipeIngredient;
 use pocketmine\crafting\RecipeIngredient;
 use pocketmine\crafting\TagWildcardRecipeIngredient;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
+use pocketmine\data\bedrock\item\ItemSerializer;
 use pocketmine\data\bedrock\item\ItemTypeNames;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -31,32 +32,24 @@ use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\TagItemDescriptor;
 use pocketmine\player\GameMode;
 use pocketmine\utils\AssumptionFailedError;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
+use Supero\NightfallProtocol\utils\ProtocolSingletonTrait;
 
 class CustomTypeConverter extends TypeConverter
 {
-    private static $instance = null;
-
-    public static function getFakeInstance(int $protocol) : self{
-        if(self::$instance === null){
-            self::$instance = new self($protocol);
-        }
-        return self::$instance;
-    }
-
-    public static function setFakeInstance(self $instance) : void{
-        self::$instance = $instance;
-    }
+    use ProtocolSingletonTrait;
     private const PM_ID_TAG = "___Id___";
 
     private const RECIPE_INPUT_WILDCARD_META = 0x7fff;
 
     private BlockItemIdMap $blockItemIdMap;
     private CustomBlockTranslator $blockTranslator;
-    private ItemTranslator $itemTranslator;
+    private CustomItemTranslator $itemTranslator;
     private ItemTypeDictionary $itemTypeDictionary;
+    private CustomItemIdMetaDowngrader $itemDataDowngrader;
     private int $shieldRuntimeId;
 
     private SkinAdapter $skinAdapter;
@@ -66,22 +59,22 @@ class CustomTypeConverter extends TypeConverter
      * @throws JsonException
      */
     public function __construct(int $protocol = CustomProtocolInfo::CURRENT_PROTOCOL){
-        $this->setFakeInstance($this);
-
         $this->protocol = $protocol;
         $this->blockItemIdMap = BlockItemIdMap::getInstance();
 
         $this->blockTranslator = CustomBlockTranslator::loadFromProtocol($protocol);
         $this->itemTypeDictionary = CustomItemTypeDictionaryFromDataHelper::loadFromProtocolId($protocol);
+        $this->itemDataDowngrader = new CustomItemIdMetaDowngrader($this->itemTypeDictionary, CustomItemTranslator::getItemSchemaId($protocol));
 
         $this->shieldRuntimeId = $this->itemTypeDictionary->fromStringId(ItemTypeNames::SHIELD);
 
-        $this->itemTranslator = new ItemTranslator(
+        $this->itemTranslator = new CustomItemTranslator(
             $this->itemTypeDictionary,
             $this->blockTranslator->getBlockStateDictionary(),
             GlobalItemDataHandlers::getSerializer(),
             GlobalItemDataHandlers::getDeserializer(),
-            $this->blockItemIdMap
+            $this->blockItemIdMap,
+            $this->itemDataDowngrader
         );
 
         $this->skinAdapter = new LegacySkinAdapter();
@@ -91,7 +84,7 @@ class CustomTypeConverter extends TypeConverter
 
     public function getItemTypeDictionary() : ItemTypeDictionary{ return $this->itemTypeDictionary; }
 
-    public function getCustomItemTranslator() : ItemTranslator{ return $this->itemTranslator; }
+    public function getCustomItemTranslator() : CustomItemTranslator{ return $this->itemTranslator; }
 
     public function getSkinAdapter() : SkinAdapter{ return $this->skinAdapter; }
 
@@ -130,8 +123,11 @@ class CustomTypeConverter extends TypeConverter
             return new ProtocolRecipeIngredient(null, 0);
         }
         if($ingredient instanceof MetaWildcardRecipeIngredient){
-            $id = $this->itemTypeDictionary->fromStringId($ingredient->getItemId());
-            $meta = self::RECIPE_INPUT_WILDCARD_META;
+            $oldStringId = $ingredient->getItemId();
+            [$stringId, $meta] = $this->itemDataDowngrader->downgrade($oldStringId, 0);
+
+            $id = $this->itemTypeDictionary->fromStringId($stringId);
+            $meta = $meta === 0 && $stringId === $oldStringId ? self::RECIPE_INPUT_WILDCARD_META : $meta; // downgrader returns the same meta
             $descriptor = new IntIdMetaItemDescriptor($id, $meta);
         }elseif($ingredient instanceof ExactRecipeIngredient){
             $item = $ingredient->getItem();
