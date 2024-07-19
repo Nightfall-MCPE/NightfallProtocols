@@ -59,6 +59,11 @@ class CustomTypeConverter extends TypeConverter
      * @throws JsonException
      */
     public function __construct(int $protocol = CustomProtocolInfo::CURRENT_PROTOCOL){
+
+        parent::__construct();
+
+        $this->setProtocolInstance($this, $protocol);
+
         $this->protocol = $protocol;
         $this->blockItemIdMap = BlockItemIdMap::getInstance();
 
