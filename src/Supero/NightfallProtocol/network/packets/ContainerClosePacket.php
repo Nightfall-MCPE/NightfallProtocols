@@ -2,8 +2,10 @@
 
 namespace Supero\NightfallProtocol\network\packets;
 
+use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 
@@ -48,5 +50,14 @@ class ContainerClosePacket extends PM_Packet
             $out->putByte($this->windowType);
         }
         $out->putBool($this->server);
+    }
+
+    public function getConstructorArguments(PM_Packet|ClientboundPacket|ServerboundPacket $packet): array
+    {
+        return [
+            $packet->windowId,
+            $packet->windowType,
+            $packet->server
+        ];
     }
 }

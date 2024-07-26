@@ -10,8 +10,11 @@ use pocketmine\utils\BinaryDataException;
 
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
+use Supero\NightfallProtocol\network\packets\CraftingDataPacket;
+use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
+use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
 //This class isn't static but eh, it's whatever
 class CustomPacketPool extends PacketPool
@@ -32,6 +35,9 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new ContainerClosePacket());
         $this->registerPacket(new TextPacket());
         $this->registerPacket(new StartGamePacket());
+        $this->registerPacket(new ResourcePackStackPacket());
+        $this->registerPacket(new UpdatePlayerGameTypePacket());
+        $this->registerPacket(new CraftingDataPacket());
     }
 
     public function registerPacket(Packet $packet) : void{
