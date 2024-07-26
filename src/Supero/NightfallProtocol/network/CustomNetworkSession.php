@@ -88,11 +88,11 @@ class CustomNetworkSession extends NetworkSession
                     );
                     break;
                 case PreSpawnPacketHandler::class:
-                    $this->setHandler(new CustomPreSpawnPacketHandler(
-                            $this->getProperty("server"),
-                            $this->getProperty("player"),
-                            $this,
-                            $this->getProperty("invManager"))
+                    $handler = new CustomPreSpawnPacketHandler(
+                        $this->getProperty("server"),
+                        $this->getProperty("player"),
+                        $this,
+                        $this->getProperty("invManager")
                     );
                     break;
                 default:
@@ -252,9 +252,7 @@ class CustomNetworkSession extends NetworkSession
         if(!($packet instanceof ServerboundPacket)){
             throw new PacketHandlingException("Unexpected non-serverbound packet");
         }
-        //Ugly
-        $convertedPacket = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter")) ?? $packet;
-        $packet = $convertedPacket;
+        $packet = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter"));
 
         $timings = Timings::getReceiveDataPacketTimings($packet);
         $timings->startTiming();
@@ -341,8 +339,7 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     public function sendDataPacket(ClientboundPacket $packet, bool $immediate = false) : bool{
-        $convertedPacket = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter")) ?? $packet;
-        $packet = $convertedPacket;
+        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"));
         return $this->sendDataPacketInternal($packet, $immediate, null);
     }
 

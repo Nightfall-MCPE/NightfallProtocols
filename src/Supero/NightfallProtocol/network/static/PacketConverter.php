@@ -15,10 +15,9 @@ use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
-
 /**
  * This class is for translations within packets that go unhandled.
- * TODO: Translated all needed packets
+ * TODO: Translate all needed packets
  */
 class PacketConverter
 {
@@ -34,54 +33,72 @@ class PacketConverter
         LevelSoundEventPacket::NETWORK_ID
     ];
 
-    public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ?ServerboundPacket
+    public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
     {
-        if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return null;
+        //dupe
+        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
+        if($searchedPacket !== null && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
+            //Since we override the packet in the packet pool, the class shouldn't be  the same, making us detect packets that have been modified
+            //Allows us to use `createPacket` instead of `create`
+            //As well as get the packet arguments from `getConstructorArguments`
+            $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
+            //Don't return it just in-case the packet needs further translation below
+        }
+        if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return $packet;
+        $protocol = $converter->getProtocol();
+
         if ($packet instanceof LevelSoundEventPacket) {
             if (($packet->sound === LevelSoundEvent::BREAK && $packet->extraData !== -1) || $packet->sound === LevelSoundEvent::PLACE || $packet->sound === LevelSoundEvent::HIT || $packet->sound === LevelSoundEvent::LAND || $packet->sound === LevelSoundEvent::ITEM_USE_ON) {
-                $packet->extraData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getInstance()->getStateIdFromRuntimeId($packet->extraData));
+                $packet->extraData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->extraData));
             }
             return $packet;
         }
 
-        return null;
+        return $packet;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter) : ?ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter) : ClientboundPacket
     {
-        if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return null;
+        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
+        if($searchedPacket !== null && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
+            $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
+        }
+        if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return $packet;
+        $protocol = $converter->getProtocol();
         switch ($packet::NETWORK_ID) {
             case UpdateSubChunkBlocksPacket::NETWORK_ID:
                 /**
                  * TODO: De-code each layer and change the runtimes of each entry
                  * @see https://github.com/Flonja/multiversion/blob/master/translator/block.go#L292
                  */
-                return null;
+                return $packet;
             case UpdateBlockSyncedPacket::NETWORK_ID:
             case UpdateBlockPacket::NETWORK_ID:
                 /** @var UpdateBlockPacket $packet */
-                $packet->blockRuntimeId = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getInstance()->getStateIdFromRuntimeId($packet->blockRuntimeId));
+                $packet->blockRuntimeId = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->blockRuntimeId));
                 return $packet;
             case LevelEventPacket::NETWORK_ID:
                 /** @var LevelEventPacket $packet */
                 if ($packet->eventId === LevelEvent::PARTICLE_DESTROY || $packet->eventId === (LevelEvent::ADD_PARTICLE_MASK | ParticleIds::TERRAIN)) {
-                    $packet->eventData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getInstance()->getStateIdFromRuntimeId($packet->eventData));
+                    $packet->eventData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->eventData));
                     return $packet;
 
                 } elseif ($packet->eventId === LevelEvent::PARTICLE_PUNCH_BLOCK) {
-                    $packet->eventData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getInstance()->getStateIdFromRuntimeId($packet->eventData & 0xFFFFFF));
+                    $packet->eventData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->eventData & 0xFFFFFF));
                     return $packet;
                 }
-                return null;
+                return $packet;
             case LevelSoundEventPacket::NETWORK_ID:
                 /** @var LevelSoundEventPacket $packet */
                 if($packet->sound === LevelSoundEvent::ITEM_USE_ON){
-                    $packet->extraData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getInstance()->getStateIdFromRuntimeId($packet->extraData));
+                    $packet->extraData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->extraData));
                     return $packet;
                 }
-                return null;
+                return $packet;
             default:
-                return null;
+                return $packet;
         }
     }
 }

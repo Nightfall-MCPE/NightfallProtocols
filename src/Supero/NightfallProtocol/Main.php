@@ -6,6 +6,7 @@ namespace Supero\NightfallProtocol;
 
 use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
@@ -64,10 +65,17 @@ class Main extends PluginBase
         if($this->getConfig()->get("debug-mode")){
             $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
                 $packet = $event->getPacket();
+                var_dump($packet::class);
                 if($packet instanceof PacketViolationWarningPacket){
                     $this->getLogger()->warning("Received [{$packet->getType()}] Packet Violation message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
                 }
             }, EventPriority::NORMAL, $this);
+            $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
+                foreach ($event->getPackets() as $packet) {
+                    var_dump($packet::class);
+                }
+            }, EventPriority::NORMAL, $this);
+
         }
     }
 }

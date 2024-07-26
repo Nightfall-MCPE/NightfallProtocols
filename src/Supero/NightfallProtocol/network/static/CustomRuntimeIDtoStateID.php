@@ -3,27 +3,28 @@
 namespace Supero\NightfallProtocol\network\static;
 
 use pocketmine\block\RuntimeBlockStateRegistry;
-use pocketmine\network\mcpe\convert\TypeConverter;
-use pocketmine\utils\SingletonTrait;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
+use Supero\NightfallProtocol\utils\ProtocolSingletonTrait;
 
 class CustomRuntimeIDtoStateID
 {
-    use SingletonTrait;
+    use ProtocolSingletonTrait;
 
     private array $runtimeIdToStateId = [];
 
-    public function __construct()
+    public function __construct(int $protocol)
     {
-        $blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
+        $this->setProtocolInstance($this, $protocol);
+        $blockTranslator = CustomTypeConverter::getInstance()->getBlockTranslator();
         foreach (RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state) {
             $blockRuntimeId = $blockTranslator->internalIdToNetworkId($stateId = $state->getStateId());
-            $this->runtimeIdToStateId[$blockRuntimeId] = $stateId;
+            $this->runtimeIdToStateId[$protocol][$blockRuntimeId] = $stateId;
         }
     }
 
     public function getStateIdFromRuntimeId(int $blockRuntimeId): int
     {
-        return $this->runtimeIdToStateId[$blockRuntimeId] ?? 0;
+        return $this->runtimeIdToStateId[$this->getProtocolId()][$blockRuntimeId] ?? 0;
     }
 
 }

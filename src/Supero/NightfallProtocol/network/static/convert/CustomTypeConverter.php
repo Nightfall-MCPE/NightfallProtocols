@@ -9,7 +9,6 @@ use pocketmine\crafting\MetaWildcardRecipeIngredient;
 use pocketmine\crafting\RecipeIngredient;
 use pocketmine\crafting\TagWildcardRecipeIngredient;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
-use pocketmine\data\bedrock\item\ItemSerializer;
 use pocketmine\data\bedrock\item\ItemTypeNames;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -21,7 +20,6 @@ use pocketmine\network\mcpe\convert\SkinAdapter;
 use pocketmine\network\mcpe\convert\TypeConversionException;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\serializer\ItemTypeDictionary;
-use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\GameMode as ProtocolGameMode;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackExtraData;
@@ -32,7 +30,6 @@ use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\TagItemDescriptor;
 use pocketmine\player\GameMode;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
@@ -219,7 +216,8 @@ class CustomTypeConverter extends TypeConverter
         $extraData = $id === $this->shieldRuntimeId ?
             new ItemStackExtraDataShield($nbt, canPlaceOn: [], canDestroy: [], blockingTick: 0) :
             new ItemStackExtraData($nbt, canPlaceOn: [], canDestroy: []);
-        $extraDataSerializer = PacketSerializer::encoder();
+        $extraDataSerializer = CustomPacketSerializer::encoder();
+        $extraDataSerializer->setProtocol($this->protocol);
         $extraData->write($extraDataSerializer);
 
         return new ItemStack(

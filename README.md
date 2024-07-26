@@ -1,7 +1,8 @@
 ### NightfallProtocols
 
-Simple multi-version base
+Simple multi-version base to support older versions.
 
+Replacement of [NetherGames MultiVersion](https://github.com/NetherGamesMC/PocketMine-MP) for people who can't use it
 
 ### Versions
 
@@ -16,4 +17,4 @@ These are the planned versions:
 
 ### Contribution
 
-Feel free to contribute adding more versions, If you'd like to add a specific version that hasn't been specified as a planned version, Clearly specify why.
+Feel free to contribute adding more versions, If you'd like to add a specific version that has not been specified as a planned version, Clearly specify why.
