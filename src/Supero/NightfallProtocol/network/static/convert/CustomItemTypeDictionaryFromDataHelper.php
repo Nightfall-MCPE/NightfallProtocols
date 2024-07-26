@@ -16,6 +16,7 @@ class CustomItemTypeDictionaryFromDataHelper
         CustomProtocolInfo::CURRENT_PROTOCOL => "",
         CustomProtocolInfo::PROTOCOL_1_21_0 => "",
         CustomProtocolInfo::PROTOCOL_1_20_80 => "-1.20.80",
+        CustomProtocolInfo::PROTOCOL_1_20_70 => "-1.20.70",
     ];
 
     public static function loadFromProtocolId(int $protocolId) : ItemTypeDictionary{
