@@ -44,6 +44,7 @@ use Supero\NightfallProtocol\network\chunk\CustomChunkCache;
 use Supero\NightfallProtocol\network\handlers\CustomLoginPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
+use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\PacketConverter;
@@ -403,6 +404,38 @@ class CustomNetworkSession extends NetworkSession
         }finally{
             $timings->stopTiming();
         }
+    }
+
+    public function onChatMessage(Translatable|string $message) : void{
+        if($message instanceof Translatable){
+            if(!$this->getProperty("server")->isLanguageForced()){
+                $this->sendDataPacket(TextPacket::translation(...$this->prepareClientTranslatableMessage($message)));
+            }else{
+                $this->sendDataPacket(TextPacket::raw($this->getProperty("server")->getLanguage()->translate($message)));
+            }
+        }else{
+            $this->sendDataPacket(TextPacket::raw($message));
+        }
+    }
+
+    public function onJukeboxPopup(Translatable|string $message) : void{
+        $parameters = [];
+        if($message instanceof Translatable){
+            if(!$this->getProperty("server")->isLanguageForced()){
+                [$message, $parameters] = $this->prepareClientTranslatableMessage($message);
+            }else{
+                $message = $this->getProperty("player")->getLanguage()->translate($message);
+            }
+        }
+        $this->sendDataPacket(TextPacket::jukeboxPopup($message, $parameters));
+    }
+
+    public function onPopup(string $message) : void{
+        $this->sendDataPacket(TextPacket::popup($message));
+    }
+
+    public function onTip(string $message) : void{
+        $this->sendDataPacket(TextPacket::tip($message));
     }
 
     private function getLogPrefix() : string{
