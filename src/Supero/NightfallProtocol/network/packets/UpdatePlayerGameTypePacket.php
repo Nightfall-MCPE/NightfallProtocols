@@ -18,7 +18,7 @@ class UpdatePlayerGameTypePacket extends PM_Packet
     /**
      * @generate-create-func
      */
-    public static function create(int $gameMode, int $playerActorUniqueId, int $tick) : self{
+    public static function createPacket(int $gameMode, int $playerActorUniqueId, int $tick) : self{
         $result = new self;
         $result->gameMode = $gameMode;
         $result->playerActorUniqueId = $playerActorUniqueId;

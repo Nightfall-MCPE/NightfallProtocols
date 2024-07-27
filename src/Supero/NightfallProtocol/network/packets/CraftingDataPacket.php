@@ -50,7 +50,7 @@ class CraftingDataPacket extends PM_Packet
      * @param PotionContainerChangeRecipe[] $potionContainerRecipes
      * @param MaterialReducerRecipe[]       $materialReducerRecipes
      */
-    public static function create(array $recipesWithTypeIds, array $potionTypeRecipes, array $potionContainerRecipes, array $materialReducerRecipes, bool $cleanRecipes) : self{
+    public static function createPacket(array $recipesWithTypeIds, array $potionTypeRecipes, array $potionContainerRecipes, array $materialReducerRecipes, bool $cleanRecipes) : self{
         $result = new self;
         $result->recipesWithTypeIds = $recipesWithTypeIds;
         $result->potionTypeRecipes = $potionTypeRecipes;
