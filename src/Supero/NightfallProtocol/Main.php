@@ -23,7 +23,7 @@ class Main extends PluginBase
 {
     public static function getProtocolDataFolder(): string
     {
-        return dirname(__DIR__, 3) . "/resources/versions";
+        return dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "versions";
     }
 
     /**
