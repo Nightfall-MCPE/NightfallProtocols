@@ -38,7 +38,7 @@ class PacketConverter
         //dupe
         if(!$converter instanceof CustomTypeConverter) return $packet;
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
-        if($searchedPacket !== null && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
+        if($searchedPacket !== null && !method_exists($packet, "createPacket") && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
             //Since we override the packet in the packet pool, the class shouldn't be  the same, making us detect packets that have been modified
             //Allows us to use `createPacket` instead of `create`
             //As well as get the packet arguments from `getConstructorArguments`
