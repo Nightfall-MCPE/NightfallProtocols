@@ -112,12 +112,15 @@ class CustomShapedRecipe extends RecipeWithTypeId{
         $priority = $in->getVarInt();
         if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80){
             $symmetric = $in->getBool();
+
+            if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0){
+                $unlockingRequirement = RecipeUnlockingRequirement::read($in);
+            }
         }
-        $unlockingRequirement = RecipeUnlockingRequirement::read($in);
 
         $recipeNetId = $in->readRecipeNetId();
 
-        return new self($recipeType, $recipeId, $input, $output, $uuid, $block, $priority, $symmetric ?? true, $unlockingRequirement, $recipeNetId);
+        return new self($recipeType, $recipeId, $input, $output, $uuid, $block, $priority, $symmetric ?? true, $unlockingRequirement ?? new RecipeUnlockingRequirement(null), $recipeNetId);
     }
 
     public function encode(PacketSerializer $out) : void{
@@ -140,9 +143,11 @@ class CustomShapedRecipe extends RecipeWithTypeId{
         $out->putVarInt($this->priority);
         if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80) {
             $out->putBool($this->symmetric);
-        }
-        $this->unlockingRequirement->write($out);
 
+            if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0) {
+                $this->unlockingRequirement->write($out);
+            }
+        }
         $out->writeRecipeNetId($this->recipeNetId);
     }
 }
