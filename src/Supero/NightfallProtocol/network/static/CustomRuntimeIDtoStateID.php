@@ -12,7 +12,7 @@ class CustomRuntimeIDtoStateID
 
     private array $runtimeIdToStateId = [];
 
-    public function __construct(int $protocol)
+    public function __construct(private int $protocol)
     {
         $this->setProtocolInstance($this, $protocol);
         $blockTranslator = CustomTypeConverter::getInstance()->getBlockTranslator();
@@ -24,7 +24,7 @@ class CustomRuntimeIDtoStateID
 
     public function getStateIdFromRuntimeId(int $blockRuntimeId): int
     {
-        return $this->runtimeIdToStateId[$this->getProtocolId()][$blockRuntimeId] ?? 0;
+        return $this->runtimeIdToStateId[$this->protocol][$blockRuntimeId] ?? 0;
     }
 
 }
