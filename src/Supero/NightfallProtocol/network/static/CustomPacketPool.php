@@ -39,7 +39,7 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new ResourcePackStackPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
         $this->registerPacket(new CraftingDataPacket());
-        $this->registerPacket(new CreativeContentPacket())
+        $this->registerPacket(new CreativeContentPacket());
     }
 
     public function registerPacket(Packet $packet) : void{
