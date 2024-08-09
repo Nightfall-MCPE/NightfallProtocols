@@ -13,14 +13,14 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 class CustomItemTypeDictionaryFromDataHelper
 {
     private const PATHS = [
-        CustomProtocolInfo::CURRENT_PROTOCOL => "",
-        CustomProtocolInfo::PROTOCOL_1_21_0 => "",
+        CustomProtocolInfo::CURRENT_PROTOCOL => "latest",
+        CustomProtocolInfo::PROTOCOL_1_21_0 => "latest",
         CustomProtocolInfo::PROTOCOL_1_20_80 => "-1.20.80",
         CustomProtocolInfo::PROTOCOL_1_20_70 => "-1.20.70",
     ];
 
     public static function loadFromProtocolId(int $protocolId) : ItemTypeDictionary{
-        if(self::PATHS[$protocolId] == ""){
+        if(self::PATHS[$protocolId] == "latest"){
             $path = BedrockDataFiles::REQUIRED_ITEM_LIST_JSON;
         } else {
             $path = Main::getProtocolDataFolder() . '/required_item_list.json';
