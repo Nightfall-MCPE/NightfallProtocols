@@ -30,20 +30,20 @@ class CustomBlockTranslator
     public const BLOCK_STATE_META_MAP_PATH = 1;
     private const PATHS = [
         CustomProtocolInfo::CURRENT_PROTOCOL => [
-            self::CANONICAL_BLOCK_STATES_PATH => '',
-            self::BLOCK_STATE_META_MAP_PATH => '',
+            self::CANONICAL_BLOCK_STATES_PATH => "",
+            self::BLOCK_STATE_META_MAP_PATH => "",
         ],
         CustomProtocolInfo::PROTOCOL_1_21_0 => [
-            self::CANONICAL_BLOCK_STATES_PATH => '',
-            self::BLOCK_STATE_META_MAP_PATH => '',
+            self::CANONICAL_BLOCK_STATES_PATH => "",
+            self::BLOCK_STATE_META_MAP_PATH => "",
         ],
         CustomProtocolInfo::PROTOCOL_1_20_80 => [
-            self::CANONICAL_BLOCK_STATES_PATH => '-1.20.80',
-            self::BLOCK_STATE_META_MAP_PATH => '-1.20.80',
+            self::CANONICAL_BLOCK_STATES_PATH => "-1.20.80",
+            self::BLOCK_STATE_META_MAP_PATH => "-1.20.80",
         ],
         CustomProtocolInfo::PROTOCOL_1_20_70 => [
-            self::CANONICAL_BLOCK_STATES_PATH => '-1.20.70',
-            self::BLOCK_STATE_META_MAP_PATH => '-1.20.70',
+            self::CANONICAL_BLOCK_STATES_PATH => "-1.20.70",
+            self::BLOCK_STATE_META_MAP_PATH => "-1.20.70",
         ],
     ];
 
@@ -52,7 +52,7 @@ class CustomBlockTranslator
      * @throws JsonException
      */
     public static function loadFromProtocol(int $protocolId) : self{
-        if($protocolId == CustomProtocolInfo::CURRENT_PROTOCOL){
+        if(self::PATHS[$protocolId] == ""){
             $canonicalBlockStatesRaw = Filesystem::fileGetContents(str_replace(".nbt", self::PATHS[$protocolId][self::CANONICAL_BLOCK_STATES_PATH] . ".nbt", BedrockDataFiles::CANONICAL_BLOCK_STATES_NBT));
             $metaMappingRaw = Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId][self::BLOCK_STATE_META_MAP_PATH] . ".json", BedrockDataFiles::BLOCK_STATE_META_MAP_JSON));
         } else {

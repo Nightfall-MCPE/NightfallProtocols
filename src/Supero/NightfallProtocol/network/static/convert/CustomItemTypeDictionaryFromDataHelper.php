@@ -20,7 +20,7 @@ class CustomItemTypeDictionaryFromDataHelper
     ];
 
     public static function loadFromProtocolId(int $protocolId) : ItemTypeDictionary{
-        if($protocolId === CustomProtocolInfo::CURRENT_PROTOCOL){
+        if(self::PATHS[$protocolId] == ""){
             $path = BedrockDataFiles::REQUIRED_ITEM_LIST_JSON;
         } else {
             $path = Main::getProtocolDataFolder() . '/required_item_list.json';
