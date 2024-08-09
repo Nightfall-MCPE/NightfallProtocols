@@ -25,7 +25,7 @@ class CustomItemTypeDictionaryFromDataHelper
         } else {
             $path = Main::getProtocolDataFolder() . '/required_item_list.json';
         }
-        return self::loadFromString(Filesystem::fileGetContents(str_replace(".json", self::PATHS[$protocolId] . ".json", $path)));
+        return self::loadFromString(Filesystem::fileGetContents(str_replace(".json", (self::PATHS[$protocolId] == "latest" ? "" : self::PATHS[$protocolId]) . ".json", $path)));
     }
 
     public static function loadFromString(string $data) : ItemTypeDictionary{

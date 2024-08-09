@@ -30,8 +30,8 @@ class CustomBlockTranslator
     public const BLOCK_STATE_META_MAP_PATH = 1;
     private const PATHS = [
         CustomProtocolInfo::CURRENT_PROTOCOL => [
-            self::CANONICAL_BLOCK_STATES_PATH => "",
-            self::BLOCK_STATE_META_MAP_PATH => "",
+            self::CANONICAL_BLOCK_STATES_PATH => "latest",
+            self::BLOCK_STATE_META_MAP_PATH => "latest",
         ],
         CustomProtocolInfo::PROTOCOL_1_21_0 => [
             self::CANONICAL_BLOCK_STATES_PATH => "latest",
