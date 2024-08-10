@@ -3,7 +3,6 @@
 namespace Supero\NightfallProtocol\network\handlers;
 
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\cache\CraftingDataCache;
 use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\InventoryManager;
@@ -26,6 +25,7 @@ use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
+use Supero\NightfallProtocol\network\static\CustomCraftingDataCache;
 
 class CustomPreSpawnPacketHandler extends PacketHandler{
     public function __construct(
@@ -121,7 +121,7 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
             $this->inventoryManager->syncCreative();
 
             $this->session->getLogger()->debug("Sending crafting data");
-            $this->session->sendDataPacket(CraftingDataCache::getInstance()->getCache($this->server->getCraftingManager()));
+            $this->session->sendDataPacket(CustomCraftingDataCache::getInstance()->getCache($this->server->getCraftingManager()));
 
             $this->session->getLogger()->debug("Sending player list");
             $this->session->syncPlayerList($this->server->getOnlinePlayers());
