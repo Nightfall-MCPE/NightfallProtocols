@@ -21,10 +21,6 @@ trait ProtocolSingletonTrait{
         return self::$instance[$protocolId] ??= self::make($protocolId);
     }
 
-    public function getProtocolId() : int{
-        return $this->protocolId;
-    }
-
     /**
      * @return array<int, self>
      */
