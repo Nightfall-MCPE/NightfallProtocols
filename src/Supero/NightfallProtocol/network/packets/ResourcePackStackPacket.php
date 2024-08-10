@@ -85,7 +85,7 @@ class ResourcePackStackPacket extends PM_Packet
             $packet->mustAccept,
             $packet->baseGameVersion,
             $packet->experiments,
-            $packet->useVanillaEditorPacks
+            $packet->useVanillaEditorPacks ?? false
         ];
     }
 }

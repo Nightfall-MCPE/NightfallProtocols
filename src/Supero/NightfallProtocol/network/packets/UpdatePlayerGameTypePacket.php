@@ -53,7 +53,7 @@ class UpdatePlayerGameTypePacket extends PM_Packet
         return [
             $packet->getGameMode(),
             $packet->getPlayerActorUniqueId(),
-            $packet->getTick()
+            $packet->getTick() ?? 0
         ];
     }
 }

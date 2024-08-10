@@ -64,7 +64,7 @@ class CodeBuilderSourcePacket extends PM_Packet
         return [
             $packet->getOperation(),
             $packet->getCategory(),
-            method_exists($packet, "getCodeStatus") ? $packet->getCodeStatus() : $packet->getValue(),
+            (method_exists($packet, "getCodeStatus") ? $packet->getCodeStatus() : $packet->getValue()) ?? 0,
         ];
     }
 }

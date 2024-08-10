@@ -6,6 +6,7 @@ use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
+use pocketmine\network\mcpe\protocol\types\inventory\WindowTypes;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 
@@ -56,7 +57,7 @@ class ContainerClosePacket extends PM_Packet
     {
         return [
             $packet->windowId,
-            $packet->windowType,
+            $packet->windowType ?? WindowTypes::CONTAINER,
             $packet->server
         ];
     }
