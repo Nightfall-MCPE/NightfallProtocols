@@ -157,6 +157,7 @@ class CustomCraftingDataCache
         }
 
         Timings::$craftingDataCacheRebuild->stopTiming();
-        return CraftingDataPacket::create($recipesWithTypeIds, $potionTypeRecipes, $potionContainerChangeRecipes, [], true);
+        //TODO: Properly handle $recipesWithTypeIds
+        return CraftingDataPacket::create([], $potionTypeRecipes, $potionContainerChangeRecipes, [], true);
     }
 }
