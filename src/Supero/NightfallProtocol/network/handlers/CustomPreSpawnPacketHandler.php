@@ -121,7 +121,7 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
             $this->inventoryManager->syncCreative();
 
             $this->session->getLogger()->debug("Sending crafting data");
-            $this->session->sendDataPacket(CustomCraftingDataCache::getInstance()->getCache($this->server->getCraftingManager()));
+            $this->session->sendDataPacket(CustomCraftingDataCache::getInstance()->getCache($this->server->getCraftingManager(), $this->session->getProtocol()));
 
             $this->session->getLogger()->debug("Sending player list");
             $this->session->syncPlayerList($this->server->getOnlinePlayers());

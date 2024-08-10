@@ -23,6 +23,7 @@ use pocketmine\utils\SingletonTrait;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\packets\types\recipe\CustomShapedRecipe as ProtocolShapedRecipe;
 use Supero\NightfallProtocol\network\packets\types\recipe\CustomShapelessRecipe as ProtocolShapelessRecipe;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
 class CustomCraftingDataCache
 {
@@ -34,7 +35,7 @@ class CustomCraftingDataCache
      */
     private array $caches = [];
 
-    public function getCache(CraftingManager $manager) : CraftingDataPacket{
+    public function getCache(CraftingManager $manager, int $protocol) : CraftingDataPacket{
         $id = spl_object_id($manager);
         if(!isset($this->caches[$id])){
             $manager->getDestructorCallbacks()->add(function() use ($id) : void{
@@ -43,7 +44,7 @@ class CustomCraftingDataCache
             $manager->getRecipeRegisteredCallbacks()->add(function() use ($id) : void{
                 unset($this->caches[$id]);
             });
-            $this->caches[$id] = $this->buildCraftingDataCache($manager);
+            $this->caches[$id] = $this->buildCraftingDataCache($manager, $protocol);
         }
         return $this->caches[$id];
     }
@@ -51,11 +52,11 @@ class CustomCraftingDataCache
     /**
      * Rebuilds the cached CraftingDataPacket.
      */
-    private function buildCraftingDataCache(CraftingManager $manager) : CraftingDataPacket{
+    private function buildCraftingDataCache(CraftingManager $manager, int $protocol) : CraftingDataPacket{
         Timings::$craftingDataCacheRebuild->startTiming();
 
         $nullUUID = Uuid::fromString(Uuid::NIL);
-        $converter = TypeConverter::getInstance();
+        $converter = CustomTypeConverter::getProtocolInstance($protocol);
         $recipesWithTypeIds = [];
 
         $noUnlockingRequirement = new RecipeUnlockingRequirement(null);
@@ -157,7 +158,6 @@ class CustomCraftingDataCache
         }
 
         Timings::$craftingDataCacheRebuild->stopTiming();
-        //TODO: Properly handle $recipesWithTypeIds
-        return CraftingDataPacket::create([], $potionTypeRecipes, $potionContainerChangeRecipes, [], true);
+        return CraftingDataPacket::create($recipesWithTypeIds, $potionTypeRecipes, $potionContainerChangeRecipes, [], true);
     }
 }

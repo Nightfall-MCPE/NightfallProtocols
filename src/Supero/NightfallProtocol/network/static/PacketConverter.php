@@ -32,8 +32,7 @@ class PacketConverter
         UpdateBlockPacket::NETWORK_ID,
         UpdateBlockSyncedPacket::NETWORK_ID,
         UpdateSubChunkBlocksPacket::NETWORK_ID,
-        CreativeContentPacket::NETWORK_ID,
-        CraftingDataPacket::NETWORK_ID
+        CreativeContentPacket::NETWORK_ID
     ];
 
     public const SERVERBOUND_TRANSLATED = [
@@ -126,9 +125,6 @@ class PacketConverter
                 }
 
                 return CreativeContentPacket::create($entries);
-            case CraftingDataPacket::NETWORK_ID:
-                //TODO: Fix recipes.
-                return $packet;
             default:
                 return $packet;
         }
