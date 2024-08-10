@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\static;
 
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
-use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -23,6 +22,8 @@ use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 /**
  * This class is for translations within packets that go unhandled.
  * TODO: Translate all needed packets
+ * @see https://github.com/Flonja/multiversion/blob/master/translator/block.go#L172
+ * @see https://github.com/Flonja/multiversion/blob/master/translator/item.go#L296
  */
 class PacketConverter
 {
