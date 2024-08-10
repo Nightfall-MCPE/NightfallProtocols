@@ -1,6 +1,6 @@
 <?php
 
-namespace Supero\NightfallProtocol\network\static;
+namespace Supero\NightfallProtocol\network\caches;
 
 use pocketmine\crafting\CraftingManager;
 use pocketmine\crafting\FurnaceType;

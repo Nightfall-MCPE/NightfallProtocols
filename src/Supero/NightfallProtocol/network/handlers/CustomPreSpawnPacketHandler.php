@@ -23,9 +23,9 @@ use pocketmine\Server;
 use pocketmine\timings\Timings;
 use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
+use Supero\NightfallProtocol\network\caches\CustomCraftingDataCache;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
-use Supero\NightfallProtocol\network\static\CustomCraftingDataCache;
 
 class CustomPreSpawnPacketHandler extends PacketHandler{
     public function __construct(
