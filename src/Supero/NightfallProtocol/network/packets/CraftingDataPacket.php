@@ -45,31 +45,6 @@ class CraftingDataPacket extends PM_Packet{
 	public bool $cleanRecipes = false;
 
 	/**
-	 * @param RecipeWithTypeId[] $entries
-	 *
-	 * @return RecipeWithTypeId[]
-	 */
-	public static function __convert(array $entries) : array{
-		$newEntries = [];
-		/** @var RecipeWithTypeId $entry */
-		foreach($newEntries as $entry){
-			switch($entry->getTypeId()){
-				case self::ENTRY_SHAPELESS:
-				case self::ENTRY_SHULKER_BOX:
-				case self::ENTRY_SHAPELESS_CHEMISTRY:
-					$newEntry = new CustomShapelessRecipe();
-
-					break;
-				case self::ENTRY_SHAPED:
-				case self::ENTRY_SHAPED_CHEMISTRY:
-
-					break;
-			}
-		}
-		return $newEntries;
-	}
-
-	/**
 	 * @generate-create-func
 	 *
 	 * @param RecipeWithTypeId[]            $recipesWithTypeIds
