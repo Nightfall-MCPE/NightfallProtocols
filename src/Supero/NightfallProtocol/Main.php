@@ -10,6 +10,7 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\mcpe\StandardPacketBroadcaster;
@@ -65,7 +66,7 @@ class Main extends PluginBase
         if($this->getConfig()->get("debug-mode")){
             $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
                 $packet = $event->getPacket();
-                var_dump($packet::class);
+                if(!$packet instanceof PlayerAuthInputPacket) var_dump($packet::class);
                 if($packet instanceof PacketViolationWarningPacket){
                     $this->getLogger()->warning("Received [{$packet->getType()}] Packet Violation message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
                 }
