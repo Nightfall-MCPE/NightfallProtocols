@@ -10,7 +10,6 @@ use pocketmine\utils\BinaryDataException;
 
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
-use Supero\NightfallProtocol\network\packets\CreativeContentPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
@@ -37,7 +36,6 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new StartGamePacket());
         $this->registerPacket(new ResourcePackStackPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
-        $this->registerPacket(new CreativeContentPacket());
     }
 
     public function registerPacket(Packet $packet) : void{
