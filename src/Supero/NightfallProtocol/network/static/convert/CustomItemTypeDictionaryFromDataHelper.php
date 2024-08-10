@@ -13,8 +13,8 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 class CustomItemTypeDictionaryFromDataHelper
 {
     private const PATHS = [
-        CustomProtocolInfo::CURRENT_PROTOCOL => "latest",
-        CustomProtocolInfo::PROTOCOL_1_21_0 => "latest",
+        CustomProtocolInfo::CURRENT_PROTOCOL => "",
+        CustomProtocolInfo::PROTOCOL_1_21_0 => "",
         CustomProtocolInfo::PROTOCOL_1_20_80 => "-1.20.80",
         CustomProtocolInfo::PROTOCOL_1_20_70 => "-1.20.70",
     ];
