@@ -20,12 +20,12 @@ class CustomItemTypeDictionaryFromDataHelper
     ];
 
     public static function loadFromProtocolId(int $protocolId) : ItemTypeDictionary{
-        if(self::PATHS[$protocolId] == "latest"){
+        if(in_array($protocolId, CustomProtocolInfo::COMBINED_LATEST)){
             $path = BedrockDataFiles::REQUIRED_ITEM_LIST_JSON;
         } else {
-            $path = Main::getProtocolDataFolder() . '/required_item_list.json';
+            $path = str_replace(".json", self::PATHS[$protocolId] . ".json", Main::getProtocolDataFolder() . '/required_item_list.json');
         }
-        return self::loadFromString(Filesystem::fileGetContents(str_replace(".json", (self::PATHS[$protocolId] == "latest" ? "" : self::PATHS[$protocolId]) . ".json", $path)));
+        return self::loadFromString(Filesystem::fileGetContents($path));
     }
 
     public static function loadFromString(string $data) : ItemTypeDictionary{

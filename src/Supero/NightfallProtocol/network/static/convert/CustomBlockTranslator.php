@@ -52,7 +52,7 @@ class CustomBlockTranslator
      * @throws JsonException
      */
     public static function loadFromProtocol(int $protocolId) : self{
-        if(self::PATHS[$protocolId] == "latest"){
+        if(in_array($protocolId, CustomProtocolInfo::COMBINED_LATEST)){
             $canonicalBlockStatesRaw = Filesystem::fileGetContents(BedrockDataFiles::CANONICAL_BLOCK_STATES_NBT);
             $metaMappingRaw = Filesystem::fileGetContents(BedrockDataFiles::BLOCK_STATE_META_MAP_JSON);
         } else {

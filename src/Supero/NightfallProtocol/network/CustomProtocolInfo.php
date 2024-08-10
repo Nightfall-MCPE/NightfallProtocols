@@ -13,6 +13,14 @@ class CustomProtocolInfo {
         self::PROTOCOL_1_20_70
 	];
 
+    //Latest + Version unharmed/
+    //In case a version has no real protocol changes.
+    //If the latest has changed from the previous, only put the current protocol here
+    public const COMBINED_LATEST = [
+        self::CURRENT_PROTOCOL,
+        self::PROTOCOL_1_21_0
+    ];
+
     public const PROTOCOL_1_21_2 = 686;
     public const PROTOCOL_1_21_0 = 685;
     public const PROTOCOL_1_20_80 = 671;
