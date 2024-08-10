@@ -67,7 +67,6 @@ class CustomBlockStateDictionaryEntry
         if(count($properties) === 0){
             return "";
         }
-        //TODO: make a more efficient encoding - NBT will do for now, but it's not very compact
         ksort($properties, SORT_STRING);
         $tag = new CompoundTag();
         foreach($properties as $k => $v){

@@ -48,8 +48,6 @@ class CustomItemTranslator
      * @throws ItemTypeSerializeException
      */
     public function toNetworkId(Item $item) : array{
-        //TODO: we should probably come up with a cache for this
-
         $itemData = $this->itemSerializer->serializeType($item);
 
         try {
@@ -76,7 +74,7 @@ class CustomItemTranslator
      * @throws ItemTypeSerializeException
      */
     public function toNetworkNbt(Item $item) : CompoundTag{
-        //TODO: this relies on the assumption that network item NBT is the same as disk item NBT, which may not always
+        //this relies on the assumption that network item NBT is the same as disk item NBT, which may not always
         //be true - if we stick on an older world version while updating network version, this could be a problem (and
         //may be a problem for multi version implementations)
         return $this->itemSerializer->serializeStack($item, null, $this->itemDataDowngrader)->toNbt();
@@ -89,7 +87,6 @@ class CustomItemTranslator
         try{
             $stringId = $this->itemTypeDictionary->fromIntId($networkId);
         }catch(\InvalidArgumentException $e){
-            //TODO: a quiet version of fromIntId() would be better than catching InvalidArgumentException
             throw TypeConversionException::wrap($e, "Invalid network itemstack ID $networkId");
         }
 

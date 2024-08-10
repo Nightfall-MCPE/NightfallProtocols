@@ -146,7 +146,7 @@ class CustomLoginPacketHandler extends PacketHandler{
                     throw new PacketHandlingException("'extraData' key should be an array");
                 }
                 $mapper = new JsonMapper();
-                $mapper->bEnforceMapType = false; //TODO: we don't really need this as an array, but right now we don't have enough models
+                $mapper->bEnforceMapType = false;
                 $mapper->bExceptionOnMissingData = true;
                 $mapper->bExceptionOnUndefinedProperty = true;
                 $mapper->bStrictObjectTypeChecking = true;
@@ -175,7 +175,7 @@ class CustomLoginPacketHandler extends PacketHandler{
         }
 
         $mapper = new JsonMapper();
-        $mapper->bEnforceMapType = false; //TODO: we don't really need this as an array, but right now we don't have enough models
+        $mapper->bEnforceMapType = false;
         $mapper->bExceptionOnMissingData = true;
         $mapper->bExceptionOnUndefinedProperty = true;
         $mapper->bStrictObjectTypeChecking = true;
@@ -188,7 +188,7 @@ class CustomLoginPacketHandler extends PacketHandler{
     }
 
     /**
-     * TODO: This is separated for the purposes of allowing plugins (like Specter) to hack it and bypass authentication.
+     * This is separated for the purposes of allowing plugins (like Specter) to hack it and bypass authentication.
      * In the future this won't be necessary.
      *
      * @throws InvalidArgumentException

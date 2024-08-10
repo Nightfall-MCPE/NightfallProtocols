@@ -55,7 +55,6 @@ class CustomBlockStateDictionary
     private function getIdMetaToStateIdLookup() : array{
         if($this->idMetaToStateIdLookupCache === null){
             $table = [];
-            //TODO: if we ever allow mutating the dictionary, this would need to be rebuilt on modification
 
             foreach($this->states as $i => $state){
                 $table[$state->getStateName()][$state->getMeta()] = $i;
