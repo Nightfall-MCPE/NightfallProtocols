@@ -19,3 +19,8 @@ These are the planned versions:
 ### Contribution
 
 Feel free to contribute adding more versions, If you'd like to add a specific version that has not been specified as a planned version, Clearly specify why.
+
+### Huge thanks to
+
+- [Flonja](https://github.com/Flonja) for bearing with me over the months and helping with previous attempts as well as his [multiversion](https://github.com/Flonja/multiversion)
+- [glance](https://github.com/glancist) for the help with un-seen item translation (crafting data and creative content packets)
