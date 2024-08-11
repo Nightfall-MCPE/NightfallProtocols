@@ -10,11 +10,12 @@ class CustomProtocolInfo {
         self::CURRENT_PROTOCOL,
         self::PROTOCOL_1_21_0,
         self::PROTOCOL_1_20_80,
-        self::PROTOCOL_1_20_70
+        self::PROTOCOL_1_20_70,
+        self::PROTOCOL_1_20_60
 	];
 
-    //Latest + Version unharmed/
-    //In case a version has no real protocol changes.
+    //Latest + Version unharmed.
+    //In case a version has no real protocol/item/block changes.
     //If the latest has changed from the previous, only put the current protocol here
     public const COMBINED_LATEST = [
         self::CURRENT_PROTOCOL,
@@ -25,5 +26,6 @@ class CustomProtocolInfo {
     public const PROTOCOL_1_21_0 = 685;
     public const PROTOCOL_1_20_80 = 671;
     public const PROTOCOL_1_20_70 = 662;
+    public const PROTOCOL_1_20_60 = 649;
 
 }

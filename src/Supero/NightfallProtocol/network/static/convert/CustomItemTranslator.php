@@ -117,6 +117,7 @@ class CustomItemTranslator
             CustomProtocolInfo::PROTOCOL_1_21_0 => 191,
             CustomProtocolInfo::PROTOCOL_1_20_80 => 181,
             CustomProtocolInfo::PROTOCOL_1_20_70 => 171,
+            CustomProtocolInfo::PROTOCOL_1_20_60 => 161,
 
             default => throw new AssumptionFailedError("Unknown protocol ID $protocolId"),
         };

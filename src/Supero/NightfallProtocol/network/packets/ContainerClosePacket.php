@@ -53,7 +53,7 @@ class ContainerClosePacket extends PM_Packet
         $out->putBool($this->server);
     }
 
-    public function getConstructorArguments(PM_Packet|ClientboundPacket|ServerboundPacket $packet): array
+    public function getConstructorArguments(PM_Packet $packet): array
     {
         return [
             $packet->windowId,

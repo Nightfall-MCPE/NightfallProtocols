@@ -3,11 +3,15 @@
 namespace Supero\NightfallProtocol\network\static;
 
 use pocketmine\network\mcpe\convert\TypeConverter;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandData;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeContentEntry;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\LevelEvent;
@@ -33,7 +37,8 @@ class PacketConverter
         UpdateBlockPacket::NETWORK_ID,
         UpdateBlockSyncedPacket::NETWORK_ID,
         UpdateSubChunkBlocksPacket::NETWORK_ID,
-        CreativeContentPacket::NETWORK_ID
+        CreativeContentPacket::NETWORK_ID,
+        AvailableCommandsPacket::NETWORK_ID
     ];
 
     public const SERVERBOUND_TRANSLATED = [
@@ -109,6 +114,26 @@ class PacketConverter
                     return $packet;
                 }
                 return $packet;
+            case AvailableCommandsPacket::NETWORK_ID:
+                /** @var AvailableCommandsPacket $packet */
+                $commandData = $packet->commandData;
+                $newCommandData = [];
+                foreach ($commandData as $label => $commandDatum) {
+                    $overloads = [];
+                    foreach ($commandDatum->overloads as $overloadLabel => $overload) {
+                        $overloads[$overloadLabel] = new CommandOverload($overload->isChaining(), parameters: [CommandParameter::standard("args", self::convertArg($protocol, AvailableCommandsPacket::ARG_TYPE_RAWTEXT), 0, true)]);
+                    }
+                    $newCommandData[$label] = new CommandData(
+                        $commandDatum->name,
+                        $commandDatum->description,
+                        $commandDatum->flags,
+                        $commandDatum->permission,
+                        $commandDatum->aliases,
+                        $overloads,
+                        $commandDatum->chainedSubCommandData
+                    );
+                }
+                return AvailableCommandsPacket::create($newCommandData, $packet->hardcodedEnums, $packet->softEnums, $packet->enumConstraints);
             case CreativeContentPacket::NETWORK_ID:
                 $entries = [];
                 /** @var CreativeContentPacket $packet */
@@ -129,5 +154,24 @@ class PacketConverter
             default:
                 return $packet;
         }
+    }
+
+    public static function convertArg(int $protocolId, int $type) : int{
+        if($protocolId <= CustomProtocolInfo::PROTOCOL_1_20_60){
+            return match($type){
+                AvailableCommandsPacket::ARG_TYPE_EQUIPMENT_SLOT => 43,
+                AvailableCommandsPacket::ARG_TYPE_STRING => 44,
+                AvailableCommandsPacket::ARG_TYPE_INT_POSITION => 52,
+                AvailableCommandsPacket::ARG_TYPE_POSITION => 53,
+                AvailableCommandsPacket::ARG_TYPE_MESSAGE => 55,
+                AvailableCommandsPacket::ARG_TYPE_RAWTEXT => 58,
+                AvailableCommandsPacket::ARG_TYPE_JSON => 62,
+                AvailableCommandsPacket::ARG_TYPE_BLOCK_STATES => 71,
+                AvailableCommandsPacket::ARG_TYPE_COMMAND => 74,
+                default => $type,
+            };
+        }
+
+        return $type;
     }
 }

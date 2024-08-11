@@ -48,7 +48,7 @@ class UpdatePlayerGameTypePacket extends PM_Packet
         }
     }
 
-    public function getConstructorArguments(PM_Packet|ClientboundPacket|ServerboundPacket $packet): array
+    public function getConstructorArguments(PM_Packet $packet): array
     {
         return [
             $packet->getGameMode(),
