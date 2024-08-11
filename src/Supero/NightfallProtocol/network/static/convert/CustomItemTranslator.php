@@ -53,7 +53,9 @@ class CustomItemTranslator
         try {
             $numericId = $this->itemTypeDictionary->fromStringId($itemData->getName());
         } catch (\InvalidArgumentException) {
-            throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
+            //throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
+            var_dump($itemData->getName() . " not found, replacing with an update block instead");
+            $numericId = $this->itemTypeDictionary->fromStringId("minecraft:info_update");
         }
 
         $blockStateData = $itemData->getBlock();
