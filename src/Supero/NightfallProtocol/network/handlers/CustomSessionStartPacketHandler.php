@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\handlers;
 
 use Closure;
 use pocketmine\network\mcpe\handler\PacketHandler;
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
 use ReflectionException;

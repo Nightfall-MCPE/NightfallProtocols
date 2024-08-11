@@ -7,7 +7,6 @@ use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryDataException;
-
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;

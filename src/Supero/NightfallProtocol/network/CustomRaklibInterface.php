@@ -3,8 +3,6 @@
 namespace Supero\NightfallProtocol\network;
 
 use pocketmine\network\mcpe\compression\ZlibCompressor;
-use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\raklib\RakLibPacketSender;
 use pocketmine\Server;

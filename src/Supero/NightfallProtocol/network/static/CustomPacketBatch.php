@@ -5,7 +5,6 @@ namespace Supero\NightfallProtocol\network\static;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\protocol\serializer\PacketBatch;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\utils\BinaryStream;
 
