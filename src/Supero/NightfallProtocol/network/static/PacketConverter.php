@@ -113,16 +113,16 @@ class PacketConverter
                 $entries = [];
                 /** @var CreativeContentPacket $packet */
                 foreach($packet->getEntries() as $entry){
-                    $oldItem = $entry->getItem();
+                    /*$oldItem = $entry->getItem();
                     $newItem = new ItemStack(
                         $oldItem->getId(),
                         $oldItem->getMeta(),
                         $oldItem->getCount(),
                         $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($oldItem->getBlockRuntimeId())),
                         $oldItem->getRawExtraData()
-                    );
+                    );*/
 
-                    $entries[] = new CreativeContentEntry($entry->getEntryId(), $newItem);
+                    $entries[] = new CreativeContentEntry($entry->getEntryId(), ItemStack::null());
                 }
 
                 return CreativeContentPacket::create($entries);
