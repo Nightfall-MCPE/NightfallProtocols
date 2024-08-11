@@ -138,6 +138,7 @@ class PacketConverter
                 $entries = [];
                 /** @var CreativeContentPacket $packet */
                 foreach($packet->getEntries() as $entry){
+                    //TODO: Fix this bs
                     /*$oldItem = $entry->getItem();
                     $newItem = new ItemStack(
                         $oldItem->getId(),
