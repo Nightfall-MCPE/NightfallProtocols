@@ -20,6 +20,8 @@ use pocketmine\network\mcpe\protocol\types\ParticleIds;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
+use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
@@ -70,7 +72,7 @@ class PacketConverter
         return $packet;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter) : ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter, CustomNetworkSession $session) : ClientboundPacket
     {
         if(!$converter instanceof CustomTypeConverter) return $packet;
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
@@ -135,23 +137,8 @@ class PacketConverter
                 }
                 return AvailableCommandsPacket::create($newCommandData, $packet->hardcodedEnums, $packet->softEnums, $packet->enumConstraints);
             case CreativeContentPacket::NETWORK_ID:
-                $entries = [];
-                /** @var CreativeContentPacket $packet */
-                foreach($packet->getEntries() as $entry){
-                    //TODO: Fix this bs
-                    /*$oldItem = $entry->getItem();
-                    $newItem = new ItemStack(
-                        $oldItem->getId(),
-                        $oldItem->getMeta(),
-                        $oldItem->getCount(),
-                        $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($oldItem->getBlockRuntimeId())),
-                        $oldItem->getRawExtraData()
-                    );*/
-
-                    $entries[] = new CreativeContentEntry($entry->getEntryId(), ItemStack::null());
-                }
-
-                return CreativeContentPacket::create($entries);
+                /**@var CreativeContentPacket $packet */
+                return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
             default:
                 return $packet;
         }

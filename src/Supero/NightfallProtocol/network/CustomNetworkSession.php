@@ -340,7 +340,7 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     public function sendDataPacket(ClientboundPacket $packet, bool $immediate = false) : bool{
-        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"));
+        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
         return $this->sendDataPacketInternal($packet, $immediate, null);
     }
 
