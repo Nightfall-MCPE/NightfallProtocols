@@ -12,11 +12,10 @@ use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
-use pocketmine\network\mcpe\protocol\types\inventory\CreativeContentEntry;
-use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\LevelEvent;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\network\mcpe\protocol\types\ParticleIds;
+use pocketmine\network\mcpe\protocol\types\UpdateSubChunkBlocksPacketEntry;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
@@ -88,11 +87,44 @@ class PacketConverter
         $runtimeToStateId = CustomRuntimeIDtoStateID::getProtocolInstance($protocol);
         switch ($packet::NETWORK_ID) {
             case UpdateSubChunkBlocksPacket::NETWORK_ID:
-                /**
-                 * TODO: De-code each layer and change the runtimes of each entry
-                 * @see https://github.com/Flonja/multiversion/blob/master/translator/block.go#L292
-                 */
-                return $packet;
+                // normal human: supero what type of code is this
+                // supero: yes
+
+                /** @var UpdateSubChunkBlocksPacket $packet */
+                $layer0 = $packet->getLayer0Updates();
+                $layer1 = $packet->getLayer1Updates();
+
+                $layer0Entries = [];
+                $layer1Entries = [];
+
+                foreach ($layer0 as $entry) {
+                    /** @var UpdateSubChunkBlocksPacketEntry $entry */
+                    $layer0Entries[] = new UpdateSubChunkBlocksPacketEntry(
+                        $entry->getBlockPosition(),
+                        $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($entry->getBlockRuntimeId())),
+                        $entry->getFlags(),
+                        $entry->getSyncedUpdateActorUniqueId(),
+                        $entry->getSyncedUpdateType()
+                    );
+                }
+
+                foreach ($layer1 as $entry) {
+                    /** @var UpdateSubChunkBlocksPacketEntry $entry */
+                    $layer1Entries[] = new UpdateSubChunkBlocksPacketEntry(
+                        $entry->getBlockPosition(),
+                        $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($entry->getBlockRuntimeId())),
+                        $entry->getFlags(),
+                        $entry->getSyncedUpdateActorUniqueId(),
+                        $entry->getSyncedUpdateType()
+                    );
+                }
+
+                return UpdateSubChunkBlocksPacket::create(
+                    $packet->getBaseBlockPosition(),
+                    $layer0Entries,
+                    $layer1Entries
+                );
+
             case UpdateBlockSyncedPacket::NETWORK_ID:
             case UpdateBlockPacket::NETWORK_ID:
                 /** @var UpdateBlockPacket $packet */
@@ -137,7 +169,6 @@ class PacketConverter
                 }
                 return AvailableCommandsPacket::create($newCommandData, $packet->hardcodedEnums, $packet->softEnums, $packet->enumConstraints);
             case CreativeContentPacket::NETWORK_ID:
-                /**@var CreativeContentPacket $packet */
                 return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
             default:
                 return $packet;

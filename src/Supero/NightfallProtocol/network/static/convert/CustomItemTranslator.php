@@ -54,6 +54,9 @@ class CustomItemTranslator
         try {
             $numericId = $this->itemTypeDictionary->fromStringId($itemData->getName());
         } catch (\InvalidArgumentException) {
+            //TODO: fix this using a downgrader
+            // https://github.com/NetherGamesMC/PocketMine-MP/blob/stable/src/network/mcpe/convert/ItemTranslator.php#L73
+            // https://github.com/NetherGamesMC/PocketMine-MP/blob/stable/src/data/bedrock/item/downgrade/ItemIdMetaDowngrader.php#L104
             //throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
             var_dump($itemData->getName() . " not found, replacing with an update block instead");
             return $this->toNetworkId(VanillaBlocks::INFO_UPDATE()->asItem());
