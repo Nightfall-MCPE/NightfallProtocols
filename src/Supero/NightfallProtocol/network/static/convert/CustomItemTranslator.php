@@ -2,6 +2,7 @@
 
 namespace Supero\NightfallProtocol\network\static\convert;
 
+use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\ItemDeserializer;
 use pocketmine\data\bedrock\item\ItemSerializer;
@@ -55,7 +56,7 @@ class CustomItemTranslator
         } catch (\InvalidArgumentException) {
             //throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
             var_dump($itemData->getName() . " not found, replacing with an update block instead");
-            $numericId = $this->itemTypeDictionary->fromStringId("minecraft:info_update");
+            return $this->toNetworkId(VanillaBlocks::INFO_UPDATE()->asItem());
         }
 
         $blockStateData = $itemData->getBlock();
