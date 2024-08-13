@@ -48,6 +48,7 @@ use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\PacketConverter;
+use Supero\NightfallProtocol\utils\ProtocolUtils;
 use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class CustomNetworkSession extends NetworkSession
@@ -66,11 +67,12 @@ class CustomNetworkSession extends NetworkSession
     {
         $this->protocol = $protocol;
 
-        $broadcaster = new CustomStandardPacketBroadcaster(Server::getInstance(), $protocol);
+        $broadcaster = ProtocolUtils::getPacketBroadcaster($protocol);
         $typeConverter = CustomTypeConverter::getProtocolInstance($protocol);
 
         $this->setProperty("typeConverter", $typeConverter);
-        $this->setProperty("broadcaster", $broadcaster);
+        $this->setProperty("broadcaster", $protocol);
+        //TODO: Use protocol utils when we need to override this class
         $this->setProperty("entityEventBroadcaster", new StandardEntityEventBroadcaster($broadcaster, $typeConverter));
     }
 
