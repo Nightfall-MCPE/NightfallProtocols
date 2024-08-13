@@ -439,7 +439,7 @@ class CustomNetworkSession extends NetworkSession
     }
 
     private function getLogPrefix() : string{
-        return "NetworkSession: " . $this->getDisplayName();
+        return "MultiVersionNetworkSession: " . $this->getDisplayName();
     }
 
     /**

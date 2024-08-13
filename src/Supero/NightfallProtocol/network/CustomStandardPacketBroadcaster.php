@@ -8,10 +8,8 @@ use pocketmine\network\mcpe\PacketBroadcaster;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
 use pocketmine\utils\BinaryStream;
-use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketBatch;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
-use Supero\NightfallProtocol\network\static\PacketConverter;
 
 class CustomStandardPacketBroadcaster implements PacketBroadcaster{
     public function __construct(
@@ -43,7 +41,6 @@ class CustomStandardPacketBroadcaster implements PacketBroadcaster{
         $totalLength = 0;
         $packetBuffers = [];
         foreach($packets as $packet){
-            $packet = PacketConverter::handleClientbound($packet, CustomTypeConverter::getProtocolInstance($this->protocolId));
             $encoder = CustomPacketSerializer::encoder();
             $encoder->setProtocol($this->protocolId);
 
