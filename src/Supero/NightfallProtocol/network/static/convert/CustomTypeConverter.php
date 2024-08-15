@@ -33,6 +33,7 @@ use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
+use Supero\NightfallProtocol\network\static\data\CustomGlobalItemDataHandlers;
 use Supero\NightfallProtocol\utils\ProtocolSingletonTrait;
 
 class CustomTypeConverter extends TypeConverter
@@ -73,8 +74,8 @@ class CustomTypeConverter extends TypeConverter
         $this->itemTranslator = new CustomItemTranslator(
             $this->itemTypeDictionary,
             $this->blockTranslator->getBlockStateDictionary(),
-            GlobalItemDataHandlers::getSerializer(),
-            GlobalItemDataHandlers::getDeserializer(),
+            CustomGlobalItemDataHandlers::getSerializer(),
+            CustomGlobalItemDataHandlers::getDeserializer(), // Just in case we change the deserializer in the future
             $this->blockItemIdMap,
             $this->itemDataDowngrader
         );

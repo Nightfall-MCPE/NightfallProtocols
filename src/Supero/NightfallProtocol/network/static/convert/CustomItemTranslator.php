@@ -16,6 +16,7 @@ use pocketmine\network\mcpe\protocol\serializer\ItemTypeDictionary;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\static\data\CustomItemSerializer;
 
 class CustomItemTranslator
 {
@@ -24,7 +25,7 @@ class CustomItemTranslator
     public function __construct(
         private ItemTypeDictionary $itemTypeDictionary,
         private CustomBlockStateDictionary $blockStateDictionary,
-        private ItemSerializer $itemSerializer,
+        private CustomItemSerializer $itemSerializer,
         private ItemDeserializer $itemDeserializer,
         private BlockItemIdMap $blockItemIdMap,
         private CustomItemIdMetaDowngrader $itemDataDowngrader,
@@ -49,17 +50,12 @@ class CustomItemTranslator
      * @throws ItemTypeSerializeException
      */
     public function toNetworkId(Item $item) : array{
-        $itemData = $this->itemSerializer->serializeType($item);
+        $itemData = $this->itemSerializer->serializeType($item, $this->itemDataDowngrader);
 
         try {
             $numericId = $this->itemTypeDictionary->fromStringId($itemData->getName());
         } catch (\InvalidArgumentException) {
-            //TODO: fix this using a downgrader
-            // https://github.com/NetherGamesMC/PocketMine-MP/blob/stable/src/network/mcpe/convert/ItemTranslator.php#L73
-            // https://github.com/NetherGamesMC/PocketMine-MP/blob/stable/src/data/bedrock/item/downgrade/ItemIdMetaDowngrader.php#L104
-            //throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
-            var_dump($itemData->getName() . " not found, replacing with an update block instead");
-            return $this->toNetworkId(VanillaBlocks::INFO_UPDATE()->asItem());
+            throw new ItemTypeSerializeException("Unknown item type " . $itemData->getName());
         }
 
         $blockStateData = $itemData->getBlock();
