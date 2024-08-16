@@ -48,17 +48,21 @@ class PacketConverter
 
     public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
     {
-        //dupe
         if(!$converter instanceof CustomTypeConverter) return $packet;
+
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
-        if($searchedPacket !== null && !method_exists($packet, "createPacket") && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
-            //Since we override the packet in the packet pool, the class shouldn't be  the same, making us detect packets that have been modified
-            //Allows us to use `createPacket` instead of `create`
-            //As well as get the packet arguments from `getConstructorArguments`
+        if(
+            $searchedPacket !== null &&
+            !method_exists($packet, "createPacket") &&
+            method_exists($searchedPacket, "getConstructorArguments") &&
+            method_exists($searchedPacket, "createPacket")
+        ){
             $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
-            //Don't return it just in-case the packet needs further translation below
         }
+
         if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return $packet;
+        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
+
         $protocol = $converter->getProtocol();
 
         if ($packet instanceof LevelSoundEventPacket) {
@@ -71,15 +75,20 @@ class PacketConverter
         return $packet;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter, CustomNetworkSession $session) : ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
     {
         if(!$converter instanceof CustomTypeConverter) return $packet;
+
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
-        if($searchedPacket !== null && method_exists($searchedPacket, "getConstructorArguments") && method_exists($searchedPacket, "createPacket")){
+        if(
+            $searchedPacket !== null &&
+            !method_exists($packet, "createPacket") &&
+            method_exists($searchedPacket, "getConstructorArguments") &&
+            method_exists($searchedPacket, "createPacket")
+        ){
             $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
         }
         if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return $packet;
-        //No need to translate for latest, they already have it correct.
         if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
         $protocol = $converter->getProtocol();
@@ -169,6 +178,7 @@ class PacketConverter
                 }
                 return AvailableCommandsPacket::create($newCommandData, $packet->hardcodedEnums, $packet->softEnums, $packet->enumConstraints);
             case CreativeContentPacket::NETWORK_ID:
+                if($session == null) return $packet;
                 return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
             default:
                 return $packet;

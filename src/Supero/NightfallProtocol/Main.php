@@ -22,6 +22,16 @@ use Supero\NightfallProtocol\network\CustomRaklibInterface;
 
 class Main extends PluginBase
 {
+
+    private const PACKET_VIOLATION_WARNING_TYPE = [
+        PacketViolationWarningPacket::TYPE_MALFORMED => "MALFORMED",
+    ];
+    private const PACKET_VIOLATION_WARNING_SEVERITY = [
+        PacketViolationWarningPacket::SEVERITY_WARNING => "WARNING",
+        PacketViolationWarningPacket::SEVERITY_FINAL_WARNING => "FINAL WARNING",
+        PacketViolationWarningPacket::SEVERITY_TERMINATING_CONNECTION => "TERMINATION",
+    ];
+
     public static function getProtocolDataFolder(): string
     {
         return dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "versions";
@@ -68,7 +78,7 @@ class Main extends PluginBase
                 $packet = $event->getPacket();
                 if(!$packet instanceof PlayerAuthInputPacket) var_dump($packet::class);
                 if($packet instanceof PacketViolationWarningPacket){
-                    $this->getLogger()->warning("Received [{$packet->getType()}] Packet Violation message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
+                    $this->getLogger()->warning("Received " . self::PACKET_VIOLATION_WARNING_TYPE[$packet->getType()] ?? "UNKNOWN [{$packet->getType()}]" . " Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getIp()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
                 }
             }, EventPriority::NORMAL, $this);
             $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{

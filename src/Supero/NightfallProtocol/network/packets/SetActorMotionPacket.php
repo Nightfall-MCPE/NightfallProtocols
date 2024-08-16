@@ -9,7 +9,6 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class SetActorMotionPacket extends PM_Packet
 {
-
     public int $actorRuntimeId;
     public Vector3 $motion;
     public int $tick;
