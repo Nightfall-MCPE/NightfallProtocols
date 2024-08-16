@@ -23,7 +23,7 @@ class CustomProtocolInfo {
     ];
 
     //TODO: Update to the latest version (1.21.20)
-    public const PROTOCOL_1_21_20 = 703;//im coding this on the plane i literally can't check the protocol version :sob:
+    public const PROTOCOL_1_21_20 = 712;
     public const PROTOCOL_1_21_2 = 686;
     public const PROTOCOL_1_21_0 = 685;
     public const PROTOCOL_1_20_80 = 671;

@@ -38,7 +38,7 @@ class CustomItemSerializer
         private BlockStateSerializer $blockStateSerializer
     ){
         $this->registerSpecialBlockSerializers();
-        new ItemSerializerDeserializerRegistrar(null, $this);
+        new CustomItemSerializerDeserializerRegistrar(null, $this);
     }
 
     /**
