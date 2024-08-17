@@ -14,7 +14,8 @@ class CustomItemTypeDictionaryFromDataHelper
 {
     private const PATHS = [
         CustomProtocolInfo::CURRENT_PROTOCOL => "",
-        CustomProtocolInfo::PROTOCOL_1_21_0 => "",
+        CustomProtocolInfo::PROTOCOL_1_21_2 => "-1.21.2",
+        CustomProtocolInfo::PROTOCOL_1_21_0 => "-1.21.2",
         CustomProtocolInfo::PROTOCOL_1_20_80 => "-1.20.80",
         CustomProtocolInfo::PROTOCOL_1_20_70 => "-1.20.70",
         CustomProtocolInfo::PROTOCOL_1_20_60 => "-1.20.60",
