@@ -20,7 +20,7 @@ use pocketmine\Server;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
 
-class Main extends PluginBase
+final class Main extends PluginBase
 {
 
     private const PACKET_VIOLATION_WARNING_TYPE = [
@@ -42,7 +42,6 @@ class Main extends PluginBase
      */
     protected function onEnable(): void
     {
-
         $server = $this->getServer();
 
         $regInterface = function(Server $server, bool $ipv6){
@@ -59,7 +58,6 @@ class Main extends PluginBase
                 $typeConverter
             ));
         };
-
 
         ($regInterface)($server, $server->getConfigGroup()->getConfigBool("enable-ipv6", true));
 
@@ -82,11 +80,12 @@ class Main extends PluginBase
                 }
             }, EventPriority::NORMAL, $this);
             $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
-                foreach ($event->getPackets() as $packet) {
-                    var_dump($packet::class);
+                foreach($event->getTargets() as $target){
+                    foreach($event->getPackets() as $packet){
+                        $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getIp());
+                    }
                 }
             }, EventPriority::NORMAL, $this);
-
         }
     }
 }
