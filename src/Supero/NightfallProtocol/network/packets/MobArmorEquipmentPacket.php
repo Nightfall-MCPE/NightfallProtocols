@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
@@ -49,6 +48,7 @@ class MobArmorEquipmentPacket extends PM_Packet {
            $out->putItemStackWrapper($this->body);
        }
     }
+
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->actorRuntimeId,
@@ -56,7 +56,7 @@ class MobArmorEquipmentPacket extends PM_Packet {
             $packet->chest,
             $packet->legs,
             $packet->feet,
-            $packet->body,
+            $packet->body
         ];
     }
 }

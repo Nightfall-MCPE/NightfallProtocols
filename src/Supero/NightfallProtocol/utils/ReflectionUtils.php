@@ -47,6 +47,20 @@ final class ReflectionUtils{
 
     /**
      * @param string $className
+     * @param object $instance
+     * @param array $propertiesNames
+     *
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function getProperties(string $className, object $instance, array $propertiesNames) : array{
+        $result = [];
+        foreach($propertiesNames as $propertyName) $result[$propertyName] = self::getProperty($className, $instance, $propertyName);
+        return $result;
+    }
+
+    /**
+     * @param string $className
      * @param string $methodName
      * @param mixed  ...$args
      *

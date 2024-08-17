@@ -7,10 +7,13 @@ use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryDataException;
+use Supero\NightfallProtocol\network\packets\ChangeDimensionPacket;
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
 use Supero\NightfallProtocol\network\packets\LecternUpdatePacket;
+use Supero\NightfallProtocol\network\packets\MobArmorEquipmentPacket;
 use Supero\NightfallProtocol\network\packets\MobEffectPacket;
+use Supero\NightfallProtocol\network\packets\PlayerArmorDamagePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
@@ -44,6 +47,9 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new StartGamePacket());
         $this->registerPacket(new TextPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
+        $this->registerPacket(new ChangeDimensionPacket());
+        $this->registerPacket(new MobArmorEquipmentPacket());
+        $this->registerPacket(new PlayerArmorDamagePacket());
     }
 
     public function registerPacket(Packet $packet) : void{
