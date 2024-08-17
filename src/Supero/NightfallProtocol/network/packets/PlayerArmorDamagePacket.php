@@ -60,7 +60,7 @@ class PlayerArmorDamagePacket extends PM_Packet
         $this->chestSlotDamage = $this->maybeReadDamage($flags, self::FLAG_CHEST, $in);
         $this->legsSlotDamage = $this->maybeReadDamage($flags, self::FLAG_LEGS, $in);
         $this->feetSlotDamage = $this->maybeReadDamage($flags, self::FLAG_FEET, $in);
-        if($in->getProtocolId() >= CustomProtocolInfo::PROTOCOL_1_21_20){
+        if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
             $this->bodySlotDamage = $this->maybeReadDamage($flags, self::FLAG_BODY, $in);
         }
     }

@@ -51,18 +51,14 @@ class MobArmorEquipmentPacket extends PM_Packet {
        }
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function getConstructorArguments(PM_Packet $packet): array {
-        $properties = [
-            "actorRuntimeId",
-            "head",
-            "chest",
-            "legs",
-            "feet",
-            "body"
+        return [
+            $packet->actorRuntimeId,
+            $packet->head,
+            $packet->chest,
+            $packet->legs,
+            $packet->feet,
+            $packet->body
         ];
-        return array_values(ReflectionUtils::getProperties(PM_Packet::class, $packet, $properties));
     }
 }
