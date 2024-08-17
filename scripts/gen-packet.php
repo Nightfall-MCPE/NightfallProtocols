@@ -17,12 +17,16 @@ function generateCustomPacket($packetName, $additionalProperties = []): string
     $originalContent = file_get_contents($originalFilePath);
 
     // Extract properties from original content
-    preg_match_all('/public (.+?) \$(\w+);/', $originalContent, $matches);
-    //preg_match_all('/private (.+?) \$(\w+);/', $originalContent, $matches);
+    preg_match_all('/public (.+?) \$(\w+);/', $originalContent, $publicMatches);
+    preg_match_all('/private (.+?) \$(\w+);/', $originalContent, $privateMatches);
 
     $properties = [];
-    foreach ($matches[0] as $index => $match) {
-        $properties[] = ['type' => trim($matches[1][$index]), 'name' => trim($matches[2][$index]), 'option' => "add"];
+    foreach ($publicMatches[0] as $index => $match) {
+        $properties[] = ['type' => trim($publicMatches[1][$index]), 'name' => trim($publicMatches[2][$index]), 'option' => "add"];
+    }
+
+    foreach ($privateMatches[0] as $index => $match) {
+        $properties[] = ['type' => trim($privateMatches[1][$index]), 'name' => trim($privateMatches[2][$index]), 'option' => "add"];
     }
 
     // Add additional properties
@@ -113,12 +117,13 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
+/**
 // Example usage
 try {
-    $packetName = 'MobArmorEquipmentPacket';
+    $packetName = 'DisconnectPacket';
 
     $packetContent = generateCustomPacket($packetName, [
-        ["type" => "ItemStackWrapper", "property" => "body", "option" => "already-set", "version" => ">= CustomProtocolInfo::PROTOCOL_1_21_20"],
+        ["type" => "string", "property" => "filteredMessage", "option" => "already-set", "version" => ">= CustomProtocolInfo::PROTOCOL_1_21_20"],
     ]);
 
     $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'NightfallProtocol' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
@@ -129,3 +134,4 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
+ * */
