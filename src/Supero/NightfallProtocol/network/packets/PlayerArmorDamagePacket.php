@@ -4,10 +4,8 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\PlayerArmorDamagePacket as PM_Packet;
-use ReflectionException;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
-use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class PlayerArmorDamagePacket extends PM_Packet
 {
@@ -97,18 +95,14 @@ class PlayerArmorDamagePacket extends PM_Packet
         }
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function getConstructorArguments(PM_Packet $packet): array
     {
-        $properties = [
-            "headSlotDamage",
-            "chestSlotDamage",
-            "legsSlotDamage",
-            "feetSlotDamage",
-            "bodySlotDamage"
+        return [
+            $packet->getHeadSlotDamage(),
+            $packet->getChestSlotDamage(),
+            $packet->getLegsSlotDamage(),
+            $packet->getFeetSlotDamage(),
+            $packet->getBodySlotDamage()
         ];
-        return array_values(ReflectionUtils::getProperties(PM_Packet::class, $packet, $properties));
     }
 }
