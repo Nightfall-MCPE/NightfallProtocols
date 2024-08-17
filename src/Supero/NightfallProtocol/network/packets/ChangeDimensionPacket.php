@@ -14,7 +14,7 @@ class ChangeDimensionPacket extends PM_Packet
     public int $dimension;
     public Vector3 $position;
     public bool $respawn = false;
-    public ?int $_loadingScreenId = null;
+    public ?int $loadingScreenId = null;
 
     /**
      * @generate-create-func
@@ -24,7 +24,7 @@ class ChangeDimensionPacket extends PM_Packet
         $result->dimension = $dimension;
         $result->position = $position;
         $result->respawn = $respawn;
-        $result->_loadingScreenId = $loadingScreenId;
+        $result->loadingScreenId = $loadingScreenId;
         return $result;
     }
 
@@ -33,7 +33,7 @@ class ChangeDimensionPacket extends PM_Packet
         $this->position = $in->getVector3();
         $this->respawn = $in->getBool();
         if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
-            $this->_loadingScreenId = $in->readOptional(fn() => $in->getLInt());
+            $this->loadingScreenId = $in->readOptional(fn() => $in->getLInt());
         }
     }
 
@@ -42,7 +42,7 @@ class ChangeDimensionPacket extends PM_Packet
         $out->putVector3($this->position);
         $out->putBool($this->respawn);
         if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
-            $out->writeOptional($this->_loadingScreenId, $out->putLInt(...));
+            $out->writeOptional($this->loadingScreenId, $out->putLInt(...));
         }
     }
 
