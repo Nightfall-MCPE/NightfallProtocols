@@ -3,9 +3,11 @@
 namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\PacketHandlerInterface;
 use pocketmine\network\mcpe\protocol\PlayerArmorDamagePacket as PM_Packet;
+use ReflectionException;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
+use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class PlayerArmorDamagePacket extends PM_Packet
 {
@@ -24,7 +26,7 @@ class PlayerArmorDamagePacket extends PM_Packet
     /**
      * @generate-create-func
      */
-    public static function create(?int $headSlotDamage, ?int $chestSlotDamage, ?int $legsSlotDamage, ?int $feetSlotDamage, ?int $bodySlotDamage) : self{
+    public static function createPacket(?int $headSlotDamage, ?int $chestSlotDamage, ?int $legsSlotDamage, ?int $feetSlotDamage, ?int $bodySlotDamage) : self{
         $result = new self;
         $result->headSlotDamage = $headSlotDamage;
         $result->chestSlotDamage = $chestSlotDamage;
@@ -73,25 +75,40 @@ class PlayerArmorDamagePacket extends PM_Packet
         }
     }
 
+    /**
+     * @param CustomPacketSerializer $out
+     * @return void
+     */
     protected function encodePayload(PacketSerializer $out) : void{
         $out->putByte(
             $this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) |
             $this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) |
             $this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) |
             $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) |
-            ($out->getProtocolId() >= CustomProtocolInfo::PROTOCOL_1_21_20 ? $this->composeFlag($this->bodySlotDamage, self::FLAG_BODY) : 0)
+            ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20 ? $this->composeFlag($this->bodySlotDamage, self::FLAG_BODY) : 0)
         );
 
         $this->maybeWriteDamage($this->headSlotDamage, $out);
         $this->maybeWriteDamage($this->chestSlotDamage, $out);
         $this->maybeWriteDamage($this->legsSlotDamage, $out);
         $this->maybeWriteDamage($this->feetSlotDamage, $out);
-        if($out->getProtocolId() >= CustomProtocolInfo::PROTOCOL_1_21_20){
+        if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
             $this->maybeWriteDamage($this->bodySlotDamage, $out);
         }
     }
 
-    public function handle(PacketHandlerInterface $handler) : bool{
-        return $handler->handlePlayerArmorDamage($this);
+    /**
+     * @throws ReflectionException
+     */
+    public function getConstructorArguments(PM_Packet $packet): array
+    {
+        $properties = [
+            "headSlotDamage",
+            "chestSlotDamage",
+            "legsSlotDamage",
+            "feetSlotDamage",
+            "bodySlotDamage"
+        ];
+        return array_values(ReflectionUtils::getProperties(PM_Packet::class, $packet, $properties));
     }
 }

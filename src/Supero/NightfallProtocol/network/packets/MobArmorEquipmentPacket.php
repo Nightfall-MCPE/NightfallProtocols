@@ -4,9 +4,10 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
+use ReflectionException;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class MobArmorEquipmentPacket extends PM_Packet {
     public int $actorRuntimeId;
@@ -49,14 +50,19 @@ class MobArmorEquipmentPacket extends PM_Packet {
            $out->putItemStackWrapper($this->body);
        }
     }
+
+    /**
+     * @throws ReflectionException
+     */
     public function getConstructorArguments(PM_Packet $packet): array {
-        return [
-            $packet->actorRuntimeId,
-            $packet->head,
-            $packet->chest,
-            $packet->legs,
-            $packet->feet,
-            $packet->body,
+        $properties = [
+            "actorRuntimeId",
+            "head",
+            "chest",
+            "legs",
+            "feet",
+            "body"
         ];
+        return array_values(ReflectionUtils::getProperties(PM_Packet::class, $packet, $properties));
     }
 }
