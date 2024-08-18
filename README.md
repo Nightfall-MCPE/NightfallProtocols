@@ -16,52 +16,7 @@ Currently, the plugin supports these versions:
 
 ### Contribution
 
-You can contribute with these templates
-
-##### FOR ISSUES:
-```yml
-Issue name: (Problem)
-Issue description:
-
-- Version: X.XX.XX
-- Server Version: X.XX.X 
-# ANY REPORTS WHERE THE SERVER VERSION IS
-# DIFFERENT FROM THE PLUGIN VERSION WILL BE REMOVED
-- Expected: (Explanation of the expected behaviour)
-- Actual: (Explanation of the actual behaviour)
-```
-
-Should look something like this
-```yml
-Issue name: Item stack isn't being downgraded properly
-Issue description:
-
-- Version: 1.20.60
-- Server Version: 1.21.2
-- Expected: Item stacks to be normal
-- Actual: Item stacks are in-correctly or even not downgraded
-```
-
-##### FOR PULL REQUESTS:
-```yml
-PR name: (Small description of the PR)
-PR description:
-
-- Changes: (Description of the changes in the PR)
-- Affected Versions: ALL/X.XX.XX, X.XX.Y
-
-# THESE SHALL BE TESTED !11!1 
-```
-Should look something like this
-```yml
-PR name: Added 1.20.50
-PR description:
-
-- Changes: Adds packet translation and batch compression algorithm for 1.20.50
-- Affected Versions: 1.20.50
-```
-
-These can  be simplified if it doesn't affect much.
+We welcome contributions to NightfallProtocols! Whether you're fixing a bug, proposing new features, or improving documentation, your contributions is valuable to us.
 
 ### Huge thanks to
 
