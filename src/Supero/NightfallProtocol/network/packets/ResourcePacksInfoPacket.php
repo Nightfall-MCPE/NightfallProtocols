@@ -4,15 +4,15 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\types\resourcepacks\BehaviorPackInfoEntry;
-use pocketmine\network\mcpe\protocol\types\resourcepacks\ResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 
 class ResourcePacksInfoPacket extends PM_Packet
 {
-    /** @var ResourcePackInfoEntry[] */
+    /** @var CustomResourcePackInfoEntry[] */
     public array $resourcePackEntries = [];
-    /** @var BehaviorPackInfoEntry[] */
+    /** @var CustomBehaviourPackInfoEntry[] */
     public array $behaviorPackEntries = [];
     public bool $mustAccept = false; //if true, forces client to choose between accepting packs or being disconnected
     public bool $hasAddons = false;
@@ -26,8 +26,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 
     /**
      * @generate-create-func
-     * @param ResourcePackInfoEntry[] $resourcePackEntries
-     * @param BehaviorPackInfoEntry[] $behaviorPackEntries
+     * @param CustomResourcePackInfoEntry[] $resourcePackEntries
+     * @param CustomBehaviourPackInfoEntry[] $behaviorPackEntries
      * @param string[]                $cdnUrls
      * @phpstan-param array<string, string> $cdnUrls
      */
@@ -61,12 +61,12 @@ class ResourcePacksInfoPacket extends PM_Packet
         $this->forceServerPacks = $in->getBool();
         $behaviorPackCount = $in->getLShort();
         while($behaviorPackCount-- > 0){
-            $this->behaviorPackEntries[] = BehaviorPackInfoEntry::read($in);
+            $this->behaviorPackEntries[] = CustomBehaviourPackInfoEntry::read($in);
         }
 
         $resourcePackCount = $in->getLShort();
         while($resourcePackCount-- > 0){
-            $this->resourcePackEntries[] = ResourcePackInfoEntry::read($in);
+            $this->resourcePackEntries[] = CustomResourcePackInfoEntry::read($in);
         }
 
         $this->cdnUrls = [];

@@ -8,6 +8,7 @@ use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
@@ -22,6 +23,8 @@ use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
 /**
@@ -43,7 +46,8 @@ class PacketConverter
     ];
 
     public const SERVERBOUND_TRANSLATED = [
-        LevelSoundEventPacket::NETWORK_ID
+        LevelSoundEventPacket::NETWORK_ID,
+        ResourcePacksInfoPacket::NETWORK_ID
     ];
 
     public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
@@ -180,6 +184,46 @@ class PacketConverter
             case CreativeContentPacket::NETWORK_ID:
                 if($session == null) return $packet;
                 return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
+            case ResourcePacksInfoPacket::NETWORK_ID:
+                $behaviourEntries = [];
+                /** @var ResourcePacksInfoPacket $packet */
+                foreach($packet->behaviorPackEntries as $label => $behaviourEntry){
+                    $behaviourEntries[$label] = new CustomBehaviourPackInfoEntry(
+                        $behaviourEntry->getPackId(),
+                        $behaviourEntry->getVersion(),
+                        $behaviourEntry->getSizeBytes(),
+                        $behaviourEntry->getEncryptionKey(),
+                        $behaviourEntry->getSubPackName(),
+                        $behaviourEntry->getContentId(),
+                        $behaviourEntry->hasScripts(),
+                        $behaviourEntry->isAddonPack()
+                    );
+                }
+
+                $resourceEntries = [];
+                foreach($packet->resourcePackEntries as $label => $resourcePackEntry){
+                    $resourceEntries[$label] = new CustomResourcePackInfoEntry(
+                        $resourcePackEntry->getPackId(),
+                        $resourcePackEntry->getVersion(),
+                        $resourcePackEntry->getSizeBytes(),
+                        $resourcePackEntry->getEncryptionKey(),
+                        $resourcePackEntry->getSubPackName(),
+                        $resourcePackEntry->getContentId(),
+                        $resourcePackEntry->hasScripts(),
+                        $resourcePackEntry->isAddonPack(),
+                        $resourcePackEntry->isRtxCapable()
+                    );
+                }
+
+                return \Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket::createPacket(
+                    $resourceEntries,
+                    $behaviourEntries,
+                    $packet->mustAccept,
+                    $packet->hasAddons,
+                    $packet->hasScripts,
+                    $packet->forceServerPacks,
+                    $packet->cdnUrls
+                );
             default:
                 return $packet;
         }

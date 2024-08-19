@@ -118,13 +118,10 @@ function saveToFile($path, $content): void
 }
 
 /**
-// Example usage
 try {
-    $packetName = 'DisconnectPacket';
+    $packetName = 'InventoryTransactionPacket';
 
-    $packetContent = generateCustomPacket($packetName, [
-        ["type" => "string", "property" => "filteredMessage", "option" => "already-set", "version" => ">= CustomProtocolInfo::PROTOCOL_1_21_20"],
-    ]);
+    $packetContent = generateCustomPacket($packetName);
 
     $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'NightfallProtocol' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
 
@@ -134,4 +131,4 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
- * */
+*/

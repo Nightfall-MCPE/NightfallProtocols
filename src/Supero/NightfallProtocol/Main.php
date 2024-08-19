@@ -10,7 +10,6 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\mcpe\StandardPacketBroadcaster;
@@ -22,10 +21,6 @@ use Supero\NightfallProtocol\network\CustomRaklibInterface;
 
 final class Main extends PluginBase
 {
-
-    private const PACKET_VIOLATION_WARNING_TYPE = [
-        PacketViolationWarningPacket::TYPE_MALFORMED => "MALFORMED",
-    ];
     private const PACKET_VIOLATION_WARNING_SEVERITY = [
         PacketViolationWarningPacket::SEVERITY_WARNING => "WARNING",
         PacketViolationWarningPacket::SEVERITY_FINAL_WARNING => "FINAL WARNING",
@@ -74,15 +69,14 @@ final class Main extends PluginBase
         if($this->getConfig()->get("debug-mode")){
             $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
                 $packet = $event->getPacket();
-                if(!$packet instanceof PlayerAuthInputPacket) var_dump($packet::class);
                 if($packet instanceof PacketViolationWarningPacket){
-                    $this->getLogger()->warning("Received " . self::PACKET_VIOLATION_WARNING_TYPE[$packet->getType()] ?? "UNKNOWN [{$packet->getType()}]" . " Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getIp()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
+                    $this->getLogger()->debug("Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getDisplayName()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
                 }
             }, EventPriority::NORMAL, $this);
             $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
                 foreach($event->getTargets() as $target){
                     foreach($event->getPackets() as $packet){
-                        $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getIp());
+                        $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getDisplayName());
                     }
                 }
             }, EventPriority::NORMAL, $this);
