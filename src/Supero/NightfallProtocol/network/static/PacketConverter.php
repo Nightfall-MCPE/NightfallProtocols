@@ -50,9 +50,10 @@ class PacketConverter
         LevelSoundEventPacket::NETWORK_ID
     ];
 
-    public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
+    public static function handleServerbound(ServerboundPacket $packet, CustomTypeConverter $converter) : ServerboundPacket
     {
-        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $protocol = $converter->getProtocol();
+        if(in_array($protocol, CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -65,9 +66,6 @@ class PacketConverter
         }
 
         if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return $packet;
-        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
-
-        $protocol = $converter->getProtocol();
 
         if ($packet instanceof LevelSoundEventPacket) {
             if (($packet->sound === LevelSoundEvent::BREAK && $packet->extraData !== -1) || $packet->sound === LevelSoundEvent::PLACE || $packet->sound === LevelSoundEvent::HIT || $packet->sound === LevelSoundEvent::LAND || $packet->sound === LevelSoundEvent::ITEM_USE_ON) {
@@ -79,9 +77,10 @@ class PacketConverter
         return $packet;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, CustomTypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
     {
-        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $protocol = $converter->getProtocol();
+        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -93,9 +92,7 @@ class PacketConverter
             $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
         }
         if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return $packet;
-        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
-        $protocol = $converter->getProtocol();
         $blockTranslator = $converter->getCustomBlockTranslator();
         $runtimeToStateId = CustomRuntimeIDtoStateID::getProtocolInstance($protocol);
         switch ($packet::NETWORK_ID) {

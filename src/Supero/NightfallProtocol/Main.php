@@ -19,6 +19,8 @@ use pocketmine\Server;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
+use Supero\NightfallProtocol\network\static\CustomPacketPool;
 
 final class Main extends PluginBase
 {
@@ -41,7 +43,7 @@ final class Main extends PluginBase
         $server = $this->getServer();
 
         $regInterface = function(Server $server, bool $ipv6){
-            $typeConverter = TypeConverter::getInstance();
+            $typeConverter = CustomTypeConverter::getProtocolInstance();
             $packetBroadcaster = new StandardPacketBroadcaster(Server::getInstance());
             $entityEventBroadcaster = new StandardEntityEventBroadcaster($packetBroadcaster, $typeConverter);
             $server->getNetwork()->registerInterface(new CustomRaklibInterface(
@@ -83,5 +85,7 @@ final class Main extends PluginBase
                 }
             }, EventPriority::NORMAL, $this);
         }
+
+        CustomPacketPool::getInstance();
     }
 }
