@@ -42,12 +42,12 @@ class PacketConverter
         UpdateBlockSyncedPacket::NETWORK_ID,
         UpdateSubChunkBlocksPacket::NETWORK_ID,
         CreativeContentPacket::NETWORK_ID,
-        AvailableCommandsPacket::NETWORK_ID
+        AvailableCommandsPacket::NETWORK_ID,
+        ResourcePacksInfoPacket::NETWORK_ID
     ];
 
     public const SERVERBOUND_TRANSLATED = [
-        LevelSoundEventPacket::NETWORK_ID,
-        ResourcePacksInfoPacket::NETWORK_ID
+        LevelSoundEventPacket::NETWORK_ID
     ];
 
     public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
