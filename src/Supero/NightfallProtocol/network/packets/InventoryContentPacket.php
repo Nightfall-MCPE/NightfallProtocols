@@ -25,19 +25,23 @@ class InventoryContentPacket extends PM_Packet {
         return $result;
     }
     protected function decodePayload(PacketSerializer $in) : void {
-       $this->windowId = $in->getInt();
+       $this->windowId = $in->getUnsignedVarInt();
+       $count = $in->getUnsignedVarInt();
+       for($i = 0; $i < $count; ++$i){
+           $this->items[] = $in->getItemStackWrapper();
+       }
        if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20) {
            $this->dynamicContainerId = $in->getUnsignedVarInt();
        }
     }
     protected function encodePayload(PacketSerializer $out) : void {
-       $out->putInt($this->windowId);
+        $out->putUnsignedVarInt($this->windowId);
         $out->putUnsignedVarInt(count($this->items));
         foreach($this->items as $item){
             $out->putItemStackWrapper($item);
         }
         if ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20) {
-           $out->putInt($this->dynamicContainerId);
+           $out->putUnsignedVarInt($this->dynamicContainerId);
         }
     }
     public function getConstructorArguments(PM_Packet $packet): array {
