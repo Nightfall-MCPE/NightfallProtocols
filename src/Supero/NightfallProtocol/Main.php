@@ -42,22 +42,26 @@ final class Main extends PluginBase
     {
         $server = $this->getServer();
 
-        $regInterface = function(Server $server, bool $ipv6){
+        $regInterface = function(Server $server, bool $ipV6){
             $typeConverter = CustomTypeConverter::getProtocolInstance();
             $packetBroadcaster = new StandardPacketBroadcaster(Server::getInstance());
             $entityEventBroadcaster = new StandardEntityEventBroadcaster($packetBroadcaster, $typeConverter);
             $server->getNetwork()->registerInterface(new CustomRaklibInterface(
                 $server,
-                $server->getIp(),
+                $ipV6 ? $server->getIpv6() : $server->getIp(),
                 $server->getPort(),
-                $ipv6,
+                $ipV6,
                 $packetBroadcaster,
                 $entityEventBroadcaster,
                 $typeConverter
             ));
         };
 
-        ($regInterface)($server, $server->getConfigGroup()->getConfigBool("enable-ipv6", true));
+
+        ($regInterface)($server, false);
+        if($server->getConfigGroup()->getConfigBool("enable-ipv6", true)){
+            ($regInterface)($server, true);
+        }
 
         $server->getPluginManager()->registerEvent(NetworkInterfaceRegisterEvent::class, function(NetworkInterfaceRegisterEvent $event) : void{
             $interface = $event->getInterface();
