@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * NOTE: This class isn't meant to be used to auto generate the ENTIRE packet
+ * This is just to create the base and the required fields
+ * You still need to update encodePayload & decodePayload
+ * As well as createPacket & getConstructorArguments if some of the fields did not transfer properly
+ */
+
+/**
  * @throws Exception
  */
 function generateCustomPacket($packetName, $additionalProperties = []): string
@@ -22,11 +29,11 @@ function generateCustomPacket($packetName, $additionalProperties = []): string
 
     $properties = [];
     foreach ($publicMatches[0] as $index => $match) {
-        $properties[] = ['type' => trim($publicMatches[1][$index]), 'name' => trim($publicMatches[2][$index]), 'option' => "add"];
+        $properties[] = ['type' => trim($publicMatches[1][$index]), 'name' => trim($publicMatches[2][$index]), 'option' => "add", "visibility" => "public"];
     }
 
     foreach ($privateMatches[0] as $index => $match) {
-        $properties[] = ['type' => trim($privateMatches[1][$index]), 'name' => trim($privateMatches[2][$index]), 'option' => "add"];
+        $properties[] = ['type' => trim($privateMatches[1][$index]), 'name' => trim($privateMatches[2][$index]), 'option' => "add", "visibility" => "private"];
     }
 
     // Add additional properties
@@ -44,7 +51,7 @@ function generateCustomPacket($packetName, $additionalProperties = []): string
     // Add properties
     foreach ($properties as $property) {
         if($property['option'] == "add"){
-            $classString .= "    public " . $property['type'] . " \${$property['name']};\n";
+            $classString .= "    " . $property['visibility'] . " " . $property['type'] . " \${$property['name']};\n";
         }
     }
 
@@ -102,8 +109,12 @@ function generateCustomPacket($packetName, $additionalProperties = []): string
     $classString .= "    public function getConstructorArguments(PM_Packet \$packet): array {\n";
     $classString .= "        return [\n";
     foreach ($properties as $property) {
-        if($property['option'] == "add") {
-            $classString .= "            \$packet->get" . ucfirst($property['name']) . "(),\n";
+        if ($property['option'] == "add") {
+            if ($property['visibility'] === "public") {
+                $classString .= "            \$packet->{$property['name']},\n";
+            } elseif ($property['visibility'] === "private") {
+                $classString .= "            \$packet->get" . ucfirst($property['name']) . "(),\n";
+            }
         }
     }
     $classString .= "        ];\n    }\n}";
@@ -117,11 +128,15 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
-/**
-try {
-    $packetName = 'InventoryTransactionPacket';
+/*
+ This is an example on how to generate a packet
 
-    $packetContent = generateCustomPacket($packetName);
+try {
+    $packetName = 'ServerboundDiagnosticsPacket';
+
+    $packetContent = generateCustomPacket($packetName, [
+    ["type" => "float", "property" => "avgUnaccountedTimePercent", "option" => "already-set", "version" => ">= CustomProtocolInfo::PROTOCOL_1_21_20"],
+    ]);
 
     $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'NightfallProtocol' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
 
