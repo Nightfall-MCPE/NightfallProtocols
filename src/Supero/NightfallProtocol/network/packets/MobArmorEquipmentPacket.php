@@ -29,17 +29,17 @@ class MobArmorEquipmentPacket extends PM_Packet {
         return $result;
     }
     protected function decodePayload(PacketSerializer $in) : void {
-       $this->actorRuntimeId = $in->getInt();
-       $this->head = $in->getItemStackWrapper();
-       $this->chest = $in->getItemStackWrapper();
-       $this->legs = $in->getItemStackWrapper();
-       $this->feet = $in->getItemStackWrapper();
+        $this->actorRuntimeId = $in->getActorRuntimeId();
+        $this->head = $in->getItemStackWrapper();
+        $this->chest = $in->getItemStackWrapper();
+        $this->legs = $in->getItemStackWrapper();
+        $this->feet = $in->getItemStackWrapper();
        if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20) {
            $this->body = $in->getItemStackWrapper();
        }
     }
     protected function encodePayload(PacketSerializer $out) : void {
-       $out->putInt($this->actorRuntimeId);
+       $out->putActorRuntimeId($this->actorRuntimeId);
        $out->putItemStackWrapper($this->head);
        $out->putItemStackWrapper($this->chest);
        $out->putItemStackWrapper($this->legs);
