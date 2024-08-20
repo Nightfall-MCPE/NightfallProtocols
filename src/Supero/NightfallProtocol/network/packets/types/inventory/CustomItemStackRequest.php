@@ -60,7 +60,6 @@ class CustomItemStackRequest
      * @throws PacketDecodeException
      */
     private static function readAction(PacketSerializer $in, int $typeId) : ItemStackRequestAction{
-        var_dump($typeId);
         return match($typeId){
             TakeStackRequestAction::ID => TakeStackRequestAction::read($in),
             PlaceStackRequestAction::ID => PlaceStackRequestAction::read($in),
