@@ -5,25 +5,28 @@ namespace Supero\NightfallProtocol\network\packets\types\inventory;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\BeaconPaymentStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftingConsumeInputStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftingCreateSpecificResultStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftRecipeOptionalStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftRecipeStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CreativeCreateStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DeprecatedCraftingNonImplementedStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DeprecatedCraftingResultsStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DestroyStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DropStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\GrindstoneStackRequestAction;
+use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LabTableCombineStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LoomStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\MineBlockStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\PlaceStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\SwapStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\TakeStackRequestAction;
 use pocketmine\utils\BinaryDataException;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftingConsumeInputStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeAutoStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CreativeCreateStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\DestroyStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\GrindstoneStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceIntoBundleStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeFromBundleStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeStackRequestAction;
 
 class CustomItemStackRequest
 {
@@ -57,6 +60,7 @@ class CustomItemStackRequest
      * @throws PacketDecodeException
      */
     private static function readAction(PacketSerializer $in, int $typeId) : ItemStackRequestAction{
+        var_dump($typeId);
         return match($typeId){
             TakeStackRequestAction::ID => TakeStackRequestAction::read($in),
             PlaceStackRequestAction::ID => PlaceStackRequestAction::read($in),
@@ -82,7 +86,7 @@ class CustomItemStackRequest
         };
     }
 
-    public static function read(PacketSerializer $in) : self{
+    public static function read(PacketSerializer $in) : ItemStackRequest{
         $requestId = $in->readItemStackRequestId();
         $actions = [];
         for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
@@ -94,7 +98,7 @@ class CustomItemStackRequest
             $filterStrings[] = $in->getString();
         }
         $filterStringCause = $in->getLInt();
-        return new self($requestId, $actions, $filterStrings, $filterStringCause);
+        return new ItemStackRequest($requestId, $actions, $filterStrings, $filterStringCause);
     }
 
     public function write(PacketSerializer $out) : void{
