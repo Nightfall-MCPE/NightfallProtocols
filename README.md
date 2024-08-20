@@ -13,6 +13,7 @@ Currently, the plugin supports these versions:
 - 1.20.80 (`671`)
 - 1.20.70 (`662`)
 - 1.20.60 (`649`)
+- 1.20.50 (`630`)
 
 ### Contribution
 
