@@ -10,7 +10,6 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\mcpe\StandardPacketBroadcaster;
@@ -19,13 +18,12 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
+use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
+use Supero\NightfallProtocol\network\static\CustomPacketPool;
 
 final class Main extends PluginBase
 {
-
-    private const PACKET_VIOLATION_WARNING_TYPE = [
-        PacketViolationWarningPacket::TYPE_MALFORMED => "MALFORMED",
-    ];
     private const PACKET_VIOLATION_WARNING_SEVERITY = [
         PacketViolationWarningPacket::SEVERITY_WARNING => "WARNING",
         PacketViolationWarningPacket::SEVERITY_FINAL_WARNING => "FINAL WARNING",
@@ -44,22 +42,26 @@ final class Main extends PluginBase
     {
         $server = $this->getServer();
 
-        $regInterface = function(Server $server, bool $ipv6){
-            $typeConverter = TypeConverter::getInstance();
+        $regInterface = function(Server $server, bool $ipV6){
+            $typeConverter = CustomTypeConverter::getProtocolInstance();
             $packetBroadcaster = new StandardPacketBroadcaster(Server::getInstance());
             $entityEventBroadcaster = new StandardEntityEventBroadcaster($packetBroadcaster, $typeConverter);
             $server->getNetwork()->registerInterface(new CustomRaklibInterface(
                 $server,
-                $server->getIp(),
+                $ipV6 ? $server->getIpv6() : $server->getIp(),
                 $server->getPort(),
-                $ipv6,
+                $ipV6,
                 $packetBroadcaster,
                 $entityEventBroadcaster,
                 $typeConverter
             ));
         };
 
-        ($regInterface)($server, $server->getConfigGroup()->getConfigBool("enable-ipv6", true));
+
+        ($regInterface)($server, false);
+        if($server->getConfigGroup()->getConfigBool("enable-ipv6", true)){
+            ($regInterface)($server, true);
+        }
 
         $server->getPluginManager()->registerEvent(NetworkInterfaceRegisterEvent::class, function(NetworkInterfaceRegisterEvent $event) : void{
             $interface = $event->getInterface();
@@ -74,18 +76,20 @@ final class Main extends PluginBase
         if($this->getConfig()->get("debug-mode")){
             $server->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
                 $packet = $event->getPacket();
-                if(!$packet instanceof PlayerAuthInputPacket) var_dump($packet::class);
                 if($packet instanceof PacketViolationWarningPacket){
-                    $this->getLogger()->warning("Received " . self::PACKET_VIOLATION_WARNING_TYPE[$packet->getType()] ?? "UNKNOWN [{$packet->getType()}]" . " Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getIp()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
+                    $this->getLogger()->debug("Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getDisplayName()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
                 }
+                if(!$packet instanceof PlayerAuthInputPacket) $this->getLogger()->debug("Recieved " . $packet::class . " from " . $event->getOrigin()->getDisplayName());
             }, EventPriority::NORMAL, $this);
             $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
                 foreach($event->getTargets() as $target){
                     foreach($event->getPackets() as $packet){
-                        $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getIp());
+                        $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getDisplayName());
                     }
                 }
             }, EventPriority::NORMAL, $this);
         }
+
+        CustomPacketPool::getInstance();
     }
 }

@@ -7,13 +7,15 @@ use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
-use pocketmine\network\mcpe\protocol\types\ItemInteractionData;
 use pocketmine\network\mcpe\protocol\types\PlayerAction;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockAction;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
 use pocketmine\network\mcpe\protocol\types\PlayMode;
+use Supero\NightfallProtocol\network\packets\types\CustomItemInteractionData;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomUseItemTransactionData;
 
 class PlayerAuthInputPacket extends PM_Packet
 {
@@ -30,8 +32,8 @@ class PlayerAuthInputPacket extends PM_Packet
     private ?Vector3 $vrGazeDirection = null;
     private int $tick;
     private Vector3 $delta;
-    private ?ItemInteractionData $itemInteractionData = null;
-    private ?ItemStackRequest $itemStackRequest = null;
+    private ?CustomItemInteractionData $itemInteractionData = null;
+    private ?CustomItemStackRequest $itemStackRequest = null;
     /** @var PlayerBlockAction[]|null */
     private ?array $blockActions = null;
     private ?PlayerAuthInputVehicleInfo $vehicleInfo = null;
@@ -60,8 +62,8 @@ class PlayerAuthInputPacket extends PM_Packet
         ?Vector3 $vrGazeDirection,
         int $tick,
         Vector3 $delta,
-        ?ItemInteractionData $itemInteractionData,
-        ?ItemStackRequest $itemStackRequest,
+        ?CustomItemInteractionData $itemInteractionData,
+        ?CustomItemStackRequest $itemStackRequest,
         ?array $blockActions,
         ?PlayerAuthInputVehicleInfo $vehicleInfo,
         float $analogMoveVecX,
@@ -174,11 +176,11 @@ class PlayerAuthInputPacket extends PM_Packet
         return $this->delta;
     }
 
-    public function getItemInteractionData() : ?ItemInteractionData{
+    public function getCustomItemInteractionData() : ?CustomItemInteractionData{
         return $this->itemInteractionData;
     }
 
-    public function getItemStackRequest() : ?ItemStackRequest{
+    public function getCustomItemStackRequest() : ?CustomItemStackRequest{
         return $this->itemStackRequest;
     }
 
@@ -216,10 +218,10 @@ class PlayerAuthInputPacket extends PM_Packet
         $this->tick = $in->getUnsignedVarLong();
         $this->delta = $in->getVector3();
         if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
-            $this->itemInteractionData = ItemInteractionData::read($in);
+            $this->itemInteractionData = CustomItemInteractionData::read($in);
         }
         if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST)){
-            $this->itemStackRequest = ItemStackRequest::read($in);
+            $this->itemStackRequest = CustomItemStackRequest::read($in);
         }
         if($this->hasFlag(PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS)){
             $this->blockActions = [];
@@ -279,6 +281,34 @@ class PlayerAuthInputPacket extends PM_Packet
             $packet->getVehicleInfo()->getPredictedVehicleActorUniqueId()
         );
 
+        $itemStackRequest = new CustomItemStackRequest(
+            $packet->getItemStackRequest()->getRequestId(),
+            $packet->getItemStackRequest()->getActions(),
+            $packet->getItemStackRequest()->getFilterStrings(),
+            $packet->getItemStackRequest()->getFilterStringCause()
+        );
+
+
+        $trData = $packet->getItemInteractionData()->getTransactionData();
+
+        $itemInteractionData = new CustomItemInteractionData(
+            $packet->getItemInteractionData()->getRequestId(),
+            $packet->getItemInteractionData()->getRequestChangedSlots(),
+            CustomUseItemTransactionData::new(
+                $trData->getActions(),
+                $trData->getActionType(),
+                $trData->getTriggerType(),
+                $trData->getBlockPosition(),
+                $trData->getFace(),
+                $trData->getHotbarSlot(),
+                $trData->getItemInHand(),
+                $trData->getPlayerPosition(),
+                $trData->getClickPosition(),
+                $trData->getBlockRuntimeId(),
+                $trData->getClientInteractPrediction()
+            )
+        );
+
         return [
             $packet->getPosition(),
             $packet->getPitch(),
@@ -293,8 +323,8 @@ class PlayerAuthInputPacket extends PM_Packet
             $packet->getVrGazeDirection(),
             $packet->getTick(),
             $packet->getDelta(),
-            $packet->getItemInteractionData(),
-            $packet->getItemStackRequest(),
+            $itemInteractionData,
+            $itemStackRequest,
             $packet->getBlockActions(),
             $vehicleInfo,
             $packet->getAnalogMoveVecX(),

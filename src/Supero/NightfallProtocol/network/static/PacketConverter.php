@@ -8,6 +8,7 @@ use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
@@ -22,6 +23,8 @@ use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
+use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
 /**
@@ -39,16 +42,18 @@ class PacketConverter
         UpdateBlockSyncedPacket::NETWORK_ID,
         UpdateSubChunkBlocksPacket::NETWORK_ID,
         CreativeContentPacket::NETWORK_ID,
-        AvailableCommandsPacket::NETWORK_ID
+        AvailableCommandsPacket::NETWORK_ID,
+        ResourcePacksInfoPacket::NETWORK_ID
     ];
 
     public const SERVERBOUND_TRANSLATED = [
         LevelSoundEventPacket::NETWORK_ID
     ];
 
-    public static function handleServerbound(ServerboundPacket $packet, TypeConverter $converter) : ServerboundPacket
+    public static function handleServerbound(ServerboundPacket $packet, CustomTypeConverter $converter) : ServerboundPacket
     {
-        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $protocol = $converter->getProtocol();
+        if(in_array($protocol, CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -61,9 +66,6 @@ class PacketConverter
         }
 
         if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return $packet;
-        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
-
-        $protocol = $converter->getProtocol();
 
         if ($packet instanceof LevelSoundEventPacket) {
             if (($packet->sound === LevelSoundEvent::BREAK && $packet->extraData !== -1) || $packet->sound === LevelSoundEvent::PLACE || $packet->sound === LevelSoundEvent::HIT || $packet->sound === LevelSoundEvent::LAND || $packet->sound === LevelSoundEvent::ITEM_USE_ON) {
@@ -75,9 +77,10 @@ class PacketConverter
         return $packet;
     }
 
-    public static function handleClientbound(ClientboundPacket $packet, TypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
+    public static function handleClientbound(ClientboundPacket $packet, CustomTypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
     {
-        if(!$converter instanceof CustomTypeConverter) return $packet;
+        $protocol = $converter->getProtocol();
+        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -89,9 +92,7 @@ class PacketConverter
             $packet = $searchedPacket::createPacket(...$searchedPacket->getConstructorArguments($packet));
         }
         if(!in_array($packet::NETWORK_ID, self::CLIENTBOUND_TRANSLATED)) return $packet;
-        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
 
-        $protocol = $converter->getProtocol();
         $blockTranslator = $converter->getCustomBlockTranslator();
         $runtimeToStateId = CustomRuntimeIDtoStateID::getProtocolInstance($protocol);
         switch ($packet::NETWORK_ID) {
@@ -180,6 +181,46 @@ class PacketConverter
             case CreativeContentPacket::NETWORK_ID:
                 if($session == null) return $packet;
                 return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
+            case ResourcePacksInfoPacket::NETWORK_ID:
+                $behaviourEntries = [];
+                /** @var ResourcePacksInfoPacket $packet */
+                foreach($packet->behaviorPackEntries as $label => $behaviourEntry){
+                    $behaviourEntries[$label] = new CustomBehaviourPackInfoEntry(
+                        $behaviourEntry->getPackId(),
+                        $behaviourEntry->getVersion(),
+                        $behaviourEntry->getSizeBytes(),
+                        $behaviourEntry->getEncryptionKey(),
+                        $behaviourEntry->getSubPackName(),
+                        $behaviourEntry->getContentId(),
+                        $behaviourEntry->hasScripts(),
+                        $behaviourEntry->isAddonPack()
+                    );
+                }
+
+                $resourceEntries = [];
+                foreach($packet->resourcePackEntries as $label => $resourcePackEntry){
+                    $resourceEntries[$label] = new CustomResourcePackInfoEntry(
+                        $resourcePackEntry->getPackId(),
+                        $resourcePackEntry->getVersion(),
+                        $resourcePackEntry->getSizeBytes(),
+                        $resourcePackEntry->getEncryptionKey(),
+                        $resourcePackEntry->getSubPackName(),
+                        $resourcePackEntry->getContentId(),
+                        $resourcePackEntry->hasScripts(),
+                        $resourcePackEntry->isAddonPack(),
+                        $resourcePackEntry->isRtxCapable()
+                    );
+                }
+
+                return \Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket::createPacket(
+                    $resourceEntries,
+                    $behaviourEntries,
+                    $packet->mustAccept,
+                    $packet->hasAddons,
+                    $packet->hasScripts,
+                    $packet->forceServerPacks,
+                    $packet->cdnUrls
+                );
             default:
                 return $packet;
         }

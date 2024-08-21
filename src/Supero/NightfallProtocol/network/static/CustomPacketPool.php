@@ -7,9 +7,16 @@ use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryDataException;
+use Supero\NightfallProtocol\network\packets\CameraInstructionPacket;
 use Supero\NightfallProtocol\network\packets\ChangeDimensionPacket;
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
+use Supero\NightfallProtocol\network\packets\DisconnectPacket;
+use Supero\NightfallProtocol\network\packets\EditorNetworkPacket;
+use Supero\NightfallProtocol\network\packets\InventoryContentPacket;
+use Supero\NightfallProtocol\network\packets\InventorySlotPacket;
+use Supero\NightfallProtocol\network\packets\InventoryTransactionPacket;
+use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket;
 use Supero\NightfallProtocol\network\packets\LecternUpdatePacket;
 use Supero\NightfallProtocol\network\packets\MobArmorEquipmentPacket;
 use Supero\NightfallProtocol\network\packets\MobEffectPacket;
@@ -18,7 +25,9 @@ use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
 use Supero\NightfallProtocol\network\packets\SetActorMotionPacket;
+use Supero\NightfallProtocol\network\packets\SetTitlePacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
+use Supero\NightfallProtocol\network\packets\StopSoundPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
@@ -36,20 +45,29 @@ class CustomPacketPool extends PacketPool
     {
         parent::__construct();
 
+        $this->registerPacket(new CameraInstructionPacket());
+        $this->registerPacket(new ChangeDimensionPacket());
         $this->registerPacket(new CodeBuilderSourcePacket());
         $this->registerPacket(new ContainerClosePacket());
+        $this->registerPacket(new DisconnectPacket());
+        $this->registerPacket(new EditorNetworkPacket());
+        $this->registerPacket(new InventoryContentPacket());
+        $this->registerPacket(new InventorySlotPacket());
+        $this->registerPacket(new InventoryTransactionPacket());
+        $this->registerPacket(new ItemStackRequestPacket());
         $this->registerPacket(new LecternUpdatePacket());
+        $this->registerPacket(new MobArmorEquipmentPacket());
         $this->registerPacket(new MobEffectPacket());
+        $this->registerPacket(new PlayerArmorDamagePacket());
         $this->registerPacket(new PlayerAuthInputPacket());
         $this->registerPacket(new ResourcePacksInfoPacket());
         $this->registerPacket(new ResourcePackStackPacket());
         $this->registerPacket(new SetActorMotionPacket());
+        $this->registerPacket(new SetTitlePacket());
         $this->registerPacket(new StartGamePacket());
+        $this->registerPacket(new StopSoundPacket());
         $this->registerPacket(new TextPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
-        $this->registerPacket(new ChangeDimensionPacket());
-        $this->registerPacket(new MobArmorEquipmentPacket());
-        $this->registerPacket(new PlayerArmorDamagePacket());
     }
 
     public function registerPacket(Packet $packet) : void{
