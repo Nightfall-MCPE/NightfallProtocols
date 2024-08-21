@@ -9,22 +9,21 @@ use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftingCreate
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CraftRecipeOptionalStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DeprecatedCraftingNonImplementedStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DeprecatedCraftingResultsStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DropStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LabTableCombineStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LoomStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\MineBlockStackRequestAction;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\SwapStackRequestAction;
 use pocketmine\utils\BinaryDataException;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftingConsumeInputStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeAutoStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CreativeCreateStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\DestroyStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\DropStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\GrindstoneStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceIntoBundleStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\SwapStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeFromBundleStackRequestAction;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeStackRequestAction;
 
@@ -85,7 +84,7 @@ class CustomItemStackRequest
         };
     }
 
-    public static function read(PacketSerializer $in) : ItemStackRequest{
+    public static function read(PacketSerializer $in) : self{
         $requestId = $in->readItemStackRequestId();
         $actions = [];
         for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
@@ -97,7 +96,7 @@ class CustomItemStackRequest
             $filterStrings[] = $in->getString();
         }
         $filterStringCause = $in->getLInt();
-        return new ItemStackRequest($requestId, $actions, $filterStrings, $filterStringCause);
+        return new self($requestId, $actions, $filterStrings, $filterStringCause);
     }
 
     public function write(PacketSerializer $out) : void{

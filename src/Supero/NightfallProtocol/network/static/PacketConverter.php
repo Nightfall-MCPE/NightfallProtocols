@@ -5,7 +5,6 @@ namespace Supero\NightfallProtocol\network\static;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
-use pocketmine\network\mcpe\protocol\ItemStackResponsePacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
@@ -23,10 +22,6 @@ use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket as CustomItemStackResponsePacket;
-use Supero\NightfallProtocol\network\packets\types\inventory\FullContainerName;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponse;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponseContainerInfo;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
@@ -47,8 +42,7 @@ class PacketConverter
         UpdateSubChunkBlocksPacket::NETWORK_ID,
         CreativeContentPacket::NETWORK_ID,
         AvailableCommandsPacket::NETWORK_ID,
-        ResourcePacksInfoPacket::NETWORK_ID,
-        ItemStackResponsePacket::NETWORK_ID
+        ResourcePacksInfoPacket::NETWORK_ID
     ];
 
     public const SERVERBOUND_TRANSLATED = [
@@ -145,25 +139,6 @@ class PacketConverter
                 /** @var UpdateBlockPacket $packet */
                 $packet->blockRuntimeId = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->blockRuntimeId));
                 return $packet;
-            case ItemStackResponsePacket::NETWORK_ID:
-                $responses = [];
-                /** @var ItemStackResponsePacket $packet */
-                foreach($packet->getResponses() as $response){
-                    if(!$response instanceof ItemStackResponse){
-                        $containerInfos = [];
-                        foreach($response->getContainerInfos() as $containerInfo){
-                            if(!$containerInfo instanceof ItemStackResponseContainerInfo){
-                                $containerName = $containerInfo->getContainerName();
-                                if(!$containerName instanceof FullContainerName){
-                                    $containerName = new FullContainerName($containerName->getContainerId(), $containerName->getDynamicId());
-                                }
-                                $containerInfos[] = new ItemStackResponseContainerInfo($containerName, $containerInfo->getSlots());
-                            }
-                        }
-                        $responses[] = new ItemStackResponse($response->getResult(), $response->getRequestId(), $containerInfos);
-                    }
-                }
-                return CustomItemStackResponsePacket::createPacket($responses);
             case LevelEventPacket::NETWORK_ID:
                 /** @var LevelEventPacket $packet */
                 if ($packet->eventId === LevelEvent::PARTICLE_DESTROY || $packet->eventId === (LevelEvent::ADD_PARTICLE_MASK | ParticleIds::TERRAIN)) {

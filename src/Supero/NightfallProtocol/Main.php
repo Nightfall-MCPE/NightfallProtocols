@@ -8,7 +8,6 @@ use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
-use pocketmine\network\mcpe\protocol\ItemStackResponsePacket as ProtocolItemStackResponsePacket;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
@@ -17,12 +16,10 @@ use pocketmine\network\query\DedicatedQueryNetworkInterface;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use ReflectionException;
-use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketPool;
-use Supero\NightfallProtocol\network\static\PacketConverter;
 
 final class Main extends PluginBase
 {
@@ -85,18 +82,9 @@ final class Main extends PluginBase
             }, EventPriority::NORMAL, $this);
             $server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
                 foreach($event->getTargets() as $target){
-                    $packets = [];
                     foreach($event->getPackets() as $packet){
-                        if($packet instanceof ProtocolItemStackResponsePacket){
-                            /** @var CustomNetworkSession $target */
-                            //TODO: handle ItemStackResponse
-                            $packets[] = PacketConverter::handleClientbound($packet, CustomTypeConverter::getProtocolInstance($target->getProtocol()), $target);
-                            continue;
-                        }
-                        $packets[] = $packet;
                         $this->getLogger()->debug("Sending " . $packet::class . " to " . $target->getDisplayName());
                     }
-                    $event->setPackets($packets);
                 }
             }, EventPriority::NORMAL, $this);
         }
