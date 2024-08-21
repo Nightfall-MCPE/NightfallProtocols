@@ -17,6 +17,7 @@ use Supero\NightfallProtocol\network\packets\InventoryContentPacket;
 use Supero\NightfallProtocol\network\packets\InventorySlotPacket;
 use Supero\NightfallProtocol\network\packets\InventoryTransactionPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket;
+use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\LecternUpdatePacket;
 use Supero\NightfallProtocol\network\packets\MobArmorEquipmentPacket;
 use Supero\NightfallProtocol\network\packets\MobEffectPacket;
@@ -55,6 +56,7 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new InventorySlotPacket());
         $this->registerPacket(new InventoryTransactionPacket());
         $this->registerPacket(new ItemStackRequestPacket());
+        $this->registerPacket(new ItemStackResponsePacket());
         $this->registerPacket(new LecternUpdatePacket());
         $this->registerPacket(new MobArmorEquipmentPacket());
         $this->registerPacket(new MobEffectPacket());
