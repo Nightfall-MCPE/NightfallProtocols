@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  PHPStan_Analyze:
-    name: PHPStan Analysis
+  PHP_Analyze:
+    name: PHP Analysis
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
