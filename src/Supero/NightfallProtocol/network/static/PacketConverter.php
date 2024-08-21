@@ -2,7 +2,6 @@
 
 namespace Supero\NightfallProtocol\network\static;
 
-use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;

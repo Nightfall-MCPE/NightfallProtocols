@@ -8,16 +8,22 @@ use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequ
 
 class ItemStackRequestPacket extends PM_Packet {
 
-    public array $requests;
+	/** @var CustomItemStackRequest[] */
+    private array $requests;
 
-    /**
-     * @generate-create-func
-     */
+	/**
+	 * @generate-create-func
+	 * @param CustomItemStackRequest[] $requests
+	 */
     public static function createPacket(array $requests) : self {
         $result = new self;
         $result->requests = $requests;
         return $result;
     }
+
+	/** @return CustomItemStackRequest[] */
+    public function getRequests() : array{ return $this->requests; }
+
     protected function decodePayload(PacketSerializer $in) : void {
         $this->requests = [];
         for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
@@ -30,6 +36,7 @@ class ItemStackRequestPacket extends PM_Packet {
             $request->write($out);
         }
     }
+    
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->getRequests(),

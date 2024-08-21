@@ -16,6 +16,7 @@ use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\handler\HandshakePacketHandler;
+use pocketmine\network\mcpe\handler\InGamePacketHandler;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\handler\PreSpawnPacketHandler;
 use pocketmine\network\mcpe\handler\ResourcePacksPacketHandler;
@@ -44,6 +45,7 @@ use Supero\NightfallProtocol\network\chunk\CustomChunkCache;
 use Supero\NightfallProtocol\network\handlers\CustomLoginPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
+use Supero\NightfallProtocol\network\handlers\static\InGamePacketHandler as CustomInGamePacketHandler;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
@@ -93,6 +95,13 @@ class CustomNetworkSession extends NetworkSession
                 case PreSpawnPacketHandler::class:
                     $handler = new CustomPreSpawnPacketHandler(
                         $this->getProperty("server"),
+                        $this->getProperty("player"),
+                        $this,
+                        $this->getProperty("invManager")
+                    );
+                    break;
+                case InGamePacketHandler::class:
+                    $handler = new CustomInGamePacketHandler(
                         $this->getProperty("player"),
                         $this,
                         $this->getProperty("invManager")
