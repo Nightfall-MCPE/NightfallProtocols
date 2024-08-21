@@ -8,7 +8,6 @@ use pocketmine\event\EventPriority;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
-use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\ItemStackResponsePacket as ProtocolItemStackResponsePacket;
 use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
 use pocketmine\network\mcpe\raklib\RakLibInterface;
@@ -18,12 +17,12 @@ use pocketmine\network\query\DedicatedQueryNetworkInterface;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use ReflectionException;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
-use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponse;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketPool;
+use Supero\NightfallProtocol\network\static\PacketConverter;
 
 final class Main extends PluginBase
 {
@@ -89,14 +88,9 @@ final class Main extends PluginBase
                     $packets = [];
                     foreach($event->getPackets() as $packet){
                         if($packet instanceof ProtocolItemStackResponsePacket){
-                            $responses = [];
-                            foreach($packet->getResponses() as $response){
-                                if(!$response instanceof ItemStackResponse){
-                                    $responses[] = new ItemStackResponse($response->getResult(), $response->getRequestId(), $response->getContainerInfos());
-                                }
-                            }
-                            $packets[] = ItemStackResponsePacket::createPacket($responses);
+                            /** @var CustomNetworkSession $target */
                             //TODO: handle ItemStackResponse
+                            $packets[] = PacketConverter::handleClientbound($packet, CustomTypeConverter::getProtocolInstance($target->getProtocol()), $target);
                             continue;
                         }
                         $packets[] = $packet;

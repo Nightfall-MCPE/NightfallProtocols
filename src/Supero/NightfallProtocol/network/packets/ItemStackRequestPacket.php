@@ -37,6 +37,7 @@ class ItemStackRequestPacket extends PM_Packet {
             $request->write($out);
         }
     }
+    
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->getRequests(),
