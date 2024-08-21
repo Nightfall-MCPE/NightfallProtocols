@@ -2,7 +2,6 @@
 
 namespace Supero\NightfallProtocol\network\static;
 
-use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
@@ -151,7 +150,6 @@ class PacketConverter
                 /** @var ItemStackResponsePacket $packet */
                 foreach($packet->getResponses() as $response){
                     if(!$response instanceof ItemStackResponse){
-                        var_dump($response);
                         $containerInfos = [];
                         foreach($response->getContainerInfos() as $containerInfo){
                             if(!$containerInfo instanceof ItemStackResponseContainerInfo){
