@@ -55,10 +55,10 @@ class CustomChunkRequestTask extends AsyncTask{
 
         $stream = new BinaryStream();
 
-        CustomPacketBatch::encodePackets($this->protocol, $stream, [LevelChunkPacket::create(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, $subCount, false, null, $payload)]);
+        CustomPacketBatch::encodePackets($this->protocol, $stream, [LevelChunkPacket::createPacket(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, $subCount, false, null, $payload)]);
 
         $compressor = $this->compressor->deserialize();
-        $this->setResult(($this->protocol >= CustomProtocolInfo::PROTOCOL_1_20_60 ? chr($compressor->deserialize()->getNetworkId()) : '') . $compressor->deserialize()->compress($stream->getBuffer()));
+        $this->setResult(($this->protocol >= CustomProtocolInfo::PROTOCOL_1_20_60 ? chr($compressor->getNetworkId()) : '') . $compressor->compress($stream->getBuffer()));
     }
 
     public function onCompletion() : void{

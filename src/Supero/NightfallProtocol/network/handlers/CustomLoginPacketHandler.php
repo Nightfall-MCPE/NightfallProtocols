@@ -10,6 +10,7 @@ use pocketmine\entity\InvalidSkinException;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Translatable;
+use pocketmine\network\mcpe\auth\ProcessLoginTask;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\JwtException;
 use pocketmine\network\mcpe\JwtUtils;
@@ -25,7 +26,6 @@ use pocketmine\player\PlayerInfo;
 use pocketmine\player\XboxLivePlayerInfo;
 use pocketmine\Server;
 use Ramsey\Uuid\Uuid;
-use Supero\NightfallProtocol\network\tasks\CustomProcessLoginTask;
 
 class CustomLoginPacketHandler extends PacketHandler{
     /**
@@ -194,7 +194,7 @@ class CustomLoginPacketHandler extends PacketHandler{
      * @throws InvalidArgumentException
      */
     protected function processLogin(LoginPacket $packet, bool $authRequired) : void{
-        $this->server->getAsyncPool()->submitTask(new CustomProcessLoginTask($packet->chainDataJwt->chain, $packet->clientDataJwt, $authRequired, $this->authCallback));
+        $this->server->getAsyncPool()->submitTask(new ProcessLoginTask($packet->chainDataJwt->chain, $packet->clientDataJwt, $authRequired, $this->authCallback));
         $this->session->setHandler(null); //drop packets received during login verification
     }
 }
