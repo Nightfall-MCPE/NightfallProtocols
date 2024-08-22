@@ -393,6 +393,7 @@ class CustomNetworkSession extends NetworkSession
         if(!($packet instanceof ServerboundPacket)){
             throw new PacketHandlingException("Unexpected non-serverbound packet");
         }
+        $oldPacket = clone $packet;
         $packet = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter"));
 
         $timings = Timings::getReceiveDataPacketTimings($packet);
@@ -426,7 +427,7 @@ class CustomNetworkSession extends NetworkSession
             }
 
             if(DataPacketReceiveEvent::hasHandlers()){
-                $ev = new DataPacketReceiveEvent($this, $packet);
+                $ev = new DataPacketReceiveEvent($this, $oldPacket);
                 $ev->call();
                 if($ev->isCancelled()){
                     return;
@@ -490,7 +491,6 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     public function sendDataPacket(ClientboundPacket $packet, bool $immediate = false) : bool{
-        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
         return $this->sendDataPacketInternal($packet, $immediate, null);
     }
 
@@ -513,6 +513,10 @@ class CustomNetworkSession extends NetworkSession
      * @throws ReflectionException
      */
     private function sendDataPacketInternal(ClientboundPacket $packet, bool $immediate, ?PromiseResolver $ackReceiptResolver) : bool{
+
+        $oldPacket = clone $packet;
+        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
+
         if(!$this->getProperty("connected")){
             return false;
         }
@@ -524,7 +528,7 @@ class CustomNetworkSession extends NetworkSession
         $timings->startTiming();
         try{
             if(DataPacketSendEvent::hasHandlers()){
-                $ev = new DataPacketSendEvent([$this], [$packet]);
+                $ev = new DataPacketSendEvent([$this], [$oldPacket]);
                 $ev->call();
                 if($ev->isCancelled()){
                     return false;
