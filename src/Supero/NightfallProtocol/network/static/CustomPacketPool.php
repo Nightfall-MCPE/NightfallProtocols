@@ -19,10 +19,12 @@ use Supero\NightfallProtocol\network\packets\InventoryTransactionPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\LecternUpdatePacket;
+use Supero\NightfallProtocol\network\packets\LevelChunkPacket;
 use Supero\NightfallProtocol\network\packets\MobArmorEquipmentPacket;
 use Supero\NightfallProtocol\network\packets\MobEffectPacket;
 use Supero\NightfallProtocol\network\packets\PlayerArmorDamagePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
+use Supero\NightfallProtocol\network\packets\PlayerListPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
 use Supero\NightfallProtocol\network\packets\SetActorMotionPacket;
@@ -30,6 +32,7 @@ use Supero\NightfallProtocol\network\packets\SetTitlePacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\StopSoundPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
+use Supero\NightfallProtocol\network\packets\TickSyncPacket;
 use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
 class CustomPacketPool extends PacketPool
@@ -58,10 +61,12 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new ItemStackRequestPacket());
         $this->registerPacket(new ItemStackResponsePacket());
         $this->registerPacket(new LecternUpdatePacket());
+        $this->registerPacket(new LevelChunkPacket());
         $this->registerPacket(new MobArmorEquipmentPacket());
         $this->registerPacket(new MobEffectPacket());
         $this->registerPacket(new PlayerArmorDamagePacket());
         $this->registerPacket(new PlayerAuthInputPacket());
+        $this->registerPacket(new PlayerListPacket());
         $this->registerPacket(new ResourcePacksInfoPacket());
         $this->registerPacket(new ResourcePackStackPacket());
         $this->registerPacket(new SetActorMotionPacket());
@@ -69,6 +74,7 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new StartGamePacket());
         $this->registerPacket(new StopSoundPacket());
         $this->registerPacket(new TextPacket());
+        $this->registerPacket(new TickSyncPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
     }
 

@@ -12,6 +12,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerBlockAction;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
 use pocketmine\network\mcpe\protocol\types\PlayMode;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\CustomItemInteractionData;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomUseItemTransactionData;
@@ -89,9 +90,6 @@ class PlayerAuthInputPacket extends PM_Packet
         }
         if($blockActions !== null){
             $result->inputFlags |= 1 << PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS;
-        }
-        if($vehicleInfo !== null){
-            $result->inputFlags |= 1 << PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE;
         }
 
         $result->inputMode = $inputMode;
@@ -234,7 +232,7 @@ class PlayerAuthInputPacket extends PM_Packet
                 };
             }
         }
-        if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE)){
+        if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE) && $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
             $this->vehicleInfo = PlayerAuthInputVehicleInfo::read($in);
         }
         $this->analogMoveVecX = $in->getLFloat();
@@ -242,13 +240,19 @@ class PlayerAuthInputPacket extends PM_Packet
     }
 
     protected function encodePayload(PacketSerializer $out) : void{
+        $inputFlags = $this->inputFlags;
+
+        if($this->vehicleInfo !== null && $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
+            $inputFlags |= 1 << PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE;
+        }
+
         $out->putLFloat($this->pitch);
         $out->putLFloat($this->yaw);
         $out->putVector3($this->position);
         $out->putLFloat($this->moveVecX);
         $out->putLFloat($this->moveVecZ);
         $out->putLFloat($this->headYaw);
-        $out->putUnsignedVarLong($this->inputFlags);
+        $out->putUnsignedVarLong($inputFlags);
         $out->putUnsignedVarInt($this->inputMode);
         $out->putUnsignedVarInt($this->playMode);
         $out->putUnsignedVarInt($this->interactionMode);
@@ -267,7 +271,9 @@ class PlayerAuthInputPacket extends PM_Packet
                 $blockAction->write($out);
             }
         }
-        $this->vehicleInfo?->write($out);
+        if($this->vehicleInfo !== null && $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
+            $this->vehicleInfo->write($out);
+        }
         $out->putLFloat($this->analogMoveVecX);
         $out->putLFloat($this->analogMoveVecZ);
     }

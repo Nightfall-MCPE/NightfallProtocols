@@ -12,7 +12,8 @@ class CustomProtocolInfo {
         self::PROTOCOL_1_21_0,
         self::PROTOCOL_1_20_80,
         self::PROTOCOL_1_20_70,
-        self::PROTOCOL_1_20_60
+        self::PROTOCOL_1_20_60,
+        self::PROTOCOL_1_20_50,
 	];
 
     //Latest + Version unharmed.
@@ -28,5 +29,8 @@ class CustomProtocolInfo {
     public const PROTOCOL_1_20_80 = 671;
     public const PROTOCOL_1_20_70 = 662;
     public const PROTOCOL_1_20_60 = 649;
+    public const PROTOCOL_1_20_50 = 630;
+
+    public const TICK_SYNC_PACKET = 0x17;
 
 }

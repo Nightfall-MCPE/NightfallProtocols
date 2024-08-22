@@ -4,24 +4,25 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ItemStackRequestPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
 
 class ItemStackRequestPacket extends PM_Packet {
 
-	/** @var CustomItemStackRequest[] */
+    /** @var ItemStackRequest[] */
     private array $requests;
 
-	/**
-	 * @generate-create-func
-	 * @param CustomItemStackRequest[] $requests
-	 */
+	  /**
+	   * @generate-create-func
+	   * @param CustomItemStackRequest[] $requests
+	   */
     public static function createPacket(array $requests) : self {
         $result = new self;
         $result->requests = $requests;
         return $result;
     }
 
-	/** @return CustomItemStackRequest[] */
+    /** @return CustomItemStackRequest[] */
     public function getRequests() : array{ return $this->requests; }
 
     protected function decodePayload(PacketSerializer $in) : void {

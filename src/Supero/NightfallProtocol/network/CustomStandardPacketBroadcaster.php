@@ -12,6 +12,7 @@ use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketBatch;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\PacketConverter;
+use Supero\NightfallProtocol\utils\ProtocolUtils;
 
 class CustomStandardPacketBroadcaster implements PacketBroadcaster{
     public function __construct(
@@ -63,7 +64,7 @@ class CustomStandardPacketBroadcaster implements PacketBroadcaster{
                 CustomPacketBatch::encodeRaw($stream, $packetBuffers);
                 $batchBuffer = $stream->getBuffer();
 
-                $batch = $this->server->prepareBatch($batchBuffer, $compressor, timings: Timings::$playerNetworkSendCompressBroadcast);
+                $batch = ProtocolUtils::prepareBatch($batchBuffer, $compressor, $this->server, $this->protocolId, timings: Timings::$playerNetworkSendCompressBroadcast);
                 foreach($compressorTargets as $target){
                     $target->queueCompressed($batch);
                 }
