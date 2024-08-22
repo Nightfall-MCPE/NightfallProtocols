@@ -12,17 +12,17 @@ class ItemStackRequestPacket extends PM_Packet {
     /** @var ItemStackRequest[] */
     private array $requests;
 
-    /**
-     * @generate-create-func
-     * @param $requests ItemStackRequest[]
-     */
+	  /**
+	   * @generate-create-func
+	   * @param CustomItemStackRequest[] $requests
+	   */
     public static function createPacket(array $requests) : self {
         $result = new self;
         $result->requests = $requests;
         return $result;
     }
 
-    /** @return ItemStackRequest[] */
+    /** @return CustomItemStackRequest[] */
     public function getRequests() : array{ return $this->requests; }
 
     protected function decodePayload(PacketSerializer $in) : void {
@@ -37,6 +37,7 @@ class ItemStackRequestPacket extends PM_Packet {
             $request->write($out);
         }
     }
+    
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->getRequests(),
