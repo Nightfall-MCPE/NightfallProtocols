@@ -23,3 +23,6 @@ We welcome contributions to NightfallProtocols! Whether you're fixing a bug, pro
 
 - [Flonja](https://github.com/Flonja) for bearing with me over the months and helping with previous attempts as well as his [multiversion](https://github.com/Flonja/multiversion)
 - [glance](https://github.com/glancist) for the help with un-seen item translation (crafting data and creative content packets)
+- [jack](https://github.com/didntpot) for the help with compression for 1.20.50
+
+And contributors who have worked on this project by making issues and pull requests!
