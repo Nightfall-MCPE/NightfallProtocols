@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\chunk;
 
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
-use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\thread\NonThreadSafeValue;
@@ -15,6 +14,7 @@ use Supero\NightfallProtocol\network\chunk\serializer\CustomChunkSerializer;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketBatch;
+use Supero\NightfallProtocol\network\packets\LevelChunkPacket;
 
 class CustomChunkRequestTask extends AsyncTask{
     private const TLS_KEY_PROMISE = "promise";
