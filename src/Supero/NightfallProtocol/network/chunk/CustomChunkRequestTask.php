@@ -12,6 +12,7 @@ use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\FastChunkSerializer;
 use Supero\NightfallProtocol\network\chunk\serializer\CustomChunkSerializer;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketBatch;
 
@@ -57,7 +58,7 @@ class CustomChunkRequestTask extends AsyncTask{
         CustomPacketBatch::encodePackets($this->protocol, $stream, [LevelChunkPacket::create(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, $subCount, false, null, $payload)]);
 
         $compressor = $this->compressor->deserialize();
-        $this->setResult(chr($compressor->getNetworkId()) . $compressor->compress($stream->getBuffer()));
+        $this->setResult(($this->protocol >= CustomProtocolInfo::PROTOCOL_1_20_60 ? chr($compressor->deserialize()->getNetworkId()) : '') . $compressor->deserialize()->compress($stream->getBuffer()));
     }
 
     public function onCompletion() : void{

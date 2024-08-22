@@ -13,6 +13,8 @@ use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Translatable;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
+use pocketmine\network\mcpe\compression\DecompressionException;
+use pocketmine\network\mcpe\encryption\DecryptionException;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\handler\HandshakePacketHandler;
@@ -25,8 +27,10 @@ use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
+use pocketmine\network\mcpe\protocol\serializer\PacketBatch;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\network\mcpe\protocol\ServerToClientHandshakePacket;
+use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
@@ -37,6 +41,8 @@ use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
+use pocketmine\utils\BinaryDataException;
+use pocketmine\utils\BinaryStream;
 use pocketmine\utils\TextFormat;
 use pocketmine\YmlServerProperties;
 use ReflectionException;
@@ -111,7 +117,7 @@ class CustomNetworkSession extends NetworkSession
      */
     private function onSessionStartSuccess() : void{
         $this->getProperty("logger")->debug("Session start handshake completed, awaiting login packet");
-        ReflectionUtils::invoke(NetworkSession::class, $this, "flushSendBuffer", true);
+        $this->flushSendBuffer(true);
         $this->setProperty("enableCompression", true);
         $this->setHandler(new CustomLoginPacketHandler(
             Server::getInstance(),
@@ -248,6 +254,129 @@ class CustomNetworkSession extends NetworkSession
         }));
     }
 
+    private function flushSendBuffer(bool $immediate = false) : void{
+        if(count($this->getProperty("sendBuffer")) > 0){
+            Timings::$playerNetworkSend->startTiming();
+            try{
+                $syncMode = null; //automatic
+                if($immediate){
+                    $syncMode = true;
+                }elseif($this->getProperty("forceAsyncCompression")){
+                    $syncMode = false;
+                }
+
+                $stream = new BinaryStream();
+                PacketBatch::encodeRaw($stream, $this->getProperty("sendBuffer"));
+
+                if($this->getProperty("enableCompression")){
+                    $batch = ProtocolUtils::prepareBatch(
+                        $stream->getBuffer(),
+                        $this->getProperty("compressor"),
+                        $this->getProperty("server"),
+                        $this->protocol,
+                        $syncMode,
+                        Timings::$playerNetworkSendCompressSessionBuffer
+                    );
+                }else{
+                    $batch = $stream->getBuffer();
+                }
+                $this->setProperty("sendBuffer", []);
+                $ackPromises = $this->getProperty("sendBufferAckPromises");
+                $this->setProperty("sendBufferAckPromises", []);
+                ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoBufferFlush", $batch, $immediate, $ackPromises);
+            }finally{
+                Timings::$playerNetworkSend->stopTiming();
+            }
+        }
+    }
+
+    /**
+     * @throws PacketHandlingException
+     */
+    public function handleEncoded(string $payload) : void{
+        if(!$this->getProperty("connected")){
+            return;
+        }
+
+        Timings::$playerNetworkReceive->startTiming();
+        try{
+            $this->getProperty("packetBatchLimiter")->decrement();
+
+            if($this->getProperty("cipher") !== null){
+                Timings::$playerNetworkReceiveDecrypt->startTiming();
+                try{
+                    $payload = $this->getProperty("cipher")->decrypt($payload);
+                }catch(DecryptionException $e){
+                    $this->getProperty("logger")->debug("Encrypted packet: " . base64_encode($payload));
+                    throw PacketHandlingException::wrap($e, "Packet decryption error");
+                }finally{
+                    Timings::$playerNetworkReceiveDecrypt->stopTiming();
+                }
+            }
+
+            if(strlen($payload) < 1){
+                throw new PacketHandlingException("No bytes in payload");
+            }
+
+            if($this->getProperty("enableCompression")){
+                if($this->protocol >= CustomProtocolInfo::PROTOCOL_1_20_60){
+                    $compressionType = ord($payload[0]);
+                    $compressed = substr($payload, 1);
+                    if($compressionType === CompressionAlgorithm::NONE){
+                        $decompressed = $compressed;
+                    }elseif($compressionType === $this->getProperty("compressor")->getNetworkId()){
+                        try{
+                            Timings::$playerNetworkReceiveDecompress->startTiming();
+                            $decompressed = $this->getProperty("compressor")->decompress($compressed);
+                        }catch(DecompressionException $e){
+                            $this->getProperty("logger")->debug("Failed to decompress packet: " . base64_encode($compressed));
+                            throw PacketHandlingException::wrap($e, "Compressed packet batch decode error");
+                        }finally{
+                            Timings::$playerNetworkReceiveDecompress->stopTiming();
+                        }
+                    }else{
+                        throw new PacketHandlingException("Packet compressed with unexpected compression type $compressionType");
+                    }
+                }else{
+                    try{
+                        Timings::$playerNetworkReceiveDecompress->startTiming();
+                        $decompressed = $this->getProperty("compressor")->decompress($payload);
+                    }catch(DecompressionException $e){
+                        $this->getProperty("logger")->debug("Failed to decompress packet: " . base64_encode($payload));
+                        throw PacketHandlingException::wrap($e, "Compressed packet batch decode error");
+                    }finally{
+                        Timings::$playerNetworkReceiveDecompress->stopTiming();
+                    }
+                }
+            }else{
+                $decompressed = $payload;
+            }
+
+            try{
+                $stream = new BinaryStream($decompressed);
+                foreach(PacketBatch::decodeRaw($stream) as $buffer){
+                    $this->getProperty("gamePacketLimiter")->decrement();
+                    $packet = $this->getProperty("packetPool")->getPacket($buffer);
+                    if($packet === null){
+                        $this->getProperty("logger")->debug("Unknown packet: " . base64_encode($buffer));
+                        throw new PacketHandlingException("Unknown packet received");
+                    }
+                    try{
+                        $this->handleDataPacket($packet, $buffer);
+                    }catch(PacketHandlingException $e){
+                        $this->getProperty("logger")->debug($packet->getName() . ": " . base64_encode($buffer));
+                        throw PacketHandlingException::wrap($e, "Error processing " . $packet->getName());
+                    }
+                }
+            }catch(PacketDecodeException|BinaryDataException $e){
+                $this->getProperty("logger")->logException($e);
+                throw PacketHandlingException::wrap($e, "Packet batch decode error");
+            }
+        }finally{
+            Timings::$playerNetworkReceive->stopTiming();
+        }
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -338,6 +467,16 @@ class CustomNetworkSession extends NetworkSession
         );
     }
 
+    public function queueCompressed(CompressBatchPromise|string $payload, bool $immediate = false) : void{
+        Timings::$playerNetworkSend->startTiming();
+        try{
+            $this->flushSendBuffer($immediate); //Maintain ordering if possible
+            ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoBufferFlush", $payload, $immediate);
+        }finally{
+            Timings::$playerNetworkSend->stopTiming();
+        }
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -399,7 +538,7 @@ class CustomNetworkSession extends NetworkSession
                 $this->addToSendBuffer(self::encodePacketTimed($encoder, $evPacket));
             }
             if($immediate){
-                ReflectionUtils::invoke(NetworkSession::class, $this, "flushSendBuffer", true);
+                $this->flushSendBuffer(true);
             }
 
             return true;
@@ -438,6 +577,45 @@ class CustomNetworkSession extends NetworkSession
 
     public function onTip(string $message) : void{
         $this->sendDataPacket(TextPacket::tip($message));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function tick(): void
+    {
+        if(!$this->isConnected()){
+            ReflectionUtils::invoke(NetworkSession::class, $this, "dispose");
+            return;
+        }
+
+        if($this->getProperty("info") === null){
+            if(time() >= $this->getProperty("connectTime") + 10){
+                $this->disconnectWithError(KnownTranslationFactory::pocketmine_disconnect_error_loginTimeout());
+            }
+
+            return;
+        }
+
+        if($this->getProperty("player") !== null){
+            $this->getProperty("player")->doChunkRequests();
+
+            $dirtyAttributes = $this->getProperty("player")->getAttributeMap()->needSend();
+            $this->getProperty("entityEventBroadcaster")->syncAttributes([$this], $this->getProperty("player"), $dirtyAttributes);
+            foreach($dirtyAttributes as $attribute){
+                //we might need to send these to other players in the future
+                //if that happens, this will need to become more complex than a flag on the attribute itself
+                $attribute->markSynchronized();
+            }
+        }
+        Timings::$playerNetworkSendInventorySync->startTiming();
+        try{
+            $this->getProperty("invManager")?->flushPendingUpdates();
+        }finally{
+            Timings::$playerNetworkSendInventorySync->stopTiming();
+        }
+
+        $this->flushSendBuffer();
     }
 
     private function getLogPrefix() : string{
