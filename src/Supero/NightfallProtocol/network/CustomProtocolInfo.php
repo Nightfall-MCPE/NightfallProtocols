@@ -31,4 +31,6 @@ class CustomProtocolInfo {
     public const PROTOCOL_1_20_60 = 649;
     public const PROTOCOL_1_20_50 = 630;
 
+    public const TICK_SYNC_PACKET = 0x17;
+
 }

@@ -31,6 +31,7 @@ use Supero\NightfallProtocol\network\packets\SetTitlePacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\StopSoundPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
+use Supero\NightfallProtocol\network\packets\TickSyncPacket;
 use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
 class CustomPacketPool extends PacketPool
@@ -71,6 +72,7 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new StartGamePacket());
         $this->registerPacket(new StopSoundPacket());
         $this->registerPacket(new TextPacket());
+        $this->registerPacket(new TickSyncPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
     }
 
