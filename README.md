@@ -15,6 +15,12 @@ Currently, the plugin supports these versions:
 - 1.20.60 (`649`)
 - 1.20.50 (`630`)
 
+### Discord
+
+Need help or want to help? 
+
+Come join us in our [discord](https://discord.gg/dbFjhHqZpn) server!
+
 ### Contribution
 
 We welcome contributions to NightfallProtocols! Whether you're fixing a bug, proposing new features, or improving documentation, your contributions is valuable to us.
