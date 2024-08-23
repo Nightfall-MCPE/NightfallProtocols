@@ -85,6 +85,7 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket as CustomItemStackRequestPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket as CustomPlayerAuthInputPacket;
@@ -127,7 +128,7 @@ class InGamePacketHandler extends PacketHandler{
 
 	public function __construct(
 		private Player $player,
-		private NetworkSession $session,
+		private CustomNetworkSession $session,
 		private InventoryManager $inventoryManager
 	){}
 

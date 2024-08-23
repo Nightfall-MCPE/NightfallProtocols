@@ -222,4 +222,52 @@ class StartGamePacket extends PM_Packet
         $this->networkPermissions->encode($out);
     }
 
+    public function getConstructorArguments(PM_Packet $packet): array {
+
+        $levelSettings = $packet->levelSettings;
+        $customLevelSettings = new CustomLevelSettings();
+
+        $customLevelSettings->seed = $packet->levelSettings->seed;
+        $customLevelSettings->spawnSettings = $levelSettings->spawnSettings;
+        $customLevelSettings->worldGamemode = $levelSettings->worldGamemode;
+        $customLevelSettings->difficulty = $levelSettings->difficulty;
+        $customLevelSettings->spawnPosition = $levelSettings->spawnPosition;
+        $customLevelSettings->hasAchievementsDisabled = $levelSettings->hasAchievementsDisabled;
+        $customLevelSettings->time = $levelSettings->time;
+        $customLevelSettings->eduEditionOffer = $levelSettings->eduEditionOffer;
+        $customLevelSettings->rainLevel = $levelSettings->rainLevel;
+        $customLevelSettings->lightningLevel = $levelSettings->lightningLevel;
+        $customLevelSettings->commandsEnabled = $levelSettings->commandsEnabled;
+        $customLevelSettings->gameRules = $levelSettings->gameRules;
+        $customLevelSettings->experiments = $levelSettings->experiments;
+
+        return [
+            $packet->actorUniqueId,
+            $packet->actorRuntimeId,
+            $packet->playerGamemode,
+            $packet->playerPosition,
+            $packet->pitch,
+            $packet->yaw,
+            $packet->playerActorProperties,
+            $customLevelSettings,
+            $packet->levelId,
+            $packet->worldName,
+            $packet->premiumWorldTemplateId,
+            $packet->isTrial,
+            $packet->playerMovementSettings,
+            $packet->currentTick,
+            $packet->enchantmentSeed,
+            $packet->multiplayerCorrelationId,
+            $packet->enableNewInventorySystem,
+            $packet->serverSoftwareVersion,
+            $packet->worldTemplateId,
+            $packet->enableClientSideChunkGeneration,
+            $packet->blockNetworkIdsAreHashes,
+            $packet->networkPermissions,
+            $packet->blockPalette,
+            $packet->blockPaletteChecksum,
+            $packet->itemTable
+        ];
+    }
+
 }
