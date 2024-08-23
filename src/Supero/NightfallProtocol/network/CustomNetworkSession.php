@@ -533,7 +533,10 @@ class CustomNetworkSession extends NetworkSession
                 if($ev->isCancelled()){
                     return false;
                 }
-                $packets = $ev->getPackets();
+                $packets = [];
+                foreach ($ev->getPackets() as $label => $packet) {
+                    $packets[$label] = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
+                }
             }else{
                 $packets = [$packet];
             }
