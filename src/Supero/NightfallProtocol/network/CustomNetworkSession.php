@@ -515,7 +515,6 @@ class CustomNetworkSession extends NetworkSession
     private function sendDataPacketInternal(ClientboundPacket $packet, bool $immediate, ?PromiseResolver $ackReceiptResolver) : bool{
 
         $oldPacket = clone $packet;
-        $packet = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
 
         if(!$this->getProperty("connected")){
             return false;
@@ -533,12 +532,13 @@ class CustomNetworkSession extends NetworkSession
                 if($ev->isCancelled()){
                     return false;
                 }
+                //what the sigma?
                 $packets = [];
                 foreach ($ev->getPackets() as $label => $packet) {
                     $packets[$label] = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
                 }
             }else{
-                $packets = [$packet];
+                $packets = [(PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this))];
             }
 
             if($ackReceiptResolver !== null){

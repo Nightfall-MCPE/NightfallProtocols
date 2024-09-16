@@ -250,11 +250,7 @@ class InGamePacketHandler extends PacketHandler{
 			}
 		}
 
-        if($packet instanceof \Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket){
-            $useItemTransaction = $packet->getCustomItemInteractionData();
-        } else {
-            $useItemTransaction = $packet->getItemInteractionData();
-        }
+        $useItemTransaction = $packet->getCustomItemInteractionData();
 		if($useItemTransaction !== null){
 			if(count($useItemTransaction->getTransactionData()->getActions()) > 100){
 				throw new PacketHandlingException("Too many actions in item use transaction");
@@ -457,7 +453,7 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	private function handleUseItemTransaction(UseItemTransactionData $data) : bool{
-        $this->player->selectHotbarSlot($data->getHotbarSlot());
+		$this->player->selectHotbarSlot($data->getHotbarSlot());
 
 		switch($data->getActionType()){
 			case UseItemTransactionData::ACTION_CLICK_BLOCK:
