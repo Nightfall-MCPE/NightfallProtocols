@@ -27,7 +27,6 @@ use pocketmine\network\mcpe\handler\ItemStackContainerIdTranslator;
 use pocketmine\network\mcpe\handler\ItemStackRequestProcessException;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\InventoryManager;
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\ActorPickRequestPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
@@ -85,6 +84,7 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket as CustomItemStackRequestPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket as CustomPlayerAuthInputPacket;
@@ -127,7 +127,7 @@ class InGamePacketHandler extends PacketHandler{
 
 	public function __construct(
 		private Player $player,
-		private NetworkSession $session,
+		private CustomNetworkSession $session,
 		private InventoryManager $inventoryManager
 	){}
 
@@ -210,7 +210,7 @@ class InGamePacketHandler extends PacketHandler{
 				($swimming !== null && !$this->player->toggleSwim($swimming)) |
 				($gliding !== null && !$this->player->toggleGlide($gliding)) |
 				($flying !== null && !$this->player->toggleFlight($flying));
-			if((bool) $mismatch){
+			if($mismatch){
 				$this->player->sendData([$this->player]);
 			}
 
@@ -250,7 +250,7 @@ class InGamePacketHandler extends PacketHandler{
 			}
 		}
 
-		$useItemTransaction = $packet->getItemInteractionData();
+        $useItemTransaction = $packet->getCustomItemInteractionData();
 		if($useItemTransaction !== null){
 			if(count($useItemTransaction->getTransactionData()->getActions()) > 100){
 				throw new PacketHandlingException("Too many actions in item use transaction");
@@ -320,7 +320,6 @@ class InGamePacketHandler extends PacketHandler{
 		}elseif($packet->trData instanceof MismatchTransactionData){
 			$this->session->getLogger()->debug("Mismatch transaction received");
 			$this->inventoryManager->requestSyncAll();
-			$result = true;
 		}elseif($packet->trData instanceof UseItemTransactionData){
 			$result = $this->handleUseItemTransaction($packet->trData);
 		}elseif($packet->trData instanceof UseItemOnEntityTransactionData){

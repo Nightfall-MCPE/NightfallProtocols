@@ -10,7 +10,6 @@
     }
   ],
   "require": {
-    "pocketmine/pocketmine-mp": "*",
-    "ext-curl": "*"
+    "pocketmine/pocketmine-mp": "*"
   }
 }
