@@ -67,7 +67,7 @@ class CameraInstructionPacket extends PM_Packet
             $packet->getClear(),
             $packet->getFade(),
             $packet->getTarget(),
-            ReflectionUtils::getProperty(PM_Packet::class, $packet, "removeTarget") ?? true //why is there no getter for this??
+            $packet->getRemoveTraget()
         ];
     }
 }

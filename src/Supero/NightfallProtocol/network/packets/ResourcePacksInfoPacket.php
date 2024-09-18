@@ -58,10 +58,12 @@ class ResourcePacksInfoPacket extends PM_Packet
         }
         $this->hasAddons = $in->getBool();
         $this->hasScripts = $in->getBool();
-        $this->forceServerPacks = $in->getBool();
-        $behaviorPackCount = $in->getLShort();
-        while($behaviorPackCount-- > 0){
-            $this->behaviorPackEntries[] = CustomBehaviourPackInfoEntry::read($in);
+        if($in->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_20){
+            $this->forceServerPacks = $in->getBool();
+            $behaviorPackCount = $in->getLShort();
+            while($behaviorPackCount-- > 0){
+                $this->behaviorPackEntries[] = CustomBehaviourPackInfoEntry::read($in);
+            }
         }
 
         $resourcePackCount = $in->getLShort();
@@ -83,10 +85,12 @@ class ResourcePacksInfoPacket extends PM_Packet
             $out->putBool($this->hasAddons);
         }
         $out->putBool($this->hasScripts);
-        $out->putBool($this->forceServerPacks);
-        $out->putLShort(count($this->behaviorPackEntries));
-        foreach($this->behaviorPackEntries as $entry){
-            $entry->write($out);
+        if($out->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_20) {
+            $out->putBool($this->forceServerPacks);
+            $out->putLShort(count($this->behaviorPackEntries));
+            foreach ($this->behaviorPackEntries as $entry) {
+                $entry->write($out);
+            }
         }
         $out->putLShort(count($this->resourcePackEntries));
         foreach($this->resourcePackEntries as $entry){
