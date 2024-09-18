@@ -66,8 +66,8 @@ class CameraInstructionPacket extends PM_Packet
             $packet->getSet(),
             $packet->getClear(),
             $packet->getFade(),
-            $packet->getTarget(),
-            $packet->getRemoveTraget()
+            $packet->getTarget() ?? null,
+            $packet->getRemoveTraget() ?? null
         ];
     }
 }

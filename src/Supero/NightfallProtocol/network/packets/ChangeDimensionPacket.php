@@ -46,16 +46,13 @@ class ChangeDimensionPacket extends PM_Packet
         }
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function getConstructorArguments(PM_Packet $packet): array
     {
         return [
             $packet->dimension,
             $packet->position,
             $packet->respawn,
-            ReflectionUtils::getProperty(PM_Packet::class, $packet, "loadingScreenId")
+            $packet->getLoadingScreenId() ?? 0,
         ];
     }
 

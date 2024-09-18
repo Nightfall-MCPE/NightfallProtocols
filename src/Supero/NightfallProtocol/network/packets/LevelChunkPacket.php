@@ -108,7 +108,7 @@ class LevelChunkPacket extends PM_Packet {
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->getChunkPosition(),
-            $packet->getDimensionId(),
+            $packet->getDimensionId() ?? 0,
             $packet->getSubChunkCount(),
             $packet->isClientSubChunkRequestEnabled(),
             $packet->getUsedBlobHashes(),

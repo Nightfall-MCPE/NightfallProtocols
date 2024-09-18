@@ -102,7 +102,7 @@ class PlayerArmorDamagePacket extends PM_Packet
             $packet->getChestSlotDamage(),
             $packet->getLegsSlotDamage(),
             $packet->getFeetSlotDamage(),
-            $packet->getBodySlotDamage()
+            $packet->getBodySlotDamage() ?? null
         ];
     }
 }

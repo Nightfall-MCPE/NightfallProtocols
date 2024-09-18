@@ -43,7 +43,7 @@ class TransferPacket extends PM_Packet {
         return [
             $packet->address,
             $packet->port,
-            $packet->reloadWorld,
+            $packet->reloadWorld ?? true,
         ];
     }
 }

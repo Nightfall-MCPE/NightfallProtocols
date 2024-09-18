@@ -107,11 +107,11 @@ class ResourcePacksInfoPacket extends PM_Packet
     {
         return [
             $packet->resourcePackEntries,
-            $packet->behaviorPackEntries,
+            $packet->behaviorPackEntries ?? [],
             $packet->mustAccept,
             $packet->hasAddons ?? false,
             $packet->hasScripts,
-            $packet->forceServerPacks,
+            $packet->forceServerPacks ?? true,
             $packet->cdnUrls,
         ];
     }

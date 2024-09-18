@@ -53,7 +53,7 @@ class EmotePacket extends PM_Packet {
         return [
             $packet->getActorRuntimeId(),
             $packet->getEmoteId(),
-            $packet->getEmoteLengthTicks(),
+            $packet->getEmoteLengthTicks() ?? 0,
             $packet->getXboxUserId(),
             $packet->getPlatformChatId(),
             $packet->getFlags(),

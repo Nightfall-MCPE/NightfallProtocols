@@ -128,6 +128,7 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
+/**
 try {
     $packetName = 'UpdateAttributesPacket';
 
@@ -141,3 +142,4 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
+ */

@@ -48,7 +48,7 @@ class InventoryContentPacket extends PM_Packet {
         return [
             $packet->windowId,
             $packet->items,
-            $packet->dynamicContainerId,
+            $packet->dynamicContainerId ?? 0,
         ];
     }
 }

@@ -76,7 +76,7 @@ class SetTitlePacket extends PM_Packet {
             $packet->fadeOutTime,
             $packet->xuid,
             $packet->platformOnlineId,
-            $packet->filteredTitleText,
+            $packet->filteredTitleText ?? false,
         ];
     }
 }

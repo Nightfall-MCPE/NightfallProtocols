@@ -40,7 +40,7 @@ class StopSoundPacket extends PM_Packet {
         return [
             $packet->soundName,
             $packet->stopAll,
-            $packet->stopLegacyMusic,
+            $packet->stopLegacyMusic ?? false,
         ];
     }
 }

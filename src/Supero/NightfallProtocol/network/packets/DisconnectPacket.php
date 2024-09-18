@@ -44,7 +44,7 @@ class DisconnectPacket extends PM_Packet {
         return [
             $packet->reason,
             $packet->message,
-            $packet->filteredMessage,
+            $packet->filteredMessage ?? "",
         ];
     }
 }
