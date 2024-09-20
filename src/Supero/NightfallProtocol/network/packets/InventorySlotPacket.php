@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\InventorySlotPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 

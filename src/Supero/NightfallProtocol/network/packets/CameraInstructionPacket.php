@@ -8,7 +8,6 @@ use pocketmine\network\mcpe\protocol\types\camera\CameraFadeInstruction;
 use pocketmine\network\mcpe\protocol\types\camera\CameraSetInstruction;
 use pocketmine\network\mcpe\protocol\types\camera\CameraTargetInstruction;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\utils\ReflectionUtils;
 
 class CameraInstructionPacket extends PM_Packet
 {

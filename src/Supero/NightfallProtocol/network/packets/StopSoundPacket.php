@@ -2,9 +2,8 @@
 
 namespace Supero\NightfallProtocol\network\packets;
 
-use pocketmine\network\mcpe\protocol\StopSoundPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
+use pocketmine\network\mcpe\protocol\StopSoundPacket as PM_Packet;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class StopSoundPacket extends PM_Packet {

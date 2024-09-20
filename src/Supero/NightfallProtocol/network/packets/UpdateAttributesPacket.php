@@ -2,9 +2,8 @@
 
 namespace Supero\NightfallProtocol\network\packets;
 
-use pocketmine\network\mcpe\protocol\UpdateAttributesPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
+use pocketmine\network\mcpe\protocol\UpdateAttributesPacket as PM_Packet;
 use Supero\NightfallProtocol\network\packets\types\CustomUpdateAttribute;
 
 class UpdateAttributesPacket extends PM_Packet {

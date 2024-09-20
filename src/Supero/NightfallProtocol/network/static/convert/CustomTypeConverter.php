@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\TagItemDescriptor;
 use pocketmine\player\GameMode;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\data\CustomGlobalItemDataHandlers;

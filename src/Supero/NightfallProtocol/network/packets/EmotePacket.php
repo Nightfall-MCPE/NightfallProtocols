@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\EmotePacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class EmotePacket extends PM_Packet {
