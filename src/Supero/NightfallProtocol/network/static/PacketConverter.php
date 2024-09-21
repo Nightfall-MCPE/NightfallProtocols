@@ -152,10 +152,7 @@ class PacketConverter
                 return $packet;
             case LevelSoundEventPacket::NETWORK_ID:
                 /** @var LevelSoundEventPacket $packet */
-                if($packet->sound === LevelSoundEvent::ITEM_USE_ON){
-                    $packet->extraData = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->extraData));
-                    return $packet;
-                }
+                $packet->extraData = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->extraData));
                 return $packet;
             case AvailableCommandsPacket::NETWORK_ID:
                 /** @var AvailableCommandsPacket $packet */
