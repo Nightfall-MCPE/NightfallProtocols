@@ -3,6 +3,7 @@
 namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\EmotePacket as PM_Packet;
+use pocketmine\network\mcpe\protocol\PacketHandlerInterface;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
@@ -28,6 +29,25 @@ class EmotePacket extends PM_Packet {
         $result->flags = $flags;
         return $result;
     }
+
+    public function getActorRuntimeId() : int{
+        return $this->actorRuntimeId;
+    }
+
+    public function getEmoteId() : string{
+        return $this->emoteId;
+    }
+
+    public function getEmoteLengthTicks() : int{ return $this->emoteLengthTicks; }
+
+    public function getXboxUserId() : string{ return $this->xboxUserId; }
+
+    public function getPlatformChatId() : string{ return $this->platformChatId; }
+
+    public function getFlags() : int{
+        return $this->flags;
+    }
+
     protected function decodePayload(PacketSerializer $in) : void {
         $this->actorRuntimeId = $in->getActorRuntimeId();
         $this->emoteId = $in->getString();
@@ -52,10 +72,15 @@ class EmotePacket extends PM_Packet {
         return [
             $packet->getActorRuntimeId(),
             $packet->getEmoteId(),
-            $packet->getEmoteLengthTicks() ?? 0,
+            $packet->getEmoteLengthTicks(),
             $packet->getXboxUserId(),
             $packet->getPlatformChatId(),
             $packet->getFlags(),
         ];
+    }
+
+    public function handle(PacketHandlerInterface $handler): bool
+    {
+        return $handler->handleEmote($this);
     }
 }

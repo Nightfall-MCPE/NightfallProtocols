@@ -42,9 +42,22 @@ class UpdateAttributesPacket extends PM_Packet {
     }
 
     public function getConstructorArguments(PM_Packet $packet): array {
+        $entries = [];
+        foreach ($packet->entries as $label => $entry) {
+            $entries[$label] = new CustomUpdateAttribute(
+                $entry->getId(),
+                $entry->getMin(),
+                $entry->getMax(),
+                $entry->getCurrent(),
+                $entry->getDefaultMin(),
+                $entry->getDefaultMax(),
+                $entry->getDefault(),
+                $entry->getModifiers()
+            );
+        }
         return [
             $packet->actorRuntimeId,
-            $packet->entries,
+            $entries,
             $packet->tick
         ];
     }
