@@ -128,15 +128,11 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
-/*
- This is an example on how to generate a packet
-
+/**
 try {
-    $packetName = 'ServerboundDiagnosticsPacket';
+    $packetName = 'UpdateAttributesPacket';
 
-    $packetContent = generateCustomPacket($packetName, [
-    ["type" => "float", "property" => "avgUnaccountedTimePercent", "option" => "already-set", "version" => ">= CustomProtocolInfo::PROTOCOL_1_21_20"],
-    ]);
+    $packetContent = generateCustomPacket($packetName);
 
     $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'NightfallProtocol' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
 
@@ -146,4 +142,4 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
-*/
+ */

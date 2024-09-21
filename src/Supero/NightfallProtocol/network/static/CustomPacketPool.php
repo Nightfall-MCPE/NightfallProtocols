@@ -13,6 +13,7 @@ use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
 use Supero\NightfallProtocol\network\packets\DisconnectPacket;
 use Supero\NightfallProtocol\network\packets\EditorNetworkPacket;
+use Supero\NightfallProtocol\network\packets\EmotePacket;
 use Supero\NightfallProtocol\network\packets\InventoryContentPacket;
 use Supero\NightfallProtocol\network\packets\InventorySlotPacket;
 use Supero\NightfallProtocol\network\packets\InventoryTransactionPacket;
@@ -33,6 +34,8 @@ use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\StopSoundPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\packets\TickSyncPacket;
+use Supero\NightfallProtocol\network\packets\TransferPacket;
+use Supero\NightfallProtocol\network\packets\UpdateAttributesPacket;
 use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
 class CustomPacketPool extends PacketPool
@@ -55,6 +58,7 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new ContainerClosePacket());
         $this->registerPacket(new DisconnectPacket());
         $this->registerPacket(new EditorNetworkPacket());
+        $this->registerPacket(new EmotePacket());
         $this->registerPacket(new InventoryContentPacket());
         $this->registerPacket(new InventorySlotPacket());
         $this->registerPacket(new InventoryTransactionPacket());
@@ -75,6 +79,8 @@ class CustomPacketPool extends PacketPool
         $this->registerPacket(new StopSoundPacket());
         $this->registerPacket(new TextPacket());
         $this->registerPacket(new TickSyncPacket());
+        $this->registerPacket(new TransferPacket());
+        $this->registerPacket(new UpdateAttributesPacket());
         $this->registerPacket(new UpdatePlayerGameTypePacket());
     }
 

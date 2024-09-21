@@ -2,10 +2,8 @@
 
 namespace Supero\NightfallProtocol\network\static\convert;
 
-use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\ItemDeserializer;
-use pocketmine\data\bedrock\item\ItemSerializer;
 use pocketmine\data\bedrock\item\ItemTypeDeserializeException;
 use pocketmine\data\bedrock\item\ItemTypeSerializeException;
 use pocketmine\data\bedrock\item\SavedItemData;
@@ -113,6 +111,7 @@ class CustomItemTranslator
 
     public static function getItemSchemaId(int $protocolId) : int{
         return match($protocolId){
+            CustomProtocolInfo::PROTOCOL_1_21_30 => 211,
             CustomProtocolInfo::PROTOCOL_1_21_20 => 201,
             CustomProtocolInfo::PROTOCOL_1_21_2,
             CustomProtocolInfo::PROTOCOL_1_21_0 => 191,

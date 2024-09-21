@@ -36,7 +36,7 @@ class EditorNetworkPacket extends PM_Packet {
 
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
-            $packet->isRouteToManager(),
+            $packet->isRouteToManager() ?? false,
             $packet->getPayload(),
         ];
     }

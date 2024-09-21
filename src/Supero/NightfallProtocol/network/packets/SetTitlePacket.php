@@ -2,9 +2,8 @@
 
 namespace Supero\NightfallProtocol\network\packets;
 
-use pocketmine\network\mcpe\protocol\SetTitlePacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
+use pocketmine\network\mcpe\protocol\SetTitlePacket as PM_Packet;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class SetTitlePacket extends PM_Packet {
@@ -76,7 +75,7 @@ class SetTitlePacket extends PM_Packet {
             $packet->fadeOutTime,
             $packet->xuid,
             $packet->platformOnlineId,
-            $packet->filteredTitleText,
+            $packet->filteredTitleText ?? false,
         ];
     }
 }

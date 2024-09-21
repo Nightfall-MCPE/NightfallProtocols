@@ -5,7 +5,6 @@ namespace Supero\NightfallProtocol\network\packets;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
 use pocketmine\utils\Limits;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
@@ -108,7 +107,7 @@ class LevelChunkPacket extends PM_Packet {
     public function getConstructorArguments(PM_Packet $packet): array {
         return [
             $packet->getChunkPosition(),
-            $packet->getDimensionId(),
+            $packet->getDimensionId() ?? 0,
             $packet->getSubChunkCount(),
             $packet->isClientSubChunkRequestEnabled(),
             $packet->getUsedBlobHashes(),

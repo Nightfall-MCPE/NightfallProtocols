@@ -3,11 +3,9 @@
 namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\math\Vector3;
-use ReflectionException;
-use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\ChangeDimensionPacket as PM_Packet;
-use Supero\NightfallProtocol\utils\ReflectionUtils;
+use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class ChangeDimensionPacket extends PM_Packet
 {
@@ -46,16 +44,13 @@ class ChangeDimensionPacket extends PM_Packet
         }
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function getConstructorArguments(PM_Packet $packet): array
     {
         return [
             $packet->dimension,
             $packet->position,
             $packet->respawn,
-            ReflectionUtils::getProperty(PM_Packet::class, $packet, "loadingScreenId")
+            $packet->getLoadingScreenId() ?? 0,
         ];
     }
 

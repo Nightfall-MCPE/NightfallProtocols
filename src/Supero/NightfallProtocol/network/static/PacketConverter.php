@@ -22,7 +22,6 @@ use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 
@@ -52,7 +51,7 @@ class PacketConverter
     public static function handleServerbound(ServerboundPacket $packet, CustomTypeConverter $converter) : ServerboundPacket
     {
         $protocol = $converter->getProtocol();
-        if(in_array($protocol, CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
+        if(in_array($protocol, CustomProtocolInfo::COMBINED_LATEST)) return $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -67,6 +66,7 @@ class PacketConverter
         if(!in_array($packet::NETWORK_ID, self::SERVERBOUND_TRANSLATED)) return $packet;
 
         if ($packet instanceof LevelSoundEventPacket) {
+            //TODO: Does this also need translation?
             if (($packet->sound === LevelSoundEvent::BREAK && $packet->extraData !== -1) || $packet->sound === LevelSoundEvent::PLACE || $packet->sound === LevelSoundEvent::HIT || $packet->sound === LevelSoundEvent::LAND || $packet->sound === LevelSoundEvent::ITEM_USE_ON) {
                 $packet->extraData = $converter->getCustomBlockTranslator()->internalIdToNetworkId(CustomRuntimeIDtoStateID::getProtocolInstance($protocol)->getStateIdFromRuntimeId($packet->extraData));
             }
@@ -79,7 +79,7 @@ class PacketConverter
     public static function handleClientbound(ClientboundPacket $packet, CustomTypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
     {
         $protocol = $converter->getProtocol();
-        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return  $packet;
+        if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST)) return $packet;
 
         $searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
         if(
@@ -152,10 +152,7 @@ class PacketConverter
                 return $packet;
             case LevelSoundEventPacket::NETWORK_ID:
                 /** @var LevelSoundEventPacket $packet */
-                if($packet->sound === LevelSoundEvent::ITEM_USE_ON){
-                    $packet->extraData = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->extraData));
-                    return $packet;
-                }
+                $packet->extraData = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->extraData));
                 return $packet;
             case AvailableCommandsPacket::NETWORK_ID:
                 /** @var AvailableCommandsPacket $packet */
@@ -181,21 +178,7 @@ class PacketConverter
                 if($session == null) return $packet;
                 return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
             case ResourcePacksInfoPacket::NETWORK_ID:
-                $behaviourEntries = [];
                 /** @var ResourcePacksInfoPacket $packet */
-                foreach($packet->behaviorPackEntries as $label => $behaviourEntry){
-                    $behaviourEntries[$label] = new CustomBehaviourPackInfoEntry(
-                        $behaviourEntry->getPackId(),
-                        $behaviourEntry->getVersion(),
-                        $behaviourEntry->getSizeBytes(),
-                        $behaviourEntry->getEncryptionKey(),
-                        $behaviourEntry->getSubPackName(),
-                        $behaviourEntry->getContentId(),
-                        $behaviourEntry->hasScripts(),
-                        $behaviourEntry->isAddonPack()
-                    );
-                }
-
                 $resourceEntries = [];
                 foreach($packet->resourcePackEntries as $label => $resourcePackEntry){
                     $resourceEntries[$label] = new CustomResourcePackInfoEntry(
@@ -213,11 +196,11 @@ class PacketConverter
 
                 return \Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket::createPacket(
                     $resourceEntries,
-                    $behaviourEntries,
+                    [],
                     $packet->mustAccept,
                     $packet->hasAddons,
                     $packet->hasScripts,
-                    $packet->forceServerPacks,
+                    false,
                     $packet->cdnUrls
                 );
             default:

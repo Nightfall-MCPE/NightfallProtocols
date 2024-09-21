@@ -4,7 +4,6 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\DisconnectPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class DisconnectPacket extends PM_Packet {
@@ -44,7 +43,7 @@ class DisconnectPacket extends PM_Packet {
         return [
             $packet->reason,
             $packet->message,
-            $packet->filteredMessage,
+            $packet->filteredMessage ?? "",
         ];
     }
 }

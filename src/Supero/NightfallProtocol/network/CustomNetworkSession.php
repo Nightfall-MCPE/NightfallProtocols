@@ -77,11 +77,11 @@ class CustomNetworkSession extends NetworkSession
 
         $broadcaster = ProtocolUtils::getPacketBroadcaster($protocol);
         $typeConverter = CustomTypeConverter::getProtocolInstance($protocol);
+        $eventBroadcaster = ProtocolUtils::getEntityEventBroadcaster($protocol);
 
         $this->setProperty("typeConverter", $typeConverter);
         $this->setProperty("broadcaster", $broadcaster);
-        //TODO: Use protocol utils when we need to override this class
-        $this->setProperty("entityEventBroadcaster", new StandardEntityEventBroadcaster($broadcaster, $typeConverter));
+        $this->setProperty("entityEventBroadcaster", $eventBroadcaster);
     }
 
 
