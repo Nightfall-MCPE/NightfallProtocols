@@ -9,7 +9,7 @@
       "email": "superomarking@outlook.com"
     }
   ],
-  "require": {
+  "require-dev": {
     "pocketmine/pocketmine-mp": "*"
   }
 }
