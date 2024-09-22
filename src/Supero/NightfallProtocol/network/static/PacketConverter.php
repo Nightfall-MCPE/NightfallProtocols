@@ -141,6 +141,10 @@ class PacketConverter
                 return $packet;
             case LevelEventPacket::NETWORK_ID:
                 /** @var LevelEventPacket $packet */
+                // Src here: https://github.com/NetherGamesMC/BedrockProtocol/blob/master/src/LevelEventPacket.php#L42
+                if ($protocol <= CustomProtocolInfo::PROTOCOL_1_20_50 && $packet->eventId >= ParticleIds::BREEZE_WIND_EXPLOSION) {
+                    $packet->eventId = LevelEvent::ADD_PARTICLE_MASK | --$packet->eventId;
+                }
                 if ($packet->eventId === LevelEvent::PARTICLE_DESTROY || $packet->eventId === (LevelEvent::ADD_PARTICLE_MASK | ParticleIds::TERRAIN)) {
                     $packet->eventData = $blockTranslator->internalIdToNetworkId($runtimeToStateId->getStateIdFromRuntimeId($packet->eventData));
                     return $packet;
