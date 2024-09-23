@@ -12,5 +12,8 @@
   "require-dev": {
     "pocketmine/pocketmine-mp": "*",
     "friendsofphp/php-cs-fixer": "^3.64"
+  },
+  "require": {
+    "ext-curl": "*"
   }
 }
