@@ -48,7 +48,6 @@ return (new Config())
         (new Finder())
             ->ignoreDotFiles(false)
             ->ignoreVCSIgnored(true)
-            ->exclude(['dev-tools/phpstan', 'tests/Fixtures'])
             ->in(__DIR__)
     )
 ;
