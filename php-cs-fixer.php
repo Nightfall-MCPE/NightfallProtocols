@@ -37,13 +37,6 @@ return (new PhpCsFixer\Config)
 			'import_functions' => true,
 			'import_classes' => null,
 		],
-		'header_comment' => [
-			'comment_type' => 'comment',
-			'header' => <<<BODY
-
-BODY,
-			'location' => 'after_open'
-		],
 		'indentation_type' => true,
 		'logical_operators' => true,
 		'native_constant_invocation' => [
