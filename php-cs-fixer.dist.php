@@ -15,7 +15,6 @@ return (new Config())
         '@PHPUnit100Migration:risky' => true,
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
-        'PhpCsFixerInternal/configurable_fixer_template' => true, // internal rules, shall not be used outside of main repo
         'general_phpdoc_annotation_remove' => ['annotations' => ['expectedDeprecation']], // one should use PHPUnit built-in method instead
         'header_comment' => ['header' => <<<'EOF'
             This file is part of PHP CS Fixer.
