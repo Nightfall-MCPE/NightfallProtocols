@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-      
+
 jobs:
   build:
     name: Check
@@ -51,24 +51,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout fix/codestyle branch
+        run: git checkout fix/codestyle || git checkout -b fix/codestyle origin/fix/codestyle
+
       - name: Run PHP-CS-Fixer
         run: php-cs-fixer fix --config=./php-cs-fixer.php --diff --ansi
-        
+
       - name: Commit changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
           git commit -m "Apply PHP CS Fixer changes" || echo "No changes to commit"
-          
-      - name: Checkout it!
-        run: git checkout fix/codestyle
-          
-      - name: Remove branch and create again
-        run: git reset --hard origin/fix/codestyle
-          
-      - name: Pull changes from remote branch
-        run: git pull origin fix/codestyle --rebase
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
