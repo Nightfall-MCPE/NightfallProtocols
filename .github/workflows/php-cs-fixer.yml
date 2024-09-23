@@ -35,7 +35,7 @@ jobs:
           key: "php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}"
           restore-keys: "php-${{ matrix.php }}-composer-"
 
-      - name: Install PHPStan Composer dependencies
+      - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
 
       - name: Run PHP CS Fixer
