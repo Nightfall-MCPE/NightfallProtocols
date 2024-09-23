@@ -393,7 +393,9 @@ class CustomNetworkSession extends NetworkSession
         if(!($packet instanceof ServerboundPacket)){
             throw new PacketHandlingException("Unexpected non-serverbound packet");
         }
-        $oldPacket = clone $packet;
+        //TODO: WHAT DO I DO HERE????
+        // The modified packet is being decoded properly but not the original one due to us overriding it
+        // Meaning we can't send the original packet in the event (WTF !!!!!!!!)
         $packet = PacketConverter::handleServerbound($packet, $this->getProperty("typeConverter"));
 
         $timings = Timings::getReceiveDataPacketTimings($packet);
@@ -427,7 +429,7 @@ class CustomNetworkSession extends NetworkSession
             }
 
             if(DataPacketReceiveEvent::hasHandlers()){
-                $ev = new DataPacketReceiveEvent($this, $oldPacket);
+                $ev = new DataPacketReceiveEvent($this, $packet);
                 $ev->call();
                 if($ev->isCancelled()){
                     return;
