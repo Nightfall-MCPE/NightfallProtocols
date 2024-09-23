@@ -11,7 +11,7 @@ on:
       
 jobs:
   build:
-    name: Jobs
+    name: Check
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,6 +37,23 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
+        
+  codestyle:
+    name: Code Style checks
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
 
-      - name: Run PHP CS Fixer
-        run: vendor/bin/php-cs-fixer fix --config=./php-cs-fixer.dist.php
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP and tools
+        uses: shivammathur/setup-php@2.31.1
+        with:
+          php-version: 8.3
+          tools: php-cs-fixer:3.49
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run PHP-CS-Fixer
+        run: php-cs-fixer fix --dry-run --diff --ansi
