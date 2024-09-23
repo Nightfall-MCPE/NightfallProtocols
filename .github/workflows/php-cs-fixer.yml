@@ -61,6 +61,9 @@ jobs:
           git add .
           git commit -m "Apply PHP CS Fixer changes" || echo "No changes to commit"
           
+      - name: Checkout it!
+        run: git checkout fix/codestyle
+          
       - name: Remove branch and create again
         run: git reset --hard origin/fix/codestyle
           
