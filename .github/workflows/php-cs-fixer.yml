@@ -1,0 +1,73 @@
+name: PHP CS Fixer
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - "8.3"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.21.1
+        with:
+          php-version: ${{ matrix.php }}
+
+      - name: Restore Composer package cache
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/composer"
+          key: "php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}"
+          restore-keys: "php-${{ matrix.php }}-composer-"
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
+        
+  codestyle:
+    name: Code Style checks
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP and tools
+        uses: shivammathur/setup-php@2.31.1
+        with:
+          php-version: 8.3
+          tools: php-cs-fixer:3.49
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout fix/codestyle branch
+        run: |
+          git fetch origin
+          git checkout fix/codestyle || git checkout -b fix/codestyle origin/fix/codestyle
+
+      - name: Run PHP-CS-Fixer
+        run: php-cs-fixer fix --config=./php-cs-fixer.php --diff --ansi
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Apply PHP CS Fixer changes" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: fix/codestyle
