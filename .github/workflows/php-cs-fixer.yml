@@ -52,7 +52,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout fix/codestyle branch
-        run: git checkout fix/codestyle || git checkout -b fix/codestyle origin/fix/codestyle
+        run: |
+          git fetch origin
+          git checkout fix/codestyle || git checkout -b fix/codestyle origin/fix/codestyle
 
       - name: Run PHP-CS-Fixer
         run: php-cs-fixer fix --config=./php-cs-fixer.php --diff --ansi
