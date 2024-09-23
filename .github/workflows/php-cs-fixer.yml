@@ -50,9 +50,6 @@ jobs:
           tools: php-cs-fixer:3.49
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Set working directory
-        run: cd ${{ github.workspace }}
 
       - name: Run PHP-CS-Fixer
-        run: php-cs-fixer fix --dry-run --diff --ansi
+        run: php-cs-fixer fix --config=./php-cs-fixer.dist.php --dry-run --diff --ansi
