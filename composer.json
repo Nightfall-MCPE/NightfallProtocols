@@ -11,6 +11,6 @@
   ],
   "require-dev": {
     "pocketmine/pocketmine-mp": "*",
-    "friendsofphp/php-cs-fixer": "^3.0"
+    "friendsofphp/php-cs-fixer": "^3.64"
   }
 }
