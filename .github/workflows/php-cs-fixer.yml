@@ -52,4 +52,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run PHP-CS-Fixer
-        run: php-cs-fixer fix --config=./php-cs-fixer.dist.php --dry-run --diff --ansi
+        run: php-cs-fixer fix --config=./php-cs-fixer.php --dry-run --diff --ansi
