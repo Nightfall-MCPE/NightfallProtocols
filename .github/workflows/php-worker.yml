@@ -1,4 +1,4 @@
-name: PHP Composer
+name: PHP Worker
 
 on:
   push:
@@ -32,8 +32,6 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    # - name: Run test suite
-    #   run: composer run-script test
+    - name: OSKAR-PHP-CS-Fixer
+      uses: OskarStark/php-cs-fixer-ga@3.26.0
+          
