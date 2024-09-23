@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\packets\types\inventory\stackrequest;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;

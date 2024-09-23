@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\static;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -40,63 +42,63 @@ use Supero\NightfallProtocol\network\packets\UpdatePlayerGameTypePacket;
 
 class CustomPacketPool extends PacketPool
 {
-    protected static ?PacketPool $instance = null;
+	protected static ?PacketPool $instance = null;
 
-    public static function getInstance() : self{
-        if(self::$instance === null){
-            self::$instance = new self;
-        }
-        return self::$instance;
-    }
-    public function __construct()
-    {
-        parent::__construct();
+	public static function getInstance() : self{
+		if(self::$instance === null){
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->registerPacket(new CameraInstructionPacket());
-        $this->registerPacket(new ChangeDimensionPacket());
-        $this->registerPacket(new CodeBuilderSourcePacket());
-        $this->registerPacket(new ContainerClosePacket());
-        $this->registerPacket(new DisconnectPacket());
-        $this->registerPacket(new EditorNetworkPacket());
-        $this->registerPacket(new EmotePacket());
-        $this->registerPacket(new InventoryContentPacket());
-        $this->registerPacket(new InventorySlotPacket());
-        $this->registerPacket(new InventoryTransactionPacket());
-        $this->registerPacket(new ItemStackRequestPacket());
-        $this->registerPacket(new ItemStackResponsePacket());
-        $this->registerPacket(new LecternUpdatePacket());
-        $this->registerPacket(new LevelChunkPacket());
-        $this->registerPacket(new MobArmorEquipmentPacket());
-        $this->registerPacket(new MobEffectPacket());
-        $this->registerPacket(new PlayerArmorDamagePacket());
-        $this->registerPacket(new PlayerAuthInputPacket());
-        $this->registerPacket(new PlayerListPacket());
-        $this->registerPacket(new ResourcePacksInfoPacket());
-        $this->registerPacket(new ResourcePackStackPacket());
-        $this->registerPacket(new SetActorMotionPacket());
-        $this->registerPacket(new SetTitlePacket());
-        $this->registerPacket(new StartGamePacket());
-        $this->registerPacket(new StopSoundPacket());
-        $this->registerPacket(new TextPacket());
-        $this->registerPacket(new TickSyncPacket());
-        $this->registerPacket(new TransferPacket());
-        $this->registerPacket(new UpdateAttributesPacket());
-        $this->registerPacket(new UpdatePlayerGameTypePacket());
-    }
+		$this->registerPacket(new CameraInstructionPacket());
+		$this->registerPacket(new ChangeDimensionPacket());
+		$this->registerPacket(new CodeBuilderSourcePacket());
+		$this->registerPacket(new ContainerClosePacket());
+		$this->registerPacket(new DisconnectPacket());
+		$this->registerPacket(new EditorNetworkPacket());
+		$this->registerPacket(new EmotePacket());
+		$this->registerPacket(new InventoryContentPacket());
+		$this->registerPacket(new InventorySlotPacket());
+		$this->registerPacket(new InventoryTransactionPacket());
+		$this->registerPacket(new ItemStackRequestPacket());
+		$this->registerPacket(new ItemStackResponsePacket());
+		$this->registerPacket(new LecternUpdatePacket());
+		$this->registerPacket(new LevelChunkPacket());
+		$this->registerPacket(new MobArmorEquipmentPacket());
+		$this->registerPacket(new MobEffectPacket());
+		$this->registerPacket(new PlayerArmorDamagePacket());
+		$this->registerPacket(new PlayerAuthInputPacket());
+		$this->registerPacket(new PlayerListPacket());
+		$this->registerPacket(new ResourcePacksInfoPacket());
+		$this->registerPacket(new ResourcePackStackPacket());
+		$this->registerPacket(new SetActorMotionPacket());
+		$this->registerPacket(new SetTitlePacket());
+		$this->registerPacket(new StartGamePacket());
+		$this->registerPacket(new StopSoundPacket());
+		$this->registerPacket(new TextPacket());
+		$this->registerPacket(new TickSyncPacket());
+		$this->registerPacket(new TransferPacket());
+		$this->registerPacket(new UpdateAttributesPacket());
+		$this->registerPacket(new UpdatePlayerGameTypePacket());
+	}
 
-    public function registerPacket(Packet $packet) : void{
-        $this->pool[$packet->pid()] = clone $packet;
-    }
+	public function registerPacket(Packet $packet) : void{
+		$this->pool[$packet->pid()] = clone $packet;
+	}
 
-    public function getPacketById(int $pid) : ?Packet{
-        return isset($this->pool[$pid]) ? clone $this->pool[$pid] : null;
-    }
+	public function getPacketById(int $pid) : ?Packet{
+		return isset($this->pool[$pid]) ? clone $this->pool[$pid] : null;
+	}
 
-    /**
-     * @throws BinaryDataException
-     */
-    public function getPacket(string $buffer) : ?Packet{
-        $offset = 0;
-        return $this->getPacketById(Binary::readUnsignedVarInt($buffer, $offset) & DataPacket::PID_MASK);
-    }
+	/**
+	 * @throws BinaryDataException
+	 */
+	public function getPacket(string $buffer) : ?Packet{
+		$offset = 0;
+		return $this->getPacketById(Binary::readUnsignedVarInt($buffer, $offset) & DataPacket::PID_MASK);
+	}
 }

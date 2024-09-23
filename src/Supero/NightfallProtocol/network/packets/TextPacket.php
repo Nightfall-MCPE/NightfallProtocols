@@ -1,168 +1,169 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\TextPacket as PM_Packet;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
+use function count;
 
 class TextPacket extends PM_Packet
 {
 
-    public const TYPE_RAW = 0;
-    public const TYPE_CHAT = 1;
-    public const TYPE_TRANSLATION = 2;
-    public const TYPE_POPUP = 3;
-    public const TYPE_JUKEBOX_POPUP = 4;
-    public const TYPE_TIP = 5;
-    public const TYPE_SYSTEM = 6;
-    public const TYPE_WHISPER = 7;
-    public const TYPE_ANNOUNCEMENT = 8;
-    public const TYPE_JSON_WHISPER = 9;
-    public const TYPE_JSON = 10;
-    public const TYPE_JSON_ANNOUNCEMENT = 11;
+	public const TYPE_RAW = 0;
+	public const TYPE_CHAT = 1;
+	public const TYPE_TRANSLATION = 2;
+	public const TYPE_POPUP = 3;
+	public const TYPE_JUKEBOX_POPUP = 4;
+	public const TYPE_TIP = 5;
+	public const TYPE_SYSTEM = 6;
+	public const TYPE_WHISPER = 7;
+	public const TYPE_ANNOUNCEMENT = 8;
+	public const TYPE_JSON_WHISPER = 9;
+	public const TYPE_JSON = 10;
+	public const TYPE_JSON_ANNOUNCEMENT = 11;
 
-    public int $type;
-    public bool $needsTranslation = false;
-    public string $sourceName;
-    public string $message;
-    /** @var string[] */
-    public array $parameters = [];
-    public string $xboxUserId = "";
-    public string $platformChatId = "";
-    public string $filteredMessage = "";
+	public int $type;
+	public bool $needsTranslation = false;
+	public string $sourceName;
+	public string $message;
+	/** @var string[] */
+	public array $parameters = [];
+	public string $xboxUserId = "";
+	public string $platformChatId = "";
+	public string $filteredMessage = "";
 
-    private static function messageOnly(int $type, string $message) : self{
-        $result = new self;
-        $result->type = $type;
-        $result->message = $message;
-        return $result;
-    }
+	private static function messageOnly(int $type, string $message) : self{
+		$result = new self();
+		$result->type = $type;
+		$result->message = $message;
+		return $result;
+	}
 
-    /**
-     * @param string[] $parameters
-     */
-    private static function baseTranslation(int $type, string $key, array $parameters) : self{
-        $result = new self;
-        $result->type = $type;
-        $result->needsTranslation = true;
-        $result->message = $key;
-        $result->parameters = $parameters;
-        return $result;
-    }
+	/**
+	 * @param string[] $parameters
+	 */
+	private static function baseTranslation(int $type, string $key, array $parameters) : self{
+		$result = new self();
+		$result->type = $type;
+		$result->needsTranslation = true;
+		$result->message = $key;
+		$result->parameters = $parameters;
+		return $result;
+	}
 
-    public static function raw(string $message) : self{
-        return self::messageOnly(self::TYPE_RAW, $message);
-    }
+	public static function raw(string $message) : self{
+		return self::messageOnly(self::TYPE_RAW, $message);
+	}
 
-    /**
-     * @param string[]  $parameters
-     */
-    public static function translation(string $key, array $parameters = []) : self{
-        return self::baseTranslation(self::TYPE_TRANSLATION, $key, $parameters);
-    }
+	/**
+	 * @param string[] $parameters
+	 */
+	public static function translation(string $key, array $parameters = []) : self{
+		return self::baseTranslation(self::TYPE_TRANSLATION, $key, $parameters);
+	}
 
-    public static function popup(string $message) : self{
-        return self::messageOnly(self::TYPE_POPUP, $message);
-    }
+	public static function popup(string $message) : self{
+		return self::messageOnly(self::TYPE_POPUP, $message);
+	}
 
-    /**
-     * @param string[] $parameters
-     */
-    public static function translatedPopup(string $key, array $parameters = []) : self{
-        return self::baseTranslation(self::TYPE_POPUP, $key, $parameters);
-    }
+	/**
+	 * @param string[] $parameters
+	 */
+	public static function translatedPopup(string $key, array $parameters = []) : self{
+		return self::baseTranslation(self::TYPE_POPUP, $key, $parameters);
+	}
 
-    /**
-     * @param string[] $parameters
-     */
-    public static function jukeboxPopup(string $key, array $parameters = []) : self{
-        return self::baseTranslation(self::TYPE_JUKEBOX_POPUP, $key, $parameters);
-    }
+	/**
+	 * @param string[] $parameters
+	 */
+	public static function jukeboxPopup(string $key, array $parameters = []) : self{
+		return self::baseTranslation(self::TYPE_JUKEBOX_POPUP, $key, $parameters);
+	}
 
-    public static function tip(string $message) : self{
-        return self::messageOnly(self::TYPE_TIP, $message);
-    }
+	public static function tip(string $message) : self{
+		return self::messageOnly(self::TYPE_TIP, $message);
+	}
 
-    /**
-     * @param CustomPacketSerializer $in
-     * @return void
-     */
-    protected function decodePayload(PacketSerializer $in) : void{
-        $this->type = $in->getByte();
-        $this->needsTranslation = $in->getBool();
-        switch($this->type){
-            case self::TYPE_CHAT:
-            case self::TYPE_WHISPER:
-                /** @noinspection PhpMissingBreakStatementInspection */
-            case self::TYPE_ANNOUNCEMENT:
-                $this->sourceName = $in->getString();
-            case self::TYPE_RAW:
-            case self::TYPE_TIP:
-            case self::TYPE_SYSTEM:
-            case self::TYPE_JSON_WHISPER:
-            case self::TYPE_JSON:
-            case self::TYPE_JSON_ANNOUNCEMENT:
-                $this->message = $in->getString();
-                break;
+	/**
+	 * @param CustomPacketSerializer $in
+	 */
+	protected function decodePayload(PacketSerializer $in) : void{
+		$this->type = $in->getByte();
+		$this->needsTranslation = $in->getBool();
+		switch($this->type){
+			case self::TYPE_CHAT:
+			case self::TYPE_WHISPER:
+				/** @noinspection PhpMissingBreakStatementInspection */
+			case self::TYPE_ANNOUNCEMENT:
+				$this->sourceName = $in->getString();
+			case self::TYPE_RAW:
+			case self::TYPE_TIP:
+			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON_WHISPER:
+			case self::TYPE_JSON:
+			case self::TYPE_JSON_ANNOUNCEMENT:
+				$this->message = $in->getString();
+				break;
 
-            case self::TYPE_TRANSLATION:
-            case self::TYPE_POPUP:
-            case self::TYPE_JUKEBOX_POPUP:
-                $this->message = $in->getString();
-                $count = $in->getUnsignedVarInt();
-                for($i = 0; $i < $count; ++$i){
-                    $this->parameters[] = $in->getString();
-                }
-                break;
-        }
+			case self::TYPE_TRANSLATION:
+			case self::TYPE_POPUP:
+			case self::TYPE_JUKEBOX_POPUP:
+				$this->message = $in->getString();
+				$count = $in->getUnsignedVarInt();
+				for($i = 0; $i < $count; ++$i){
+					$this->parameters[] = $in->getString();
+				}
+				break;
+		}
 
-        $this->xboxUserId = $in->getString();
-        $this->platformChatId = $in->getString();
-        if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0) {
-            $this->filteredMessage = $in->getString();
-        }
-    }
+		$this->xboxUserId = $in->getString();
+		$this->platformChatId = $in->getString();
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0) {
+			$this->filteredMessage = $in->getString();
+		}
+	}
 
-    /**
-     * @param CustomPacketSerializer $out
-     * @return void
-     */
-    protected function encodePayload(PacketSerializer $out) : void{
-        $out->putByte($this->type);
-        $out->putBool($this->needsTranslation);
-        switch($this->type){
-            case self::TYPE_CHAT:
-            case self::TYPE_WHISPER:
-                /** @noinspection PhpMissingBreakStatementInspection */
-            case self::TYPE_ANNOUNCEMENT:
-                $out->putString($this->sourceName);
-            case self::TYPE_RAW:
-            case self::TYPE_TIP:
-            case self::TYPE_SYSTEM:
-            case self::TYPE_JSON_WHISPER:
-            case self::TYPE_JSON:
-            case self::TYPE_JSON_ANNOUNCEMENT:
-                $out->putString($this->message);
-                break;
+	/**
+	 * @param CustomPacketSerializer $out
+	 */
+	protected function encodePayload(PacketSerializer $out) : void{
+		$out->putByte($this->type);
+		$out->putBool($this->needsTranslation);
+		switch($this->type){
+			case self::TYPE_CHAT:
+			case self::TYPE_WHISPER:
+				/** @noinspection PhpMissingBreakStatementInspection */
+			case self::TYPE_ANNOUNCEMENT:
+				$out->putString($this->sourceName);
+			case self::TYPE_RAW:
+			case self::TYPE_TIP:
+			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON_WHISPER:
+			case self::TYPE_JSON:
+			case self::TYPE_JSON_ANNOUNCEMENT:
+				$out->putString($this->message);
+				break;
 
-            case self::TYPE_TRANSLATION:
-            case self::TYPE_POPUP:
-            case self::TYPE_JUKEBOX_POPUP:
-                $out->putString($this->message);
-                $out->putUnsignedVarInt(count($this->parameters));
-                foreach($this->parameters as $p){
-                    $out->putString($p);
-                }
-                break;
-        }
+			case self::TYPE_TRANSLATION:
+			case self::TYPE_POPUP:
+			case self::TYPE_JUKEBOX_POPUP:
+				$out->putString($this->message);
+				$out->putUnsignedVarInt(count($this->parameters));
+				foreach($this->parameters as $p){
+					$out->putString($p);
+				}
+				break;
+		}
 
-        $out->putString($this->xboxUserId);
-        $out->putString($this->platformChatId);
-        if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0) {
-            $out->putString($this->filteredMessage);
-        }
-    }
+		$out->putString($this->xboxUserId);
+		$out->putString($this->platformChatId);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0) {
+			$out->putString($this->filteredMessage);
+		}
+	}
 
 }

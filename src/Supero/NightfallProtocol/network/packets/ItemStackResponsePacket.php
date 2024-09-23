@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ItemStackResponsePacket as PM_Packet;
@@ -17,7 +19,7 @@ class ItemStackResponsePacket extends PM_Packet{
 	 * @param ItemStackResponse[] $responses
 	 */
 	public static function createPacket(array $responses) : self{
-		$result = new self;
+		$result = new self();
 		$result->responses = $responses;
 		return $result;
 	}
@@ -39,9 +41,9 @@ class ItemStackResponsePacket extends PM_Packet{
 		}
 	}
 
-    public function getConstructorArguments(PM_Packet $packet): array {
-        return [
-            $packet->getResponses(),
-        ];
-    }
+	public function getConstructorArguments(PM_Packet $packet) : array {
+		return [
+			$packet->getResponses(),
+		];
+	}
 }

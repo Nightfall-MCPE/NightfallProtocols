@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\packets\types\inventory\stackrequest;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
@@ -8,6 +10,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackReque
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestActionType;
 use pocketmine\network\mcpe\protocol\types\recipe\RecipeIngredient;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use function count;
 
 /**
  * Tells that the current transaction crafted the specified recipe, using the recipe book. This is effectively the same
