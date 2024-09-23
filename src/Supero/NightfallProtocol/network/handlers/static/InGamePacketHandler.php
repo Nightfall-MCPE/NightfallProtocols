@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Supero\NightfallProtocol\network\handlers\static;
 
 use pocketmine\block\BaseSign;
@@ -250,7 +252,7 @@ class InGamePacketHandler extends PacketHandler{
 			}
 		}
 
-        $useItemTransaction = $packet->getCustomItemInteractionData();
+		$useItemTransaction = $packet->getCustomItemInteractionData();
 		if($useItemTransaction !== null){
 			if(count($useItemTransaction->getTransactionData()->getActions()) > 100){
 				throw new PacketHandlingException("Too many actions in item use transaction");
@@ -267,7 +269,7 @@ class InGamePacketHandler extends PacketHandler{
 			$this->inventoryManager->setCurrentItemStackRequestId(null);
 		}
 
-        /** @var CustomPlayerAuthInputPacket $packet */
+		/** @var CustomPlayerAuthInputPacket $packet */
 		$itemStackRequest = $packet->getCustomItemStackRequest();
 		if($itemStackRequest !== null){
 			$result = $this->handleSingleItemStackRequest($itemStackRequest);
@@ -595,7 +597,7 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	public function handleItemStackRequest(ItemStackRequestPacket $packet) : bool{
-        /** @var CustomItemStackRequestPacket $packet */
+		/** @var CustomItemStackRequestPacket $packet */
 		$responses = [];
 		if(count($packet->getRequests()) > 80){
 			//TODO: we can probably lower this limit, but this will do for now
