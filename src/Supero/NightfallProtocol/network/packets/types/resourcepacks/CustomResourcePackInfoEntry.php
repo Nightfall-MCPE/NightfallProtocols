@@ -17,7 +17,8 @@ class CustomResourcePackInfoEntry{
 		private string $contentId = "",
 		private bool $hasScripts = false,
 		private bool $isAddonPack = false,
-		private bool $isRtxCapable = false
+		private bool $isRtxCapable = false,
+		private string $cdnUrl = ""
 	){}
 
 	public function getPackId() : string{
@@ -52,6 +53,8 @@ class CustomResourcePackInfoEntry{
 
 	public function isRtxCapable() : bool{ return $this->isRtxCapable; }
 
+	public function getCdnUrl() : string{ return $this->cdnUrl; }
+
 	public function write(PacketSerializer $out) : void{
 		$out->putString($this->packId);
 		$out->putString($this->version);
@@ -64,6 +67,9 @@ class CustomResourcePackInfoEntry{
 			$out->putBool($this->isAddonPack);
 		}
 		$out->putBool($this->isRtxCapable);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40) {
+			$out->putString($this->cdnUrl);
+		}
 	}
 
 	public static function read(PacketSerializer $in) : self{
@@ -78,6 +84,9 @@ class CustomResourcePackInfoEntry{
 			$isAddonPack = $in->getBool();
 		}
 		$rtxCapable = $in->getBool();
-		return new self($uuid, $version, $sizeBytes, $encryptionKey, $subPackName, $contentId, $hasScripts, $isAddonPack ?? false, $rtxCapable);
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40) {
+			$cdnUrl = $in->getString();
+		}
+		return new self($uuid, $version, $sizeBytes, $encryptionKey, $subPackName, $contentId, $hasScripts, $isAddonPack ?? false, $rtxCapable, $cdnUrl ?? "");
 	}
 }

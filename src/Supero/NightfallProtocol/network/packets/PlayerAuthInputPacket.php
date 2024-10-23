@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Supero\NightfallProtocol\network\packets;
 
+use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket as PM_Packet;
@@ -34,6 +35,7 @@ class PlayerAuthInputPacket extends PM_Packet
 	private int $playMode;
 	private int $interactionMode;
 	private ?Vector3 $vrGazeDirection = null;
+	private Vector2 $interactRotation;
 	private int $tick;
 	private Vector3 $delta;
 	private ?CustomItemInteractionData $itemInteractionData = null;
@@ -43,6 +45,7 @@ class PlayerAuthInputPacket extends PM_Packet
 	private ?PlayerAuthInputVehicleInfo $vehicleInfo = null;
 	private float $analogMoveVecX;
 	private float $analogMoveVecZ;
+	private Vector3 $cameraOrientation;
 
 	/**
 	 * @param int                      $inputFlags      @see PlayerAuthInputFlags
@@ -64,6 +67,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		int $playMode,
 		int $interactionMode,
 		?Vector3 $vrGazeDirection,
+		Vector2 $interactRotation,
 		int $tick,
 		Vector3 $delta,
 		?CustomItemInteractionData $itemInteractionData,
@@ -71,7 +75,8 @@ class PlayerAuthInputPacket extends PM_Packet
 		?array $blockActions,
 		?PlayerAuthInputVehicleInfo $vehicleInfo,
 		float $analogMoveVecX,
-		float $analogMoveVecZ
+		float $analogMoveVecZ,
+		Vector3 $cameraOrientation
 	) : self{
 		if($playMode === PlayMode::VR && $vrGazeDirection === null){
 			//yuck, can we get a properly written packet just once? ...
@@ -102,6 +107,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		if($vrGazeDirection !== null){
 			$result->vrGazeDirection = $vrGazeDirection->asVector3();
 		}
+		$result->interactRotation = $interactRotation;
 		$result->tick = $tick;
 		$result->delta = $delta;
 		$result->itemInteractionData = $itemInteractionData;
@@ -110,6 +116,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$result->vehicleInfo = $vehicleInfo;
 		$result->analogMoveVecX = $analogMoveVecX;
 		$result->analogMoveVecZ = $analogMoveVecZ;
+		$result->cameraOrientation = $cameraOrientation;
 		return $result;
 	}
 
@@ -169,6 +176,10 @@ class PlayerAuthInputPacket extends PM_Packet
 		return $this->vrGazeDirection;
 	}
 
+	public function getInteractRotation() : Vector2{
+		return $this->interactRotation;
+	}
+
 	public function getTick() : int{
 		return $this->tick;
 	}
@@ -183,6 +194,10 @@ class PlayerAuthInputPacket extends PM_Packet
 
 	public function getCustomItemStackRequest() : ?CustomItemStackRequest{
 		return $this->itemStackRequest;
+	}
+
+	public function getCameraOrientation() : Vector3{
+		return $this->cameraOrientation;
 	}
 
 	/**
@@ -213,7 +228,9 @@ class PlayerAuthInputPacket extends PM_Packet
 		$this->inputMode = $in->getUnsignedVarInt();
 		$this->playMode = $in->getUnsignedVarInt();
 		$this->interactionMode = $in->getUnsignedVarInt();
-		if($this->playMode === PlayMode::VR){
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$this->interactRotation = $in->getVector2();
+		}elseif($this->playMode === PlayMode::VR){
 			$this->vrGazeDirection = $in->getVector3();
 		}
 		$this->tick = $in->getUnsignedVarLong();
@@ -241,6 +258,9 @@ class PlayerAuthInputPacket extends PM_Packet
 		}
 		$this->analogMoveVecX = $in->getLFloat();
 		$this->analogMoveVecZ = $in->getLFloat();
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$this->cameraOrientation = $in->getVector3();
+		}
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -260,7 +280,9 @@ class PlayerAuthInputPacket extends PM_Packet
 		$out->putUnsignedVarInt($this->inputMode);
 		$out->putUnsignedVarInt($this->playMode);
 		$out->putUnsignedVarInt($this->interactionMode);
-		if($this->playMode === PlayMode::VR){
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$out->putVector2($this->interactRotation);
+		}elseif($this->playMode === PlayMode::VR){
 			assert($this->vrGazeDirection !== null);
 			$out->putVector3($this->vrGazeDirection);
 		}
@@ -280,6 +302,9 @@ class PlayerAuthInputPacket extends PM_Packet
 		}
 		$out->putLFloat($this->analogMoveVecX);
 		$out->putLFloat($this->analogMoveVecZ);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$out->putVector3($this->cameraOrientation);
+		}
 	}
 
 	public function getConstructorArguments(PM_Packet $packet) : array

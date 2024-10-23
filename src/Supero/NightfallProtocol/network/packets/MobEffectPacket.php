@@ -48,7 +48,9 @@ class MobEffectPacket extends PM_Packet
 		$this->amplifier = $in->getVarInt();
 		$this->particles = $in->getBool();
 		$this->duration = $in->getVarInt();
-		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$this->tick = $in->getUnsignedVarLong();
+		}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
 			$this->tick = $in->getLLong();
 		}
 	}
@@ -60,7 +62,9 @@ class MobEffectPacket extends PM_Packet
 		$out->putVarInt($this->amplifier);
 		$out->putBool($this->particles);
 		$out->putVarInt($this->duration);
-		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$out->putUnsignedVarLong($this->tick);
+		}elseif($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
 			$out->putLLong($this->tick);
 		}
 	}
