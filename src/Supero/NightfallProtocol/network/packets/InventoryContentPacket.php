@@ -73,7 +73,8 @@ class InventoryContentPacket extends PM_Packet {
 			$packet->windowId,
 			$packet->items,
 			$customContainerName,
-			$packet->dynamicContainerSize
+			0,
+			$packet->storage
 		];
 	}
 }

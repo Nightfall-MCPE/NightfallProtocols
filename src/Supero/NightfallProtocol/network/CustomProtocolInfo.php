@@ -24,8 +24,7 @@ class CustomProtocolInfo {
 	//In case a version has no real protocol/item/block changes.
 	//If the latest has changed from the previous, only put the current protocol here
 	public const COMBINED_LATEST = [
-		self::CURRENT_PROTOCOL,
-		self::PROTOCOL_1_21_30 //TODO: wait for PMMP to officially support version v1.21.40
+		self::CURRENT_PROTOCOL
 	];
 
 	public const PROTOCOL_1_21_40 = 748;

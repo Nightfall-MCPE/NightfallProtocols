@@ -70,8 +70,9 @@ class InventorySlotPacket extends PM_Packet {
 			$packet->windowId,
 			$packet->inventorySlot,
 			$customContainerName,
-			$packet->dynamicContainerSize,
+			0,
 			$packet->item,
+			$packet->storage,
 		];
 	}
 }

@@ -38,8 +38,8 @@ class CustomBlockTranslator
 			self::BLOCK_STATE_META_MAP_PATH => "",
 		],
 		CustomProtocolInfo::PROTOCOL_1_21_30 => [
-			self::CANONICAL_BLOCK_STATES_PATH => "", //TODO: wait for PMMP to officially support version v1.21.40
-			self::BLOCK_STATE_META_MAP_PATH => "", //TODO: wait for PMMP to officially support version v1.21.40
+			self::CANONICAL_BLOCK_STATES_PATH => "-1.21.30",
+			self::BLOCK_STATE_META_MAP_PATH => "-1.21.30",
 		],
 		CustomProtocolInfo::PROTOCOL_1_21_20 => [
 			self::CANONICAL_BLOCK_STATES_PATH => "-1.21.20",

@@ -83,7 +83,7 @@ class PacketConverter
 	public static function handleClientbound(ClientboundPacket $packet, CustomTypeConverter $converter, ?CustomNetworkSession $session) : ClientboundPacket
 	{
 		$protocol = $converter->getProtocol();
-		if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST, true) && $protocol !== CustomProtocolInfo::PROTOCOL_1_21_30) return $packet; //ResourcePacksInfoPacket (COMBINE_LATEST are needed for Items and Blocks stuff)
+		if(in_array($converter->getProtocol(), CustomProtocolInfo::COMBINED_LATEST, true)) return $packet;
 
 		$searchedPacket = CustomPacketPool::getInstance()->getPacketById($packet::NETWORK_ID);
 		if(

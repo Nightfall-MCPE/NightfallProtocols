@@ -6,13 +6,12 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ItemStackRequestPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
 use function count;
 
 class ItemStackRequestPacket extends PM_Packet {
 
-	/** @var ItemStackRequest[] */
+	/** @var CustomItemStackRequest[] */
 	private array $requests;
 
 	  /**
