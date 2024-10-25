@@ -74,11 +74,13 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$this->resourcePackEntries[] = CustomResourcePackInfoEntry::read($in);
 		}
 
-		$this->cdnUrls = [];
-		for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; $i++){
-			$packId = $in->getString();
-			$cdnUrl = $in->getString();
-			$this->cdnUrls[$packId] = $cdnUrl;
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30 && $in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+			$this->cdnUrls = [];
+			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; $i++){
+				$packId = $in->getString();
+				$cdnUrl = $in->getString();
+				$this->cdnUrls[$packId] = $cdnUrl;
+			}
 		}
 	}
 
@@ -99,10 +101,12 @@ class ResourcePacksInfoPacket extends PM_Packet
 		foreach($this->resourcePackEntries as $entry){
 			$entry->write($out);
 		}
-		$out->putUnsignedVarInt(count($this->cdnUrls));
-		foreach($this->cdnUrls as $packId => $cdnUrl){
-			$out->putString($packId);
-			$out->putString($cdnUrl);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30 && $out->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+			$out->putUnsignedVarInt(count($this->cdnUrls));
+			foreach($this->cdnUrls as $packId => $cdnUrl){
+				$out->putString($packId);
+				$out->putString($cdnUrl);
+			}
 		}
 	}
 
@@ -115,7 +119,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$packet->hasAddons ?? false,
 			$packet->hasScripts,
 			false,
-			$packet->cdnUrls,
+			[]
 		];
 	}
 }

@@ -35,7 +35,9 @@ class UpdatePlayerGameTypePacket extends PM_Packet
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->gameMode = $in->getVarInt();
 		$this->playerActorUniqueId = $in->getActorUniqueId();
-		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80){
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+			$this->tick = $in->getUnsignedVarLong();
+		}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80){
 			$this->tick = $in->getUnsignedVarInt();
 		}
 	}
@@ -43,7 +45,9 @@ class UpdatePlayerGameTypePacket extends PM_Packet
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putVarInt($this->gameMode);
 		$out->putActorUniqueId($this->playerActorUniqueId);
-		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80) {
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40) {
+			$out->putUnsignedVarLong($this->tick);
+		}elseif($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80) {
 			$out->putUnsignedVarInt($this->tick);
 		}
 	}

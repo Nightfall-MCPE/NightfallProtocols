@@ -17,16 +17,18 @@ class InventoryContentPacket extends PM_Packet {
 	public array $items = [];
 	public FullContainerName $customContainerName;
 	public int $dynamicContainerSize;
+	public ItemStackWrapper $storage;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function createPacket(int $windowId, array $items, FullContainerName $containerName, int $dynamicContainerSize) : self {
+	public static function createPacket(int $windowId, array $items, FullContainerName $containerName, int $dynamicContainerSize, ItemStackWrapper $storage) : self {
 		$result = new self();
 		$result->windowId = $windowId;
 		$result->items = $items;
 		$result->customContainerName = $containerName;
 		$result->dynamicContainerSize = $dynamicContainerSize;
+		$result->storage = $storage;
 		return $result;
 	}
 	protected function decodePayload(PacketSerializer $in) : void{
@@ -37,7 +39,11 @@ class InventoryContentPacket extends PM_Packet {
 		}
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30){
 			$this->customContainerName = FullContainerName::read($in);
-			$this->dynamicContainerSize = $in->getUnsignedVarInt();
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+				$this->storage = $in->getItemStackWrapper();
+			}else{
+				$this->dynamicContainerSize = $in->getUnsignedVarInt();
+			}
 		}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
 			$this->customContainerName = new FullContainerName(0, $in->getUnsignedVarInt());
 		}
@@ -51,7 +57,11 @@ class InventoryContentPacket extends PM_Packet {
 		}
 		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30){
 			$this->customContainerName->write($out);
-			$out->putUnsignedVarInt($this->dynamicContainerSize);
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
+				$out->putItemStackWrapper($this->storage);
+			}else{
+				$out->putUnsignedVarInt($this->dynamicContainerSize);
+			}
 		}elseif($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
 			$out->putUnsignedVarInt($this->customContainerName->getDynamicId() ?? 0);
 		}
@@ -63,7 +73,8 @@ class InventoryContentPacket extends PM_Packet {
 			$packet->windowId,
 			$packet->items,
 			$customContainerName,
-			$packet->dynamicContainerSize
+			0,
+			$packet->storage
 		];
 	}
 }

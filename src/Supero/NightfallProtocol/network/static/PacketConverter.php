@@ -203,7 +203,8 @@ class PacketConverter
 						$resourcePackEntry->getContentId(),
 						$resourcePackEntry->hasScripts(),
 						$resourcePackEntry->isAddonPack(),
-						$resourcePackEntry->isRtxCapable()
+						$resourcePackEntry->isRtxCapable(),
+						$resourcePackEntry->getCdnUrl()
 					);
 				}
 
@@ -214,7 +215,7 @@ class PacketConverter
 					$packet->hasAddons,
 					$packet->hasScripts,
 					false,
-					$packet->cdnUrls
+					[]
 				);
 			default:
 				return $packet;
