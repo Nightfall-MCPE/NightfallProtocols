@@ -49,7 +49,7 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
-$packet = "AddActorPacket";
+$packet = "CameraPresetsPacket";
 
 $fileUrl = "https://api.github.com/repos/NetherGamesMC/BedrockProtocol/contents/src/$packet.php";
 
