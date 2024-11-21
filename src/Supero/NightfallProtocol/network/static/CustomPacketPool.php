@@ -56,7 +56,7 @@ class CustomPacketPool extends PacketPool
 		parent::__construct();
 
 		$this->registerPacket(new CameraInstructionPacket());
-        $this->registerPacket(new CameraPresetsPacket());
+		$this->registerPacket(new CameraPresetsPacket());
 		$this->registerPacket(new ChangeDimensionPacket());
 		$this->registerPacket(new CodeBuilderSourcePacket());
 		$this->registerPacket(new ContainerClosePacket());
