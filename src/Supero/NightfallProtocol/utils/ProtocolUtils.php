@@ -65,13 +65,13 @@ class ProtocolUtils
 		}
 	}
 
-    // https://github.com/didntpot/MultiVersion/blob/master/src/MultiVersion/network/proto/v419/v419PacketTranslator.php#L244
-    public static function injectClientData(int $p, array &$data) : void
-    {
-        if($p <= CustomProtocolInfo::PROTOCOL_1_21_30) {
-            $data["MaxViewDistance"] = 0;
-            $data["MemoryTier"] = 0;
-            $data["PlatformType"] = 0;
-        }
-    }
+	// https://github.com/didntpot/MultiVersion/blob/master/src/MultiVersion/network/proto/v419/v419PacketTranslator.php#L244
+	public static function injectClientData(int $p, array &$data) : void
+	{
+		if($p <= CustomProtocolInfo::PROTOCOL_1_21_30) {
+			$data["MaxViewDistance"] = 0;
+			$data["MemoryTier"] = 0;
+			$data["PlatformType"] = 0;
+		}
+	}
 }
