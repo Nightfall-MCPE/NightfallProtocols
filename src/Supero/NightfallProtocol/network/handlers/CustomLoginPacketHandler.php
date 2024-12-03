@@ -28,6 +28,8 @@ use pocketmine\player\PlayerInfo;
 use pocketmine\player\XboxLivePlayerInfo;
 use pocketmine\Server;
 use Ramsey\Uuid\Uuid;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
+use Supero\NightfallProtocol\utils\ProtocolUtils;
 use function is_array;
 
 class CustomLoginPacketHandler extends PacketHandler{
@@ -37,7 +39,7 @@ class CustomLoginPacketHandler extends PacketHandler{
 	 */
 	public function __construct(
 		private Server $server,
-		private NetworkSession $session,
+		private CustomNetworkSession $session,
 		private Closure $playerInfoConsumer,
 		private Closure $authCallback
 	){}
@@ -176,6 +178,8 @@ class CustomLoginPacketHandler extends PacketHandler{
 		}catch(JwtException $e){
 			throw PacketHandlingException::wrap($e);
 		}
+
+        ProtocolUtils::injectClientData($this->session->getProtocol(), $clientDataClaims);
 
 		$mapper = new JsonMapper();
 		$mapper->bEnforceMapType = false;
