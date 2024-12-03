@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Supero\NightfallProtocol\network\handlers\static;
 
+use pocketmine\inventory\Inventory;
 use pocketmine\item\Durable;
 use pocketmine\network\mcpe\handler\ItemStackContainerIdTranslator;
 use pocketmine\network\mcpe\InventoryManager;
