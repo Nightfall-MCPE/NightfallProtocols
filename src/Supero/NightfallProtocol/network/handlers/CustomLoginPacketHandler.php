@@ -16,7 +16,6 @@ use pocketmine\network\mcpe\auth\ProcessLoginTask;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\JwtException;
 use pocketmine\network\mcpe\JwtUtils;
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\types\login\AuthenticationData;
 use pocketmine\network\mcpe\protocol\types\login\ClientData;
@@ -179,7 +178,7 @@ class CustomLoginPacketHandler extends PacketHandler{
 			throw PacketHandlingException::wrap($e);
 		}
 
-        ProtocolUtils::injectClientData($this->session->getProtocol(), $clientDataClaims);
+		ProtocolUtils::injectClientData($this->session->getProtocol(), $clientDataClaims);
 
 		$mapper = new JsonMapper();
 		$mapper->bEnforceMapType = false;
