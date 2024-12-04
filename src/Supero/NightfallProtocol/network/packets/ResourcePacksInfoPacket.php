@@ -10,6 +10,7 @@ use Ramsey\Uuid\UuidInterface;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
+use Supero\NightfallProtocol\utils\ReflectionUtils;
 use function count;
 
 class ResourcePacksInfoPacket extends PM_Packet
@@ -75,7 +76,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 			}
 		}
 		if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
-			$in->putUUID(uuid: $this->worldTemplateId);
+			$in->putUUID($this->worldTemplateId);
 			$in->putString($this->worldTemplateVersion);
 		}
 
@@ -84,7 +85,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$this->resourcePackEntries[] = CustomResourcePackInfoEntry::read($in);
 		}
 
-		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0 && $in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+		if($in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
 			$this->cdnUrls = [];
 			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; $i++){
 				$packId = $in->getString();
@@ -115,7 +116,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 		foreach($this->resourcePackEntries as $entry){
 			$entry->write($out);
 		}
-		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0 && $out->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+		if($out->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
 			$out->putUnsignedVarInt(count($this->cdnUrls));
 			foreach($this->cdnUrls as $packId => $cdnUrl){
 				$out->putString($packId);
@@ -132,8 +133,9 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$packet->mustAccept,
 			$packet->hasAddons ?? false,
 			$packet->hasScripts,
-			$packet->worldTemplateId,
-			$packet->worldTemplateVersion,
+			// PM has these properties private, for some reason...
+			ReflectionUtils::getProperty($packet::class, $packet, "worldTemplateId"),
+			ReflectionUtils::getProperty($packet::class, $packet, "worldTemplateVersion"),
 			false,
 			[]
 		];

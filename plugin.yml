@@ -3,5 +3,5 @@ name: NightfallProtocol
 version: 1.0
 main: Supero\NightfallProtocol\Main
 api: 5.0.0
-mcpe-protocol: 748
+mcpe-protocol: 766
 ...

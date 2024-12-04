@@ -16,6 +16,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
 use pocketmine\network\mcpe\protocol\types\PlayMode;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\serializer\CustomBitSet;
 use Supero\NightfallProtocol\network\packets\types\CustomItemInteractionData;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomUseItemTransactionData;
@@ -30,7 +31,7 @@ class PlayerAuthInputPacket extends PM_Packet
 	private float $headYaw;
 	private float $moveVecX;
 	private float $moveVecZ;
-	private int $inputFlags;
+	private CustomBitSet $inputFlags;
 	private int $inputMode;
 	private int $playMode;
 	private int $interactionMode;
@@ -46,9 +47,10 @@ class PlayerAuthInputPacket extends PM_Packet
 	private float $analogMoveVecX;
 	private float $analogMoveVecZ;
 	private Vector3 $cameraOrientation;
+	private Vector2 $rawMove;
 
 	/**
-	 * @param int                      $inputFlags      @see PlayerAuthInputFlags
+	 * @param CustomBitSet             $inputFlags      @see PlayerAuthInputFlags
 	 * @param int                      $inputMode       @see InputMode
 	 * @param int                      $playMode        @see PlayMode
 	 * @param int                      $interactionMode @see InteractionMode
@@ -62,7 +64,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		float $headYaw,
 		float $moveVecX,
 		float $moveVecZ,
-		int $inputFlags,
+		CustomBitSet $inputFlags,
 		int $inputMode,
 		int $playMode,
 		int $interactionMode,
@@ -76,12 +78,19 @@ class PlayerAuthInputPacket extends PM_Packet
 		?PlayerAuthInputVehicleInfo $vehicleInfo,
 		float $analogMoveVecX,
 		float $analogMoveVecZ,
-		Vector3 $cameraOrientation
+		Vector3 $cameraOrientation,
+		Vector2 $rawMove
 	) : self{
 		if($playMode === PlayMode::VR && $vrGazeDirection === null){
 			//yuck, can we get a properly written packet just once? ...
 			throw new \InvalidArgumentException("Gaze direction must be provided for VR play mode");
 		}
+
+		$inputFlags->set(PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST, $itemStackRequest !== null);
+		$inputFlags->set(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION, $itemInteractionData !== null);
+		$inputFlags->set(PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS, $blockActions !== null);
+		$inputFlags->set(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE, $vehicleInfo !== null);
+
 		$result = new self();
 		$result->position = $position->asVector3();
 		$result->pitch = $pitch;
@@ -89,18 +98,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$result->headYaw = $headYaw;
 		$result->moveVecX = $moveVecX;
 		$result->moveVecZ = $moveVecZ;
-
-		$result->inputFlags = $inputFlags & ~((1 << PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST) | (1 << PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION) | (1 << PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS));
-		if($itemStackRequest !== null){
-			$result->inputFlags |= 1 << PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST;
-		}
-		if($itemInteractionData !== null){
-			$result->inputFlags |= 1 << PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION;
-		}
-		if($blockActions !== null){
-			$result->inputFlags |= 1 << PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS;
-		}
-
+		$result->inputFlags = $inputFlags;
 		$result->inputMode = $inputMode;
 		$result->playMode = $playMode;
 		$result->interactionMode = $interactionMode;
@@ -117,6 +115,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$result->analogMoveVecX = $analogMoveVecX;
 		$result->analogMoveVecZ = $analogMoveVecZ;
 		$result->cameraOrientation = $cameraOrientation;
+		$result->rawMove = $rawMove;
 		return $result;
 	}
 
@@ -147,7 +146,7 @@ class PlayerAuthInputPacket extends PM_Packet
 	/**
 	 * @see PlayerAuthInputFlags
 	 */
-	public function getInputFlags() : int{
+	public function getInputFlags() : CustomBitSet{
 		return $this->inputFlags;
 	}
 
@@ -213,10 +212,6 @@ class PlayerAuthInputPacket extends PM_Packet
 
 	public function getAnalogMoveVecZ() : float{ return $this->analogMoveVecZ; }
 
-	public function hasFlag(int $flag) : bool{
-		return ($this->inputFlags & (1 << $flag)) !== 0;
-	}
-
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->pitch = $in->getLFloat();
 		$this->yaw = $in->getLFloat();
@@ -224,7 +219,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$this->moveVecX = $in->getLFloat();
 		$this->moveVecZ = $in->getLFloat();
 		$this->headYaw = $in->getLFloat();
-		$this->inputFlags = $in->getUnsignedVarLong();
+		$this->inputFlags = CustomBitSet::read($in, $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50 ? 65 : 64);
 		$this->inputMode = $in->getUnsignedVarInt();
 		$this->playMode = $in->getUnsignedVarInt();
 		$this->interactionMode = $in->getUnsignedVarInt();
@@ -235,13 +230,13 @@ class PlayerAuthInputPacket extends PM_Packet
 		}
 		$this->tick = $in->getUnsignedVarLong();
 		$this->delta = $in->getVector3();
-		if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
+		if($this->inputFlags->get(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
 			$this->itemInteractionData = CustomItemInteractionData::read($in);
 		}
-		if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST)){
+		if($this->inputFlags->get(PlayerAuthInputFlags::PERFORM_ITEM_STACK_REQUEST)){
 			$this->itemStackRequest = CustomItemStackRequest::read($in);
 		}
-		if($this->hasFlag(PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS)){
+		if($this->inputFlags->get(PlayerAuthInputFlags::PERFORM_BLOCK_ACTIONS)){
 			$this->blockActions = [];
 			$max = $in->getVarInt();
 			for($i = 0; $i < $max; ++$i){
@@ -253,13 +248,16 @@ class PlayerAuthInputPacket extends PM_Packet
 				};
 			}
 		}
-		if($this->hasFlag(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE) && $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
+		if($this->inputFlags->get(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE) && $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
 			$this->vehicleInfo = PlayerAuthInputVehicleInfo::read($in);
 		}
 		$this->analogMoveVecX = $in->getLFloat();
 		$this->analogMoveVecZ = $in->getLFloat();
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 			$this->cameraOrientation = $in->getVector3();
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+				$this->rawMove = $in->getVector2();
+			}
 		}
 	}
 
@@ -267,7 +265,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$inputFlags = $this->inputFlags;
 
 		if($this->vehicleInfo !== null && $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
-			$inputFlags |= 1 << PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE;
+			$inputFlags->set(PlayerAuthInputFlags::IN_CLIENT_PREDICTED_VEHICLE, true);
 		}
 
 		$out->putLFloat($this->pitch);
@@ -276,7 +274,7 @@ class PlayerAuthInputPacket extends PM_Packet
 		$out->putLFloat($this->moveVecX);
 		$out->putLFloat($this->moveVecZ);
 		$out->putLFloat($this->headYaw);
-		$out->putUnsignedVarLong($inputFlags);
+		$this->inputFlags->write($out, $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50 ? 65 : 64);
 		$out->putUnsignedVarInt($this->inputMode);
 		$out->putUnsignedVarInt($this->playMode);
 		$out->putUnsignedVarInt($this->interactionMode);
@@ -304,6 +302,9 @@ class PlayerAuthInputPacket extends PM_Packet
 		$out->putLFloat($this->analogMoveVecZ);
 		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 			$out->putVector3($this->cameraOrientation);
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+				$out->putVector2($this->rawMove);
+			}
 		}
 	}
 
@@ -361,7 +362,9 @@ class PlayerAuthInputPacket extends PM_Packet
 			$packet->getBlockActions(),
 			$vehicleInfo,
 			$packet->getAnalogMoveVecX(),
-			$packet->getAnalogMoveVecZ()
+			$packet->getAnalogMoveVecZ(),
+			$packet->getCameraOrientation(),
+			$packet->getRawMove()
 		];
 	}
 }

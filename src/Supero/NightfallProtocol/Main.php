@@ -83,7 +83,7 @@ final class Main extends PluginBase
 				if($packet instanceof PacketViolationWarningPacket){
 					$this->getLogger()->debug("Packet Violation (" . self::PACKET_VIOLATION_WARNING_SEVERITY[$packet->getSeverity()] . ") from {$event->getOrigin()->getDisplayName()} message: '{$packet->getMessage()}' Packet ID: 0x" . str_pad(dechex($packet->getPacketId()), 2, "0", STR_PAD_LEFT));
 				}
-				if(!$packet instanceof PlayerAuthInputPacket) $this->getLogger()->debug("Received " . $packet::class . " from " . $event->getOrigin()->getDisplayName());
+				//if(!$packet instanceof PlayerAuthInputPacket) $this->getLogger()->debug("Received " . $packet::class . " from " . $event->getOrigin()->getDisplayName());
 			}, EventPriority::NORMAL, $this);
 			$server->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
 				foreach($event->getTargets() as $target){
