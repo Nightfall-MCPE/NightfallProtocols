@@ -59,7 +59,6 @@ class ResourcePacksInfoPacket extends PM_Packet
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
 			$this->hasAddons = $in->getBool();
 		}
-		$this->hasAddons = $in->getBool();
 		$this->hasScripts = $in->getBool();
 		if($in->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_20){
 			$this->forceServerPacks = $in->getBool();
@@ -74,7 +73,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$this->resourcePackEntries[] = CustomResourcePackInfoEntry::read($in);
 		}
 
-		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30 && $in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0 && $in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
 			$this->cdnUrls = [];
 			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; $i++){
 				$packId = $in->getString();
@@ -101,7 +100,7 @@ class ResourcePacksInfoPacket extends PM_Packet
 		foreach($this->resourcePackEntries as $entry){
 			$entry->write($out);
 		}
-		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30 && $out->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_0 && $out->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
 			$out->putUnsignedVarInt(count($this->cdnUrls));
 			foreach($this->cdnUrls as $packId => $cdnUrl){
 				$out->putString($packId);
