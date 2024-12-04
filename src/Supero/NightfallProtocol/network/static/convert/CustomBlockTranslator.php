@@ -37,6 +37,10 @@ class CustomBlockTranslator
 			self::CANONICAL_BLOCK_STATES_PATH => "",
 			self::BLOCK_STATE_META_MAP_PATH => "",
 		],
+		CustomProtocolInfo::PROTOCOL_1_21_40 => [
+			self::CANONICAL_BLOCK_STATES_PATH => "-1.21.40",
+			self::BLOCK_STATE_META_MAP_PATH => "-1.21.40",
+		],
 		CustomProtocolInfo::PROTOCOL_1_21_30 => [
 			self::CANONICAL_BLOCK_STATES_PATH => "-1.21.30",
 			self::BLOCK_STATE_META_MAP_PATH => "-1.21.30",

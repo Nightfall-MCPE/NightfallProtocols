@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Supero\NightfallProtocol\network\packets\types\inventory\stackresponse;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\types\inventory\stackresponse\ItemStackResponseSlotInfo;
 use Supero\NightfallProtocol\network\packets\types\inventory\FullContainerName;
 use function count;
 

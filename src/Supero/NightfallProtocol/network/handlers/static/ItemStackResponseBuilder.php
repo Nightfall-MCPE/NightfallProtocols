@@ -9,11 +9,11 @@ use pocketmine\item\Durable;
 use pocketmine\network\mcpe\handler\ItemStackContainerIdTranslator;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerUIIds;
-use pocketmine\network\mcpe\protocol\types\inventory\stackresponse\ItemStackResponseSlotInfo;
 use pocketmine\utils\AssumptionFailedError;
 use Supero\NightfallProtocol\network\packets\types\inventory\FullContainerName;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponse;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponseContainerInfo;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponseSlotInfo;
 
 final class ItemStackResponseBuilder{
 
@@ -74,6 +74,7 @@ final class ItemStackResponseBuilder{
 					$slotId,
 					$item->getCount(),
 					$itemStackInfo->getStackId(),
+					$item->getCustomName(),
 					$item->getCustomName(),
 					$item instanceof Durable ? $item->getDamage() : 0,
 				);

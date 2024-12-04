@@ -1,6 +1,6 @@
 {
   "name": "nightfall-mcpe/nightfallprotocols",
-  "description": "Simple multi-version plugin for nightfall-mcpe",
+  "description": "(not-so) Simple multi-version plugin",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
@@ -11,7 +11,7 @@
   ],
   "require-dev": {
     "pocketmine/pocketmine-mp": "*",
-    "friendsofphp/php-cs-fixer": "^3.64"
+    "friendsofphp/php-cs-fixer": "*"
   },
   "require": {
     "ext-curl": "*"

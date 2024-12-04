@@ -27,12 +27,14 @@ final class CustomCameraPreset{
 		private ?Vector2 $horizontalRotationLimit,
 		private ?Vector2 $verticalRotationLimit,
 		private ?bool $continueTargeting,
+		private ?float $blockListeningRadius,
 		private ?Vector2 $viewOffset,
 		private ?Vector3 $entityOffset,
 		private ?float $radius,
 		private ?int $audioListenerType,
 		private ?bool $playerEffects,
-		private ?bool $alignTargetAndCameraForward
+		private ?bool $alignTargetAndCameraForward,
+		private ?bool $aimAssist,
 	){}
 
 	public function getName() : string{ return $this->name; }
@@ -59,6 +61,8 @@ final class CustomCameraPreset{
 
 	public function getContinueTargeting() : ?bool{ return $this->continueTargeting; }
 
+	public function getBlockListeningRadius() : ?float{ return $this->blockListeningRadius; }
+
 	public function getViewOffset() : ?Vector2{ return $this->viewOffset; }
 
 	public function getEntityOffset() : ?Vector3{ return $this->entityOffset; }
@@ -70,6 +74,8 @@ final class CustomCameraPreset{
 	public function getPlayerEffects() : ?bool{ return $this->playerEffects; }
 
 	public function getAlignTargetAndCameraForward() : ?bool{ return $this->alignTargetAndCameraForward; }
+
+	public function getAimAssist() : ?bool{ return $this->aimAssist; }
 
 	public static function read(PacketSerializer $in) : self{
 		$name = $in->getString();
@@ -87,6 +93,9 @@ final class CustomCameraPreset{
 					$horizontalRotationLimit = $in->readOptional($in->getVector2(...));
 					$verticalRotationLimit = $in->readOptional($in->getVector2(...));
 					$continueTargeting = $in->readOptional($in->getBool(...));
+					if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+						$blockListeningRadius = $in->readOptional($in->getLFloat(...));
+					}
 				}
 			}
 			$viewOffset = $in->readOptional($in->getVector2(...));
@@ -99,6 +108,9 @@ final class CustomCameraPreset{
 		$playerEffects = $in->readOptional($in->getBool(...));
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 			$alignTargetAndCameraForward = $in->readOptional($in->getBool(...));
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+				$aimAssist = $in->readOptional($in->getBool(...));
+			}
 		}
 
 		return new self(
@@ -114,12 +126,14 @@ final class CustomCameraPreset{
 			$horizontalRotationLimit ?? null,
 			$verticalRotationLimit ?? null,
 			$continueTargeting ?? null,
+			$blockListeningRadius ?? null,
 			$viewOffset ?? null,
 			$entityOffset ?? null,
 			$radius ?? null,
 			$audioListenerType,
 			$playerEffects,
-			$alignTargetAndCameraForward ?? null
+			$alignTargetAndCameraForward ?? null,
+			$aimAssist ?? null
 		);
 	}
 
@@ -140,13 +154,15 @@ final class CustomCameraPreset{
 			null,
 			null,
 			null,
+			null,
 			$nbt->getTag("audio_listener_type") === null ? null : match($nbt->getString("audio_listener_type")){
 				"camera" => self::AUDIO_LISTENER_TYPE_CAMERA,
 				"player" => self::AUDIO_LISTENER_TYPE_PLAYER,
 				default => throw new \InvalidArgumentException("Invalid audio listener type: " . $nbt->getString("audio_listener_type")),
 			},
 			$nbt->getTag("player_effects") === null ? null : $nbt->getByte("player_effects") !== 0,
-			null
+			null,
+			null,
 		);
 	}
 
@@ -166,6 +182,9 @@ final class CustomCameraPreset{
 					$out->writeOptional($this->horizontalRotationLimit, $out->putVector2(...));
 					$out->writeOptional($this->verticalRotationLimit, $out->putVector2(...));
 					$out->writeOptional($this->continueTargeting, $out->putBool(...));
+					if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+						$out->writeOptional($this->blockListeningRadius, $out->putLFloat(...));
+					}
 				}
 			}
 			$out->writeOptional($this->viewOffset, $out->putVector2(...));
@@ -178,6 +197,9 @@ final class CustomCameraPreset{
 		$out->writeOptional($this->playerEffects, $out->putBool(...));
 		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 			$out->writeOptional($this->alignTargetAndCameraForward, $out->putBool(...));
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+				$out->writeOptional($this->aimAssist, $out->putBool(...));
+			}
 		}
 	}
 

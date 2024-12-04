@@ -29,15 +29,15 @@ function modifyPacketContent($content, $packet): string
     $content = str_replace('namespace pocketmine\network\mcpe\protocol;', 'namespace Supero\NightfallProtocol\network\packets;', $content);
     $content = str_replace('getProtocolId()', 'getProtocol()', $content);
     $content = str_replace('ProtocolInfo', 'CustomProtocolInfo', $content);
-    $content = str_replace("class $packet extends DataPacket", "use pocketmine\\network\mcpe\protocol\\$packet as PM_Packet;" . PHP_EOL . "class $packet extends PM_Packet", $content);
+    $content = str_replace("class $packet extends DataPacket", "use pocketmine\\network\mcpe\protocol\\$packet as PM_Packet;" . PHP_EOL . "use Supero\NightfallProtocol\\network\CustomProtocolInfo;" . PHP_EOL . "class $packet extends PM_Packet", $content);
     $content = preg_replace('/public const NETWORK_ID = .*?;\n/', '', $content);
     $content = str_replace('public static function create', 'public static function createPacket', $content);
-    $content = preg_replace('/public function handle\(PacketHandlerInterface \$handler\) : bool\s*{.*?return \$handler->handleUpdatePlayerGameType\(\$this\);\s*}/s', '', $content);
 
     $getConstructorArgs = <<<EOD
 
     public function getConstructorArguments(PM_Packet \$packet): array
-    { //TODO }
+    { //TODO 
+    }
 EOD;
 
     $lastBracePos = strrpos($content, '}');
@@ -49,11 +49,10 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
-$packet = "CameraPresetsPacket";
+$packet = "ItemStackResponseSlotInfo";
 
 $fileUrl = "https://api.github.com/repos/NetherGamesMC/BedrockProtocol/contents/src/$packet.php";
 
-// Fetch the file content
 $content = fetchFileFromRepo($fileUrl);
 
 if ($content !== null) {

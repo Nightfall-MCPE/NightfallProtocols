@@ -21,6 +21,7 @@ use pocketmine\network\mcpe\protocol\types\UpdateSubChunkBlocksPacketEntry;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
+use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
@@ -214,6 +215,8 @@ class PacketConverter
 					$packet->mustAccept,
 					$packet->hasAddons,
 					$packet->hasScripts,
+					Uuid::fromString(Uuid::NIL),
+					"",
 					false,
 					[]
 				);

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Supero\NightfallProtocol\network\packets\types\resourcepacks;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class CustomResourcePackInfoEntry{
 	public function __construct(
-		private string $packId,
+		private UuidInterface $packId,
 		private string $version,
 		private int $sizeBytes,
 		private string $encryptionKey = "",
@@ -21,7 +23,7 @@ class CustomResourcePackInfoEntry{
 		private string $cdnUrl = ""
 	){}
 
-	public function getPackId() : string{
+	public function getPackId() : UuidInterface{
 		return $this->packId;
 	}
 
@@ -56,7 +58,11 @@ class CustomResourcePackInfoEntry{
 	public function getCdnUrl() : string{ return $this->cdnUrl; }
 
 	public function write(PacketSerializer $out) : void{
-		$out->putString($this->packId);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+			$out->putUUID($this->packId);
+		}else{
+			$out->putString($this->packId->toString());
+		}
 		$out->putString($this->version);
 		$out->putLLong($this->sizeBytes);
 		$out->putString($this->encryptionKey);
@@ -73,7 +79,11 @@ class CustomResourcePackInfoEntry{
 	}
 
 	public static function read(PacketSerializer $in) : self{
-		$uuid = $in->getString();
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+			$uuid = $in->getUUID();
+		}else{
+			$uuid = Uuid::fromString($in->getString());
+		}
 		$version = $in->getString();
 		$sizeBytes = $in->getLLong();
 		$encryptionKey = $in->getString();

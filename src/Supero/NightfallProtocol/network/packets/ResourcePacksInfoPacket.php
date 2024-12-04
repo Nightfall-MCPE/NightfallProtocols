@@ -6,6 +6,7 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use Ramsey\Uuid\UuidInterface;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
@@ -20,6 +21,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 	public bool $mustAccept = false; //if true, forces client to choose between accepting packs or being disconnected
 	public bool $hasAddons = false;
 	public bool $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
+	public UuidInterface $worldTemplateId;
+	public string $worldTemplateVersion;
 	public bool $forceServerPacks = false;
 	/**
 	 * @var string[]
@@ -40,6 +43,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 		bool $mustAccept,
 		bool $hasAddons,
 		bool $hasScripts,
+		UuidInterface $worldTemplateId,
+		string $worldTemplateVersion,
 		bool $forceServerPacks,
 		array $cdnUrls,
 	) : self{
@@ -49,6 +54,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 		$result->mustAccept = $mustAccept;
 		$result->hasAddons = $hasAddons;
 		$result->hasScripts = $hasScripts;
+		$result->worldTemplateId = $worldTemplateId;
+		$result->worldTemplateVersion = $worldTemplateVersion;
 		$result->forceServerPacks = $forceServerPacks;
 		$result->cdnUrls = $cdnUrls;
 		return $result;
@@ -66,6 +73,10 @@ class ResourcePacksInfoPacket extends PM_Packet
 			while($behaviorPackCount-- > 0){
 				$this->behaviorPackEntries[] = CustomBehaviourPackInfoEntry::read($in);
 			}
+		}
+		if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
+			$in->putUUID(uuid: $this->worldTemplateId);
+			$in->putString($this->worldTemplateVersion);
 		}
 
 		$resourcePackCount = $in->getLShort();
@@ -96,6 +107,10 @@ class ResourcePacksInfoPacket extends PM_Packet
 				$entry->write($out);
 			}
 		}
+		if ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
+			$this->worldTemplateId = $out->getUUID();
+			$this->worldTemplateVersion = $out->getString();
+		}
 		$out->putLShort(count($this->resourcePackEntries));
 		foreach($this->resourcePackEntries as $entry){
 			$entry->write($out);
@@ -117,6 +132,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$packet->mustAccept,
 			$packet->hasAddons ?? false,
 			$packet->hasScripts,
+			$packet->worldTemplateId,
+			$packet->worldTemplateVersion,
 			false,
 			[]
 		];

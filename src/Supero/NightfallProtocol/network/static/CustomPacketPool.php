@@ -9,6 +9,8 @@ use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryDataException;
+use Supero\NightfallProtocol\network\packets\CameraAimAssistPacket;
+use Supero\NightfallProtocol\network\packets\CameraAimAssistPresetsPacket;
 use Supero\NightfallProtocol\network\packets\CameraInstructionPacket;
 use Supero\NightfallProtocol\network\packets\CameraPresetsPacket;
 use Supero\NightfallProtocol\network\packets\ChangeDimensionPacket;
@@ -55,6 +57,8 @@ class CustomPacketPool extends PacketPool
 	{
 		parent::__construct();
 
+		$this->registerPacket(new CameraAimAssistPacket());
+		$this->registerPacket(new CameraAimAssistPresetsPacket());
 		$this->registerPacket(new CameraInstructionPacket());
 		$this->registerPacket(new CameraPresetsPacket());
 		$this->registerPacket(new ChangeDimensionPacket());
