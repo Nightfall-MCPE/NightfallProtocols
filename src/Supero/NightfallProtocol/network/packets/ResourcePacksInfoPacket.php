@@ -76,8 +76,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 			}
 		}
 		if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
-            $this->worldTemplateId = $in->getUUID();
-            $this->worldTemplateVersion = $in->getString();
+			$this->worldTemplateId = $in->getUUID();
+			$this->worldTemplateVersion = $in->getString();
 		}
 
 		$resourcePackCount = $in->getLShort();
@@ -109,8 +109,8 @@ class ResourcePacksInfoPacket extends PM_Packet
 			}
 		}
 		if ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
-            $out->putUUID($this->worldTemplateId);
-            $out->putString($this->worldTemplateVersion);
+			$out->putUUID($this->worldTemplateId);
+			$out->putString($this->worldTemplateVersion);
 		}
 		$out->putLShort(count($this->resourcePackEntries));
 		foreach($this->resourcePackEntries as $entry){
