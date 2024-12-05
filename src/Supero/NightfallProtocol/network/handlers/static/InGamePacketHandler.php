@@ -91,7 +91,6 @@ use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\packets\ItemStackRequestPacket as CustomItemStackRequestPacket;
 use Supero\NightfallProtocol\network\packets\ItemStackResponsePacket;
 use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket as CustomPlayerAuthInputPacket;
-use Supero\NightfallProtocol\network\packets\serializer\CustomBitSet;
 use Supero\NightfallProtocol\network\packets\types\inventory\CustomItemStackRequest;
 use Supero\NightfallProtocol\network\packets\types\inventory\stackresponse\ItemStackResponse;
 use function array_push;

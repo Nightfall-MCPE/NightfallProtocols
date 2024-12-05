@@ -119,7 +119,7 @@ class CustomBitSet extends BitSet
 		$length ??= $this->length;
 
 		if($length > $this->length){
-			throw new \InvalidArgumentException("Cannot write more bits than the CustomBitSet contains");
+			throw new \InvalidArgumentException("Cannot write more bits than the BitSet contains");
 		}
 
 		$currentIndex = 0;
@@ -130,7 +130,7 @@ class CustomBitSet extends BitSet
 			$nextShift = $currentShift + self::SHIFT;
 			if($nextShift >= self::INT_BITS){
 				$nextShift -= self::INT_BITS;
-				$bits |= $parts[++$currentIndex] << (self::SHIFT - $nextShift);
+				$bits |= ($parts[++$currentIndex] ?? 0) << (self::SHIFT - $nextShift);
 			}
 			$currentShift = $nextShift;
 
