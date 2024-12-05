@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
-        
+
   codestyle:
     name: Code Style checks
     runs-on: ubuntu-20.04
@@ -47,17 +47,17 @@ jobs:
         uses: shivammathur/setup-php@2.31.1
         with:
           php-version: 8.3
-          tools: php-cs-fixer:3.49
+          tools: php-cs-fixer:3.65
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Checkout fix/codestyle branch
+      - name: Checkout main branch
         run: |
           git fetch origin
-          git checkout fix/codestyle || git checkout -b fix/codestyle origin/fix/codestyle
+          git checkout main || git checkout -b main origin/main
 
       - name: Run PHP-CS-Fixer
-        run: php-cs-fixer fix --config=./php-cs-fixer.php --diff --ansi
+        run: php-cs-fixer fix --diff --ansi
 
       - name: Commit changes
         run: |
@@ -70,4 +70,4 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: fix/codestyle
+          branch: main
