@@ -26,8 +26,11 @@ use pocketmine\timings\Timings;
 use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCraftingDataCache;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\ItemRegistryPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
+use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use function sprintf;
 
 class CustomPreSpawnPacketHandler extends PacketHandler{
@@ -91,6 +94,11 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 				0,
 				$typeConverter->getItemTypeDictionary()->getEntries(),
 			));
+
+			if($this->session->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+				$this->session->getLogger()->debug("Sending items");
+				$this->session->sendDataPacket(ItemRegistryPacket::createPacket($typeConverter->getItemTypeDictionary()->getEntries()));
+			}
 
 			$this->session->getLogger()->debug("Sending actor identifiers");
 			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getAvailableActorIdentifiers());
