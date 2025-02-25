@@ -6,6 +6,7 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\AbilitiesData as PM_AbilitiesData;
 use Supero\NightfallProtocol\network\packets\types\AbilitiesData;
 
 /**
@@ -25,7 +26,7 @@ class UpdateAbilitiesPacket extends PM_Packet{
 		return $result;
 	}
 
-	public function getData() : AbilitiesData{ return $this->data; }
+	public function getData() : PM_AbilitiesData{ return $this->data; }
 
 	protected function decodePayload(PacketSerializer $in) : void {
 		$this->data = AbilitiesData::decode($in);
@@ -33,10 +34,6 @@ class UpdateAbilitiesPacket extends PM_Packet{
 
 	protected function encodePayload(PacketSerializer $out) : void {
 		$this->data->encode($out);
-	}
-
-	public function handle(PacketHandlerInterface $handler) : bool {
-		return $handler->handleUpdateAbilities($this);
 	}
 
 	public function getConstructorArguments(PM_Packet $packet) : array {

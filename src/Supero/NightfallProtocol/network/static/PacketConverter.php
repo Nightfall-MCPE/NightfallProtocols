@@ -27,6 +27,7 @@ use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\AbilitiesData;
+use Supero\NightfallProtocol\network\packets\types\AbilitiesLayer;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use function dechex;
@@ -49,7 +50,8 @@ class PacketConverter
 		UpdateSubChunkBlocksPacket::NETWORK_ID,
 		CreativeContentPacket::NETWORK_ID,
 		AvailableCommandsPacket::NETWORK_ID,
-		ResourcePacksInfoPacket::NETWORK_ID
+		ResourcePacksInfoPacket::NETWORK_ID,
+		UpdateAbilitiesPacket::NETWORK_ID
 	];
 
 	public const SERVERBOUND_TRANSLATED = [
@@ -224,11 +226,21 @@ class PacketConverter
 				);
 			case UpdateAbilitiesPacket::NETWORK_ID:
 				$data = $packet->getData();
+				$layers = [];
+				foreach($data->getAbilityLayers() as $layer){
+					$layers[] = new AbilitiesLayer(
+						$layer->getLayerId(),
+						$layer->getBoolAbilities(),
+						$layer->getFlySpeed(),
+						$layer->getVerticalFlySpeed(),
+						$layer->getWalkSpeed()
+					);
+				}
 				$abilitiesData = new AbilitiesData(
 					$data->getCommandPermission(),
 					$data->getPlayerPermission(),
 					$data->getTargetActorUniqueId(),
-					$data->getAbilityLayers()
+					$layers
 				);
 				return \Supero\NightfallProtocol\network\packets\UpdateAbilitiesPacket::createPacket($abilitiesData);
 			default:
