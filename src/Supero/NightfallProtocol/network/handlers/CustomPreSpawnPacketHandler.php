@@ -47,7 +47,7 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 			$location = $this->player->getLocation();
 			$world = $location->getWorld();
 
-			$typeConverter = CustomTypeConverter::getProtocolInstance($this->session->getProtocol());
+			$typeConverter = $this->session->getTypeConverter();
 
 			$this->session->getLogger()->debug("Preparing StartGamePacket");
 			$levelSettings = new CustomLevelSettings();
