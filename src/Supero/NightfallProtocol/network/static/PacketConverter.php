@@ -18,6 +18,7 @@ use pocketmine\network\mcpe\protocol\types\LevelEvent;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\network\mcpe\protocol\types\ParticleIds;
 use pocketmine\network\mcpe\protocol\types\UpdateSubChunkBlocksPacketEntry;
+use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
@@ -25,6 +26,7 @@ use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\types\AbilitiesData;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use function dechex;
@@ -190,7 +192,7 @@ class PacketConverter
 				return AvailableCommandsPacket::create($newCommandData, $packet->hardcodedEnums, $packet->softEnums, $packet->enumConstraints);
 			case CreativeContentPacket::NETWORK_ID:
 				if($session == null) return $packet;
-				return CustomCreativeInventoryCache::getProtocolInstance($protocol)->getCache($session->getPlayer()->getCreativeInventory());
+				return CustomCreativeInventoryCache::getProtocolInstance($protocol)->buildPacket($session->getPlayer()->getCreativeInventory(), $session);
 			case ResourcePacksInfoPacket::NETWORK_ID:
 				/** @var ResourcePacksInfoPacket $packet */
 				$resourceEntries = [];
@@ -220,6 +222,15 @@ class PacketConverter
 					false,
 					[]
 				);
+			case UpdateAbilitiesPacket::NETWORK_ID:
+				$data = $packet->getData();
+				$abilitiesData = new AbilitiesData(
+					$data->getCommandPermission(),
+					$data->getPlayerPermission(),
+					$data->getTargetActorUniqueId(),
+					$data->getAbilityLayers()
+				);
+				return \Supero\NightfallProtocol\network\packets\UpdateAbilitiesPacket::createPacket($abilitiesData);
 			default:
 				return $packet;
 		}

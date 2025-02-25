@@ -14,6 +14,7 @@ use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
 use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use Ramsey\Uuid\UuidInterface;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
 use function count;
 
@@ -160,13 +161,15 @@ class StartGamePacket extends PM_Packet
 			$this->blockPalette[] = new BlockPaletteEntry($blockName, new CacheableNbt($state));
 		}
 
-		$this->itemTable = [];
-		for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i){
-			$stringId = $in->getString();
-			$numericId = $in->getSignedLShort();
-			$isComponentBased = $in->getBool();
+		if($Tin->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_50){
+			$this->itemTable = [];
+			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i){
+				$stringId = $in->getString();
+				$numericId = $in->getSignedLShort();
+				$isComponentBased = $in->getBool();
 
-			$this->itemTable[] = new ItemTypeEntry($stringId, $numericId, $isComponentBased);
+				$this->itemTable[] = new ItemTypeEntry($stringId, $numericId, $isComponentBased, -1, new CacheableNbt(new CompoundTag()));
+			}
 		}
 
 		$this->multiplayerCorrelationId = $in->getString();
@@ -207,11 +210,13 @@ class StartGamePacket extends PM_Packet
 			$out->put($entry->getStates()->getEncodedNbt());
 		}
 
-		$out->putUnsignedVarInt(count($this->itemTable));
-		foreach($this->itemTable as $entry){
-			$out->putString($entry->getStringId());
-			$out->putLShort($entry->getNumericId());
-			$out->putBool($entry->isComponentBased());
+		if($out->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_50){
+			$out->putUnsignedVarInt(count($this->itemTable));
+			foreach($this->itemTable as $entry){
+				$out->putString($entry->getStringId());
+				$out->putLShort($entry->getNumericId());
+				$out->putBool($entry->isComponentBased());
+			}
 		}
 
 		$out->putString($this->multiplayerCorrelationId);
@@ -269,7 +274,7 @@ class StartGamePacket extends PM_Packet
 			$packet->networkPermissions,
 			$packet->blockPalette,
 			$packet->blockPaletteChecksum,
-			$packet->itemTable
+			$packet->itemTable ?? []
 		];
 	}
 

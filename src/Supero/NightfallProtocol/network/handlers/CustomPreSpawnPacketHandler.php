@@ -9,6 +9,7 @@ use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
@@ -26,6 +27,7 @@ use pocketmine\timings\Timings;
 use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCraftingDataCache;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
 use function sprintf;
@@ -91,6 +93,11 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 				0,
 				$typeConverter->getItemTypeDictionary()->getEntries(),
 			));
+
+			if($this->session->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+				$this->session->getLogger()->debug("Sending items");
+				$this->session->sendDataPacket(ItemRegistryPacket::create($typeConverter->getItemTypeDictionary()->getEntries()));
+			}
 
 			$this->session->getLogger()->debug("Sending actor identifiers");
 			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getAvailableActorIdentifiers());
