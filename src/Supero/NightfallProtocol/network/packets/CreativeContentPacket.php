@@ -24,7 +24,7 @@ class CreativeContentPacket extends PM_Packet{
 	 * @param CreativeItemEntry[]  $items
 	 */
 	public static function createPacket(array $groups, array $items) : self {
-		$result = new self;
+		$result = new self();
 		$result->groups = $groups;
 		$result->items = $items;
 		return $result;

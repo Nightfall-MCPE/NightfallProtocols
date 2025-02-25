@@ -15,6 +15,7 @@ use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Filesystem;
 use Supero\NightfallProtocol\Main;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use function base64_decode;
 use function in_array;
 use function is_array;
 use function is_bool;
@@ -53,7 +54,6 @@ class CustomItemTypeDictionaryFromDataHelper
 		if(!is_array($table)){
 			throw new AssumptionFailedError("Invalid item list format");
 		}
-
 
 		$emptyNBT = new CacheableNbt(new CompoundTag());
 		$nbtSerializer = new LittleEndianNbtSerializer();

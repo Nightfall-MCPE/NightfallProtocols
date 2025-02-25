@@ -30,7 +30,6 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\ItemRegistryPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
-use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use function sprintf;
 
 class CustomPreSpawnPacketHandler extends PacketHandler{

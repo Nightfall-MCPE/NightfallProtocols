@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Supero\NightfallProtocol\network\packets;
 
-use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData as PM_AbilitiesData;
+use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket as PM_Packet;
 use Supero\NightfallProtocol\network\packets\types\AbilitiesData;
 
 /**
@@ -21,7 +21,7 @@ class UpdateAbilitiesPacket extends PM_Packet{
 	 * @generate-create-func
 	 */
 	public static function createPacket(AbilitiesData $data) : self {
-		$result = new self;
+		$result = new self();
 		$result->data = $data;
 		return $result;
 	}
@@ -40,5 +40,5 @@ class UpdateAbilitiesPacket extends PM_Packet{
 		return [
 			$packet->data
 		];
-    }
+	}
 }

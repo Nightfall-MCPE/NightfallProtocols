@@ -26,7 +26,7 @@ class ItemRegistryPacket extends PM_Packet{
 	 * @phpstan-param list<ItemTypeEntry> $entries
 	 */
 	public static function createPacket(array $entries) : self{
-		$result = new self;
+		$result = new self();
 		$result->entries = $entries;
 		return $result;
 	}
