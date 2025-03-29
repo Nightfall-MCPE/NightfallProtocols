@@ -6,10 +6,11 @@ namespace Supero\NightfallProtocol\network;
 
 class CustomProtocolInfo {
 
-	public const CURRENT_PROTOCOL = self::PROTOCOL_1_21_60;
+	public const CURRENT_PROTOCOL = self::PROTOCOL_1_21_70;
 
 	public const ACCEPTED_PROTOCOLS = [
 		self::CURRENT_PROTOCOL,
+		self::PROTOCOL_1_21_60,
 		self::PROTOCOL_1_21_50,
 		self::PROTOCOL_1_21_40,
 		self::PROTOCOL_1_21_30,
@@ -29,6 +30,7 @@ class CustomProtocolInfo {
 		self::CURRENT_PROTOCOL
 	];
 
+	public const PROTOCOL_1_21_70 = 786;
 	public const PROTOCOL_1_21_60 = 776;
 	public const PROTOCOL_1_21_50 = 766;
 	public const PROTOCOL_1_21_40 = 748;
