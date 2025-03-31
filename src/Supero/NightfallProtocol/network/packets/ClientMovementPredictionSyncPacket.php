@@ -11,6 +11,7 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 class ClientMovementPredictionSyncPacket extends PM_Packet {
 
+	public const OLD_FLAG_LENGTH = 120;
 	public const FLAG_LENGTH = 123;
 
 	private BitSet $flags;
@@ -105,7 +106,7 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	public function getActorFlyingState() : bool{ return $this->actorFlyingState; }
 
 	protected function decodePayload(PacketSerializer $in) : void{
-		$this->flags = BitSet::read($in, $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : 120);
+		$this->flags = BitSet::read($in, $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : self::OLD_FLAG_LENGTH);
 		$this->scale = $in->getLFloat();
 		$this->width = $in->getLFloat();
 		$this->height = $in->getLFloat();
@@ -122,7 +123,7 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
-		$this->flags->write($out, $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : 120);
+		$this->flags->write($out, $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : self::OLD_FLAG_LENGTH);
 		$out->putLFloat($this->scale);
 		$out->putLFloat($this->width);
 		$out->putLFloat($this->height);
