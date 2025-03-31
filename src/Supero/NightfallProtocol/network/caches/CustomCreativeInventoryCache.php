@@ -24,8 +24,8 @@ class CustomCreativeInventoryCache{
 	use ProtocolSingletonTrait;
 
 	/**
-	 * @var CreativeContentPacket[]
-	 * @phpstan-var array<int, CreativeContentPacket>
+	 * @var CreativeInventoryCacheEntry[]
+	 * @phpstan-var array<int, CreativeInventoryCacheEntry>
 	 */
 	private array $caches = [];
 
