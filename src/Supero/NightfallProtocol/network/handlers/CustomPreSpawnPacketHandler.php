@@ -8,7 +8,6 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\InventoryManager;
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
@@ -26,6 +25,7 @@ use pocketmine\timings\Timings;
 use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCraftingDataCache;
+use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\ItemRegistryPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
@@ -36,7 +36,7 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 	public function __construct(
 		private Server $server,
 		private Player $player,
-		private NetworkSession $session,
+		private CustomNetworkSession $session,
 		private InventoryManager $inventoryManager
 	){}
 
