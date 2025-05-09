@@ -49,7 +49,7 @@ function saveToFile($path, $content): void
     file_put_contents($path, $content);
 }
 
-$packet = "ItemStackResponseSlotInfo";
+$packet = "SetHudPacket";
 
 $fileUrl = "https://api.github.com/repos/NetherGamesMC/BedrockProtocol/contents/src/$packet.php";
 
