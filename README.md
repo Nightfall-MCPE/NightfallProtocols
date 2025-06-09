@@ -7,6 +7,7 @@ Replacement of [NetherGames MultiVersion](https://github.com/NetherGamesMC/Pocke
 ### Versions
 
 Currently, the plugin supports these versions:
+- 1.21.80 (`800`)
 - 1.21.70 (`786`)
 - 1.21.60 (`776`)
 - 1.21.50 (`766`)
