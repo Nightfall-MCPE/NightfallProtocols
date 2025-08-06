@@ -67,7 +67,11 @@ class CustomBiomeDefinitionData
 
 	public static function read(PacketSerializer $in) : self{
 		$nameIndex = $in->getLShort();
-		$id = $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100 ? $in->getLShort() : $in->readOptional($in->getLShort(...)) ?? 65535;
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100){
+			$id = $in->getLShort();
+		} else {
+			$id = $in->readOptional($in->getLShort(...)) ?? 65535;
+		}
 		$temperature = $in->getLFloat();
 		$downfall = $in->getLFloat();
 		$redSporeDensity = $in->getLFloat();

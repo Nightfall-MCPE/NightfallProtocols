@@ -548,16 +548,6 @@ class CustomNetworkSession extends NetworkSession
 				$packets = [(PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this))];
 			}
 
-			foreach ($packets as $packet) {
-				if($packet::NETWORK_ID == BiomeDefinitionListPacket::NETWORK_ID){
-					//remove from $packets
-					$packets = array_filter($packets, function ($p) use ($packet) {
-						return $p::NETWORK_ID !== BiomeDefinitionListPacket::NETWORK_ID;
-					});
-				}
-				echo "\nSending " . $packet::class . " to " . $this->getDisplayName() . " (" . $packet->pid() . ")";
-			}
-
 			if($ackReceiptResolver !== null){
 				$promises = $this->getProperty("sendBufferAckPromises");
 				$promises[] = $ackReceiptResolver;

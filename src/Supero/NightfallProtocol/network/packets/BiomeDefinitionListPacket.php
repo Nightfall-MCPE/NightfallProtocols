@@ -89,6 +89,13 @@ class BiomeDefinitionListPacket extends PM_Packet{
 	}
 
 	/**
+	 * @phpstan-param CacheableNbt<CompoundTag> $definitions
+	 */
+	public static function createLegacy(CacheableNbt $definitions) : self{
+		return self::createPacket(null, null, $definitions);
+	}
+
+	/**
 	 * @throws PacketDecodeException
 	 */
 	private function locateString(int $index) : string{

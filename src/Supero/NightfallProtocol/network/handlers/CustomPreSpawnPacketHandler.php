@@ -23,6 +23,7 @@ use pocketmine\timings\Timings;
 use pocketmine\VersionInfo;
 use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCraftingDataCache;
+use Supero\NightfallProtocol\network\caches\CustomStaticPacketCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\ItemRegistryPacket;
@@ -102,10 +103,10 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 			}
 
 			$this->session->getLogger()->debug("Sending actor identifiers");
-			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getAvailableActorIdentifiers());
+			$this->session->sendDataPacket(CustomStaticPacketCache::getInstance()->getAvailableActorIdentifiers());
 
 			$this->session->getLogger()->debug("Sending biome definitions");
-			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getBiomeDefs());
+			$this->session->sendDataPacket(CustomStaticPacketCache::getInstance()->getBiomeDefs($this->session->getProtocol()));
 
 			$this->session->getLogger()->debug("Sending attributes");
 			$this->session->getEntityEventBroadcaster()->syncAttributes([$this->session], $this->player, $this->player->getAttributeMap()->getAll());
