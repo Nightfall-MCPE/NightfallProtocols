@@ -12,10 +12,11 @@ use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
-use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use Ramsey\Uuid\UuidInterface;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
+use Supero\NightfallProtocol\network\packets\types\CustomPlayerMovementSettings;
+use Supero\NightfallProtocol\network\packets\types\ServerAuthMovementMode;
 use function count;
 
 class StartGamePacket extends PM_Packet
@@ -39,7 +40,7 @@ class StartGamePacket extends PM_Packet
 	public string $worldName;
 	public string $premiumWorldTemplateId = "";
 	public bool $isTrial = false;
-	public PlayerMovementSettings $playerMovementSettings;
+	public CustomPlayerMovementSettings $customPlayerMovementSettings;
 	public int $currentTick = 0; //only used if isTrial is true
 	public int $enchantmentSeed = 0;
 	public string $multiplayerCorrelationId = "";
@@ -48,6 +49,7 @@ class StartGamePacket extends PM_Packet
 	public UuidInterface $worldTemplateId; //why is this here twice ??? mojang
 	public bool $enableClientSideChunkGeneration;
 	public bool $blockNetworkIdsAreHashes = false; //new in 1.19.80, possibly useful for multi version
+	public bool $enableTickDeathSystems = false;
 	public NetworkPermissions $networkPermissions;
 
 	/**
@@ -90,7 +92,7 @@ class StartGamePacket extends PM_Packet
 		string $worldName,
 		string $premiumWorldTemplateId,
 		bool $isTrial,
-		PlayerMovementSettings $playerMovementSettings,
+		CustomPlayerMovementSettings $customPlayerMovementSettings,
 		int $currentTick,
 		int $enchantmentSeed,
 		string $multiplayerCorrelationId,
@@ -99,6 +101,7 @@ class StartGamePacket extends PM_Packet
 		UuidInterface $worldTemplateId,
 		bool $enableClientSideChunkGeneration,
 		bool $blockNetworkIdsAreHashes,
+		bool $enableTickDeathSystems,
 		NetworkPermissions $networkPermissions,
 		array $blockPalette,
 		int $blockPaletteChecksum,
@@ -117,7 +120,7 @@ class StartGamePacket extends PM_Packet
 		$result->worldName = $worldName;
 		$result->premiumWorldTemplateId = $premiumWorldTemplateId;
 		$result->isTrial = $isTrial;
-		$result->playerMovementSettings = $playerMovementSettings;
+		$result->customPlayerMovementSettings = $customPlayerMovementSettings;
 		$result->currentTick = $currentTick;
 		$result->enchantmentSeed = $enchantmentSeed;
 		$result->multiplayerCorrelationId = $multiplayerCorrelationId;
@@ -126,6 +129,7 @@ class StartGamePacket extends PM_Packet
 		$result->worldTemplateId = $worldTemplateId;
 		$result->enableClientSideChunkGeneration = $enableClientSideChunkGeneration;
 		$result->blockNetworkIdsAreHashes = $blockNetworkIdsAreHashes;
+		$result->enableTickDeathSystems = $enableTickDeathSystems;
 		$result->networkPermissions = $networkPermissions;
 		$result->blockPalette = $blockPalette;
 		$result->blockPaletteChecksum = $blockPaletteChecksum;
@@ -149,7 +153,7 @@ class StartGamePacket extends PM_Packet
 		$this->worldName = $in->getString();
 		$this->premiumWorldTemplateId = $in->getString();
 		$this->isTrial = $in->getBool();
-		$this->playerMovementSettings = PlayerMovementSettings::read($in);
+		$this->customPlayerMovementSettings = CustomPlayerMovementSettings::read($in);
 		$this->currentTick = $in->getLLong();
 
 		$this->enchantmentSeed = $in->getVarInt();
@@ -161,7 +165,7 @@ class StartGamePacket extends PM_Packet
 			$this->blockPalette[] = new BlockPaletteEntry($blockName, new CacheableNbt($state));
 		}
 
-		if($Tin->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_50){
+		if($in->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_50){
 			$this->itemTable = [];
 			for($i = 0, $count = $in->getUnsignedVarInt(); $i < $count; ++$i){
 				$stringId = $in->getString();
@@ -180,6 +184,9 @@ class StartGamePacket extends PM_Packet
 		$this->worldTemplateId = $in->getUUID();
 		$this->enableClientSideChunkGeneration = $in->getBool();
 		$this->blockNetworkIdsAreHashes = $in->getBool();
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100){
+			$this->enableTickDeathSystems = $in->getBool();
+		}
 		$this->networkPermissions = NetworkPermissions::decode($in);
 	}
 
@@ -199,7 +206,7 @@ class StartGamePacket extends PM_Packet
 		$out->putString($this->worldName);
 		$out->putString($this->premiumWorldTemplateId);
 		$out->putBool($this->isTrial);
-		$this->playerMovementSettings->write($out);
+		$this->customPlayerMovementSettings->write($out);
 		$out->putLLong($this->currentTick);
 
 		$out->putVarInt($this->enchantmentSeed);
@@ -227,6 +234,9 @@ class StartGamePacket extends PM_Packet
 		$out->putUUID($this->worldTemplateId);
 		$out->putBool($this->enableClientSideChunkGeneration);
 		$out->putBool($this->blockNetworkIdsAreHashes);
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100){
+			$out->putBool($this->enableTickDeathSystems);
+		}
 		$this->networkPermissions->encode($out);
 	}
 
@@ -249,6 +259,13 @@ class StartGamePacket extends PM_Packet
 		$customLevelSettings->gameRules = $levelSettings->gameRules;
 		$customLevelSettings->experiments = $levelSettings->experiments;
 
+		$playerMovementSettings = $packet->playerMovementSettings;
+		$customPlayerMovementSettings = new CustomPlayerMovementSettings(
+			ServerAuthMovementMode::SERVER_AUTHORITATIVE_V3, // just as a default
+			$playerMovementSettings->getRewindHistorySize(),
+			$playerMovementSettings->isServerAuthoritativeBlockBreaking()
+		);
+
 		return [
 			$packet->actorUniqueId,
 			$packet->actorRuntimeId,
@@ -262,7 +279,7 @@ class StartGamePacket extends PM_Packet
 			$packet->worldName,
 			$packet->premiumWorldTemplateId,
 			$packet->isTrial,
-			$packet->playerMovementSettings,
+			$customPlayerMovementSettings,
 			$packet->currentTick,
 			$packet->enchantmentSeed,
 			$packet->multiplayerCorrelationId,
@@ -271,6 +288,7 @@ class StartGamePacket extends PM_Packet
 			$packet->worldTemplateId,
 			$packet->enableClientSideChunkGeneration,
 			$packet->blockNetworkIdsAreHashes,
+			$packet->enableTickDeathSystems ?? false,
 			$packet->networkPermissions,
 			$packet->blockPalette,
 			$packet->blockPaletteChecksum,

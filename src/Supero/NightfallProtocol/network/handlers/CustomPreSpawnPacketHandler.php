@@ -16,8 +16,6 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
-use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
-use pocketmine\network\mcpe\protocol\types\ServerAuthMovementMode;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
 use pocketmine\player\Player;
 use pocketmine\Server;
@@ -30,6 +28,8 @@ use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\ItemRegistryPacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\types\CustomLevelSettings;
+use Supero\NightfallProtocol\network\packets\types\CustomPlayerMovementSettings;
+use Supero\NightfallProtocol\network\packets\types\ServerAuthMovementMode;
 use function sprintf;
 
 class CustomPreSpawnPacketHandler extends PacketHandler{
@@ -62,7 +62,8 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 			$levelSettings->lightningLevel = 0;
 			$levelSettings->commandsEnabled = true;
 			$levelSettings->gameRules = [
-				"naturalregeneration" => new BoolGameRule(false, false) //Hack for client side regeneration
+				"naturalregeneration" => new BoolGameRule(false, false), //Hack for client side regeneration
+				"locatorbar" => new BoolGameRule(false, false) //Disable client-side tracking of nearby players
 			];
 			$levelSettings->experiments = new Experiments([], false);
 
@@ -73,19 +74,20 @@ class CustomPreSpawnPacketHandler extends PacketHandler{
 				$this->player->getOffsetPosition($location),
 				$location->pitch,
 				$location->yaw,
-				new CacheableNbt(CompoundTag::create()),
+				new CacheableNbt(CompoundTag::create()), //we don't care about this right now
 				$levelSettings,
 				"",
 				$this->server->getMotd(),
 				"",
 				false,
-				new PlayerMovementSettings(ServerAuthMovementMode::SERVER_AUTHORITATIVE_V2, 0, false),
+				new CustomPlayerMovementSettings(ServerAuthMovementMode::SERVER_AUTHORITATIVE_V3, 0, true),
 				0,
 				0,
 				"",
 				true,
 				sprintf("%s %s", VersionInfo::NAME, VersionInfo::VERSION()->getFullVersion(true)),
 				Uuid::fromString(Uuid::NIL),
+				false,
 				false,
 				false,
 				new NetworkPermissions(disableClientSounds: true),

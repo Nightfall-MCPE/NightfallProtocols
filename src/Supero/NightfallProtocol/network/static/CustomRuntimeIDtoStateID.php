@@ -14,7 +14,7 @@ class CustomRuntimeIDtoStateID
 
 	private array $runtimeIdToStateId = [];
 
-	public function __construct(private int $protocol)
+	public function __construct(private readonly int $protocol)
 	{
 		$this->setProtocolInstance($this, $protocol);
 		$blockTranslator = CustomTypeConverter::getInstance()->getBlockTranslator();

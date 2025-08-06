@@ -114,7 +114,7 @@ class CustomBitSet extends BitSet
 		return new self($length, array_slice($result, 0, self::getExpectedPartsCount($length)));
 	}
 
-	public function write(PacketSerializer $out, int $length = null) : void{
+	public function write(PacketSerializer $out, ?int $length = null) : void{
 		$parts = $this->parts;
 		$length ??= $this->length;
 
@@ -146,5 +146,9 @@ class CustomBitSet extends BitSet
 
 	public function getLength() : int{
 		return $this->length;
+	}
+
+	public function equals(BitSet $that) : bool{
+		return $this->length === $that->getLength() && count($this->parts) === $that->getPartsCount();
 	}
 }

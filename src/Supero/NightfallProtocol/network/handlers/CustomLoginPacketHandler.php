@@ -18,18 +18,33 @@ use pocketmine\network\mcpe\JwtException;
 use pocketmine\network\mcpe\JwtUtils;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\types\login\AuthenticationData;
-use pocketmine\network\mcpe\protocol\types\login\ClientData;
-use pocketmine\network\mcpe\protocol\types\login\ClientDataToSkinDataHelper;
+use pocketmine\network\mcpe\protocol\types\login\AuthenticationInfo;
+use pocketmine\network\mcpe\protocol\types\login\AuthenticationType;
+use pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaPieceTintColor;
+use pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaSkinPiece;
 use pocketmine\network\mcpe\protocol\types\login\JwtChain;
+use pocketmine\network\mcpe\protocol\types\skin\PersonaPieceTintColor;
+use pocketmine\network\mcpe\protocol\types\skin\PersonaSkinPiece;
+use pocketmine\network\mcpe\protocol\types\skin\SkinAnimation;
+use pocketmine\network\mcpe\protocol\types\skin\SkinData;
+use pocketmine\network\mcpe\protocol\types\skin\SkinImage;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
 use pocketmine\player\PlayerInfo;
 use pocketmine\player\XboxLivePlayerInfo;
 use pocketmine\Server;
 use Ramsey\Uuid\Uuid;
+use ReflectionException;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
-use Supero\NightfallProtocol\utils\ProtocolUtils;
+use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\types\login\CustomClientData;
+use function array_map;
+use function base64_decode;
+use function gettype;
 use function is_array;
+use function is_object;
+use function json_decode;
+use const JSON_THROW_ON_ERROR;
 
 class CustomLoginPacketHandler extends PacketHandler{
 	/**
@@ -44,7 +59,16 @@ class CustomLoginPacketHandler extends PacketHandler{
 	){}
 
 	public function handleLogin(LoginPacket $packet) : bool{
-		$extraData = $this->fetchAuthData($packet->chainDataJwt);
+		$protocolVersion = $packet->protocol;
+
+		if($protocolVersion >= CustomProtocolInfo::PROTOCOL_1_21_90){
+			$authInfo = $this->parseAuthInfo($packet->authInfoJson);
+			$jwtChain = $this->parseJwtChain($authInfo->Certificate);
+		}else{
+			$jwtChain = $this->parseJwtChain($packet->authInfoJson);
+		}
+
+		$extraData = $this->fetchAuthData($jwtChain);
 
 		if(!Player::isValidUserName($extraData->displayName)){
 			$this->session->disconnectWithError(KnownTranslationFactory::disconnectionScreen_invalidName());
@@ -55,7 +79,7 @@ class CustomLoginPacketHandler extends PacketHandler{
 		$clientData = $this->parseClientData($packet->clientDataJwt);
 
 		try{
-			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(ClientDataToSkinDataHelper::fromClientData($clientData));
+			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(self::fromClientData($clientData));
 		}catch(InvalidArgumentException | InvalidSkinException $e){
 			$this->session->disconnectWithError(
 				reason: "Invalid skin: " . $e->getMessage(),
@@ -123,9 +147,63 @@ class CustomLoginPacketHandler extends PacketHandler{
 			return true;
 		}
 
-		$this->processLogin($packet, $ev->isAuthRequired());
+		if(isset($authInfo)){
+			$this->processLogin($authInfo->Token, AuthenticationType::from($authInfo->AuthenticationType), $jwtChain->chain, $packet->clientDataJwt, $ev->isAuthRequired());
+		}else{
+			$this->processLogin(null, null, $jwtChain->chain, $packet->clientDataJwt, $ev->isAuthRequired());
+		}
 
 		return true;
+	}
+
+	/**
+	 * @throws PacketHandlingException
+	 */
+	protected function parseAuthInfo(string $authInfo) : AuthenticationInfo{
+		try{
+			$authInfoJson = json_decode($authInfo, associative: false, flags: JSON_THROW_ON_ERROR);
+		}catch(\JsonException $e){
+			throw PacketHandlingException::wrap($e);
+		}
+		if(!is_object($authInfoJson)){
+			throw new \RuntimeException("Unexpected type for auth info data: " . gettype($authInfoJson) . ", expected object");
+		}
+
+		$mapper = new JsonMapper();
+		$mapper->bExceptionOnMissingData = true;
+		$mapper->bExceptionOnUndefinedProperty = true;
+		$mapper->bStrictObjectTypeChecking = true;
+		try{
+			$clientData = $mapper->map($authInfoJson, new AuthenticationInfo());
+		}catch(JsonMapper_Exception $e){
+			throw PacketHandlingException::wrap($e);
+		}
+		return $clientData;
+	}
+
+	/**
+	 * @throws PacketHandlingException
+	 */
+	protected function parseJwtChain(string $chainDataJwt) : JwtChain{
+		try{
+			$jwtChainJson = json_decode($chainDataJwt, associative: false, flags: JSON_THROW_ON_ERROR);
+		}catch(\JsonException $e){
+			throw PacketHandlingException::wrap($e);
+		}
+		if(!is_object($jwtChainJson)){
+			throw new \RuntimeException("Unexpected type for JWT chain data: " . gettype($jwtChainJson) . ", expected object");
+		}
+
+		$mapper = new JsonMapper();
+		$mapper->bExceptionOnMissingData = true;
+		$mapper->bExceptionOnUndefinedProperty = true;
+		$mapper->bStrictObjectTypeChecking = true;
+		try{
+			$clientData = $mapper->map($jwtChainJson, new JwtChain());
+		}catch(JsonMapper_Exception $e){
+			throw PacketHandlingException::wrap($e);
+		}
+		return $clientData;
 	}
 
 	/**
@@ -171,22 +249,20 @@ class CustomLoginPacketHandler extends PacketHandler{
 	/**
 	 * @throws PacketHandlingException
 	 */
-	protected function parseClientData(string $clientDataJwt) : ClientData{
+	protected function parseClientData(string $clientDataJwt) : CustomClientData{
 		try{
 			[, $clientDataClaims, ] = JwtUtils::parse($clientDataJwt);
 		}catch(JwtException $e){
 			throw PacketHandlingException::wrap($e);
 		}
 
-		ProtocolUtils::injectClientData($this->session->getProtocol(), $clientDataClaims);
-
 		$mapper = new JsonMapper();
-		$mapper->bEnforceMapType = false;
+		$mapper->bEnforceMapType = false; //we don't really need this as an array, but right now we don't have enough models
 		$mapper->bExceptionOnMissingData = true;
 		$mapper->bExceptionOnUndefinedProperty = true;
 		$mapper->bStrictObjectTypeChecking = true;
 		try{
-			$clientData = $mapper->map($clientDataClaims, new ClientData());
+			$clientData = $mapper->map($clientDataClaims, new CustomClientData());
 		}catch(JsonMapper_Exception $e){
 			throw PacketHandlingException::wrap($e);
 		}
@@ -197,10 +273,73 @@ class CustomLoginPacketHandler extends PacketHandler{
 	 * This is separated for the purposes of allowing plugins (like Specter) to hack it and bypass authentication.
 	 * In the future this won't be necessary.
 	 *
+	 * @param null|string[] $legacyCertificate
+	 *
+	 * @throws InvalidArgumentException|ReflectionException
+	 */
+	protected function processLogin(?string $token, ?AuthenticationType $authType, ?array $legacyCertificate, string $clientData, bool $authRequired) : void{
+		if($legacyCertificate === null){
+			throw new PacketHandlingException("Legacy certificate cannot be null");
+		}
+		$this->server->getAsyncPool()->submitTask(new ProcessLoginTask($legacyCertificate, $clientData, $authRequired, $this->authCallback));
+		$this->session->setHandler(null); //drop packets received during login verification
+	}
+
+	/**
 	 * @throws InvalidArgumentException
 	 */
-	protected function processLogin(LoginPacket $packet, bool $authRequired) : void{
-		$this->server->getAsyncPool()->submitTask(new ProcessLoginTask($packet->chainDataJwt->chain, $packet->clientDataJwt, $authRequired, $this->authCallback));
-		$this->session->setHandler(null); //drop packets received during login verification
+	private static function safeB64Decode(string $base64, string $context) : string{
+		$result = base64_decode($base64, true);
+		if($result === false){
+			throw new InvalidArgumentException("$context: Malformed base64, cannot be decoded");
+		}
+		return $result;
+	}
+
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public static function fromClientData(CustomClientData $clientData) : SkinData{
+		/** @var SkinAnimation[] $animations */
+		$animations = [];
+		foreach($clientData->AnimatedImageData as $k => $animation){
+			$animations[] = new SkinAnimation(
+				new SkinImage(
+					$animation->ImageHeight,
+					$animation->ImageWidth,
+					self::safeB64Decode($animation->Image, "AnimatedImageData.$k.Image")
+				),
+				$animation->Type,
+				$animation->Frames,
+				$animation->AnimationExpression
+			);
+		}
+		return new SkinData(
+			$clientData->SkinId,
+			$clientData->PlayFabId,
+			self::safeB64Decode($clientData->SkinResourcePatch, "SkinResourcePatch"),
+			new SkinImage($clientData->SkinImageHeight, $clientData->SkinImageWidth, self::safeB64Decode($clientData->SkinData, "SkinData")),
+			$animations,
+			new SkinImage($clientData->CapeImageHeight, $clientData->CapeImageWidth, self::safeB64Decode($clientData->CapeData, "CapeData")),
+			self::safeB64Decode($clientData->SkinGeometryData, "SkinGeometryData"),
+			self::safeB64Decode($clientData->SkinGeometryDataEngineVersion, "SkinGeometryDataEngineVersion"), //yes, they actually base64'd the version!
+			self::safeB64Decode($clientData->SkinAnimationData, "SkinAnimationData"),
+			$clientData->CapeId,
+			null,
+			$clientData->ArmSize,
+			$clientData->SkinColor,
+			array_map(function(ClientDataPersonaSkinPiece $piece) : PersonaSkinPiece{
+				return new PersonaSkinPiece($piece->PieceId, $piece->PieceType, $piece->PackId, $piece->IsDefault, $piece->ProductId);
+			}, $clientData->PersonaPieces),
+			array_map(function(ClientDataPersonaPieceTintColor $tint) : PersonaPieceTintColor{
+				return new PersonaPieceTintColor($tint->PieceType, $tint->Colors);
+			}, $clientData->PieceTintColors),
+			true,
+			$clientData->PremiumSkin,
+			$clientData->PersonaSkin,
+			$clientData->CapeOnClassicSkin,
+			true, //assume this is true? there's no field for it ...
+			$clientData->OverrideSkin ?? true,
+		);
 	}
 }

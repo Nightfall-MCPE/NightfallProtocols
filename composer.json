@@ -1,8 +1,7 @@
 {
   "name": "nightfall-mcpe/nightfallprotocols",
   "description": "(not-so) Simple multi-version plugin",
-  "minimum-stability": "stable",
-  "license": "proprietary",
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "superomarking",
@@ -10,10 +9,13 @@
     }
   ],
   "require-dev": {
-    "pocketmine/pocketmine-mp": "*",
+    "pocketmine/pocketmine-mp": "dev-bedrock-1.21.100",
     "friendsofphp/php-cs-fixer": "*"
   },
-  "require": {
-    "ext-curl": "*"
+
+  "scripts": {
+    "cs-fix": [
+      "php vendor/bin/php-cs-fixer fix --diff"
+    ]
   }
 }

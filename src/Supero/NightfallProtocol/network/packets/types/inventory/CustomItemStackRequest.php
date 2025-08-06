@@ -16,18 +16,18 @@ use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LabTableCombin
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\LoomStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\MineBlockStackRequestAction;
 use pocketmine\utils\BinaryDataException;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftingConsumeInputStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeAutoStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CraftRecipeStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CreativeCreateStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\DestroyStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\DropStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\GrindstoneStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceIntoBundleStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\PlaceStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\SwapStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeFromBundleStackRequestAction;
-use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\TakeStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomCraftingConsumeInputStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomCraftRecipeAutoStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomCraftRecipeStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomCreativeCreateStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomDestroyStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomDropStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomGrindstoneStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomPlaceIntoBundleStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomPlaceStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomSwapStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomTakeFromBundleStackRequestAction;
+use Supero\NightfallProtocol\network\packets\types\inventory\stackrequest\CustomTakeStackRequestAction;
 use function count;
 
 class CustomItemStackRequest
@@ -63,23 +63,23 @@ class CustomItemStackRequest
 	 */
 	private static function readAction(PacketSerializer $in, int $typeId) : ItemStackRequestAction{
 		return match($typeId){
-			TakeStackRequestAction::ID => TakeStackRequestAction::read($in),
-			PlaceStackRequestAction::ID => PlaceStackRequestAction::read($in),
-			SwapStackRequestAction::ID => SwapStackRequestAction::read($in),
-			DropStackRequestAction::ID => DropStackRequestAction::read($in),
-			DestroyStackRequestAction::ID => DestroyStackRequestAction::read($in),
-			CraftingConsumeInputStackRequestAction::ID => CraftingConsumeInputStackRequestAction::read($in),
+			CustomTakeStackRequestAction::ID => CustomTakeStackRequestAction::read($in),
+			CustomPlaceStackRequestAction::ID => CustomPlaceStackRequestAction::read($in),
+			CustomSwapStackRequestAction::ID => CustomSwapStackRequestAction::read($in),
+			CustomDropStackRequestAction::ID => CustomDropStackRequestAction::read($in),
+			CustomDestroyStackRequestAction::ID => CustomDestroyStackRequestAction::read($in),
+			CustomCraftingConsumeInputStackRequestAction::ID => CustomCraftingConsumeInputStackRequestAction::read($in),
 			CraftingCreateSpecificResultStackRequestAction::ID => CraftingCreateSpecificResultStackRequestAction::read($in),
-			PlaceIntoBundleStackRequestAction::ID => PlaceIntoBundleStackRequestAction::read($in),
-			TakeFromBundleStackRequestAction::ID => TakeFromBundleStackRequestAction::read($in),
+			CustomPlaceIntoBundleStackRequestAction::ID => CustomPlaceIntoBundleStackRequestAction::read($in),
+			CustomTakeFromBundleStackRequestAction::ID => CustomTakeFromBundleStackRequestAction::read($in),
 			LabTableCombineStackRequestAction::ID => LabTableCombineStackRequestAction::read($in),
 			BeaconPaymentStackRequestAction::ID => BeaconPaymentStackRequestAction::read($in),
 			MineBlockStackRequestAction::ID => MineBlockStackRequestAction::read($in),
-			CraftRecipeStackRequestAction::ID => CraftRecipeStackRequestAction::read($in),
-			CraftRecipeAutoStackRequestAction::ID => CraftRecipeAutoStackRequestAction::read($in),
-			CreativeCreateStackRequestAction::ID => CreativeCreateStackRequestAction::read($in),
+			CustomCraftRecipeStackRequestAction::ID => CustomCraftRecipeStackRequestAction::read($in),
+			CustomCraftRecipeAutoStackRequestAction::ID => CustomCraftRecipeAutoStackRequestAction::read($in),
+			CustomCreativeCreateStackRequestAction::ID => CustomCreativeCreateStackRequestAction::read($in),
 			CraftRecipeOptionalStackRequestAction::ID => CraftRecipeOptionalStackRequestAction::read($in),
-			GrindstoneStackRequestAction::ID => GrindstoneStackRequestAction::read($in),
+			CustomGrindstoneStackRequestAction::ID => CustomGrindstoneStackRequestAction::read($in),
 			LoomStackRequestAction::ID => LoomStackRequestAction::read($in),
 			DeprecatedCraftingNonImplementedStackRequestAction::ID => DeprecatedCraftingNonImplementedStackRequestAction::read($in),
 			DeprecatedCraftingResultsStackRequestAction::ID => DeprecatedCraftingResultsStackRequestAction::read($in),

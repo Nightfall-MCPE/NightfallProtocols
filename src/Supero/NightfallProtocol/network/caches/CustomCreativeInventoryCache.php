@@ -12,7 +12,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\packets\CreativeContentPacket;
-use Supero\NightfallProtocol\network\packets\types\inventory\CreativeItemEntry;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomCreativeItemEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\utils\ProtocolSingletonTrait;
 use function is_string;
@@ -78,7 +78,7 @@ class CustomCreativeInventoryCache{
 		//creative inventory may have holes if items were unregistered - ensure network IDs used are always consistent
 		$items = [];
 		foreach($inventory->getAllEntries() as $k => $entry){
-			$items[] = new CreativeItemEntry(
+			$items[] = new CustomCreativeItemEntry(
 				$k,
 				$typeConverter->coreItemStackToNet($entry->getItem()),
 				$itemGroupIndexes[$k]
@@ -131,6 +131,8 @@ class CustomCreativeInventoryCache{
 			}
 		}
 
-		return CreativeContentPacket::createPacket($groupEntries, $cachedEntry->items);
+		/** @var CustomCreativeItemEntry $items */
+		$items = $cachedEntry->items;
+		return CreativeContentPacket::createPacket($groupEntries, $items);
 	}
 }

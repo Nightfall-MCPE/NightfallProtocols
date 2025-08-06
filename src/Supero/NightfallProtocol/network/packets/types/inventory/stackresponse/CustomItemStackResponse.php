@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Supero\NightfallProtocol\network\packets\types\inventory\stackresponse;
+
+use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use function count;
+
+final class CustomItemStackResponse{
+
+	public const RESULT_OK = 0;
+	public const RESULT_ERROR = 1;
+	//TODO: there are a ton more possible result types but we don't need them yet and they are wayyyyyy too many for me
+	//to waste my time on right now...
+
+	/**
+	 * @param CustomItemStackResponseContainerInfo[] $containerInfos
+	 */
+	public function __construct(
+		private int $result,
+		private int $requestId,
+		private array $containerInfos = []
+	){
+		if($this->result !== self::RESULT_OK && count($this->containerInfos) !== 0){
+			throw new \InvalidArgumentException("Container infos must be empty if rejecting the request");
+		}
+	}
+
+	public function getResult() : int{ return $this->result; }
+
+	public function getRequestId() : int{ return $this->requestId; }
+
+	/** @return CustomItemStackResponseContainerInfo[] */
+	public function getContainerInfos() : array{ return $this->containerInfos; }
+
+	public static function read(PacketSerializer $in) : self{
+		$result = $in->getByte();
+		$requestId = $in->readItemStackRequestId();
+		$containerInfos = [];
+		if($result === self::RESULT_OK){
+			for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
+				$containerInfos[] = CustomItemStackResponseContainerInfo::read($in);
+			}
+		}
+		return new self($result, $requestId, $containerInfos);
+	}
+
+	public function write(PacketSerializer $out) : void{
+		$out->putByte($this->result);
+		$out->writeItemStackRequestId($this->requestId);
+		if($this->result === self::RESULT_OK){
+			$out->putUnsignedVarInt(count($this->containerInfos));
+			foreach($this->containerInfos as $containerInfo){
+				$containerInfo->write($out);
+			}
+		}
+	}
+}

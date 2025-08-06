@@ -6,48 +6,38 @@ namespace Supero\NightfallProtocol\network\packets;
 
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\resourcepacks\ResourcePackInfoEntry;
 use Ramsey\Uuid\UuidInterface;
+
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomBehaviourPackInfoEntry;
-use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
-use Supero\NightfallProtocol\utils\ReflectionUtils;
 use function count;
+class ResourcePacksInfoPacket extends PM_Packet{
 
-class ResourcePacksInfoPacket extends PM_Packet
-{
-	/** @var CustomResourcePackInfoEntry[] */
 	public array $resourcePackEntries = [];
-	/** @var CustomBehaviourPackInfoEntry[] */
+
 	public array $behaviorPackEntries = [];
 	public bool $mustAccept = false; //if true, forces client to choose between accepting packs or being disconnected
 	public bool $hasAddons = false;
 	public bool $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
-	public UuidInterface $worldTemplateId;
-	public string $worldTemplateVersion;
 	public bool $forceServerPacks = false;
-	/**
-	 * @var string[]
-	 * @phpstan-var array<string, string>
-	 */
-	public array $cdnUrls = [];
 
-	/**
-	 * @generate-create-func
-	 * @param CustomResourcePackInfoEntry[]  $resourcePackEntries
-	 * @param CustomBehaviourPackInfoEntry[] $behaviorPackEntries
-	 * @param string[]                       $cdnUrls
-	 * @phpstan-param array<string, string> $cdnUrls
-	 */
+	public array $cdnUrls = [];
+	private UuidInterface $worldTemplateId;
+	private string $worldTemplateVersion;
+	private bool $forceDisableVibrantVisuals;
+
 	public static function createPacket(
 		array $resourcePackEntries,
 		array $behaviorPackEntries,
 		bool $mustAccept,
 		bool $hasAddons,
 		bool $hasScripts,
-		UuidInterface $worldTemplateId,
-		string $worldTemplateVersion,
 		bool $forceServerPacks,
 		array $cdnUrls,
+		UuidInterface $worldTemplateId,
+		string $worldTemplateVersion,
+		bool $forceDisableVibrantVisuals,
 	) : self{
 		$result = new self();
 		$result->resourcePackEntries = $resourcePackEntries;
@@ -55,12 +45,19 @@ class ResourcePacksInfoPacket extends PM_Packet
 		$result->mustAccept = $mustAccept;
 		$result->hasAddons = $hasAddons;
 		$result->hasScripts = $hasScripts;
-		$result->worldTemplateId = $worldTemplateId;
-		$result->worldTemplateVersion = $worldTemplateVersion;
 		$result->forceServerPacks = $forceServerPacks;
 		$result->cdnUrls = $cdnUrls;
+		$result->worldTemplateId = $worldTemplateId;
+		$result->worldTemplateVersion = $worldTemplateVersion;
+		$result->forceDisableVibrantVisuals = $forceDisableVibrantVisuals;
 		return $result;
 	}
+
+	public function getWorldTemplateId() : UuidInterface{ return $this->worldTemplateId; }
+
+	public function getWorldTemplateVersion() : string{ return $this->worldTemplateVersion; }
+
+	public function isForceDisablingVibrantVisuals() : bool{ return $this->forceDisableVibrantVisuals; }
 
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->mustAccept = $in->getBool();
@@ -75,14 +72,17 @@ class ResourcePacksInfoPacket extends PM_Packet
 				$this->behaviorPackEntries[] = CustomBehaviourPackInfoEntry::read($in);
 			}
 		}
-		if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
+		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_90){
+				$this->forceDisableVibrantVisuals = $in->getBool();
+			}
 			$this->worldTemplateId = $in->getUUID();
 			$this->worldTemplateVersion = $in->getString();
 		}
 
 		$resourcePackCount = $in->getLShort();
 		while($resourcePackCount-- > 0){
-			$this->resourcePackEntries[] = CustomResourcePackInfoEntry::read($in);
+			$this->resourcePackEntries[] = ResourcePackInfoEntry::read($in);
 		}
 
 		if($in->getProtocol() < CustomProtocolInfo::PROTOCOL_1_21_40){
@@ -97,18 +97,21 @@ class ResourcePacksInfoPacket extends PM_Packet
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putBool($this->mustAccept);
-		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70) {
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_70){
 			$out->putBool($this->hasAddons);
 		}
 		$out->putBool($this->hasScripts);
-		if($out->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_20) {
+		if($out->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_20){
 			$out->putBool($this->forceServerPacks);
 			$out->putLShort(count($this->behaviorPackEntries));
-			foreach ($this->behaviorPackEntries as $entry) {
+			foreach($this->behaviorPackEntries as $entry){
 				$entry->write($out);
 			}
 		}
-		if ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50) {
+		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_90){
+				$out->putBool($this->forceDisableVibrantVisuals);
+			}
 			$out->putUUID($this->worldTemplateId);
 			$out->putString($this->worldTemplateVersion);
 		}
@@ -133,11 +136,11 @@ class ResourcePacksInfoPacket extends PM_Packet
 			$packet->mustAccept,
 			$packet->hasAddons ?? false,
 			$packet->hasScripts,
-			// PM has these properties private, for some reason...
-			ReflectionUtils::getProperty($packet::class, $packet, "worldTemplateId"),
-			ReflectionUtils::getProperty($packet::class, $packet, "worldTemplateVersion"),
 			false,
-			[]
+			[],
+			$packet->getWorldTemplateId(),
+			$packet->getWorldTemplateVersion(),
+			$packet->isForceDisablingVibrantVisuals() ?? false,
 		];
 	}
 }

@@ -8,20 +8,20 @@ use pocketmine\network\mcpe\protocol\CreativeContentPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\types\inventory\CreativeItemEntry;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomCreativeItemEntry;
 use function count;
 
 class CreativeContentPacket extends PM_Packet{
 
 	/** @var CreativeGroupEntry[] */
 	private array $groups;
-	/** @var CreativeItemEntry[] */
+	/** @var CustomCreativeItemEntry[] */
 	private array $items;
 
 	/**
 	 * @generate-create-func
-	 * @param CreativeGroupEntry[] $groups
-	 * @param CreativeItemEntry[]  $items
+	 * @param CreativeGroupEntry[]      $groups
+	 * @param CustomCreativeItemEntry[] $items
 	 */
 	public static function createPacket(array $groups, array $items) : self {
 		$result = new self();
@@ -33,7 +33,7 @@ class CreativeContentPacket extends PM_Packet{
 	/** @return CreativeGroupEntry[] */
 	public function getGroups() : array{ return $this->groups; }
 
-	/** @return CreativeItemEntry[] */
+	/** @return CustomCreativeItemEntry[] */
 	public function getItems() : array{ return $this->items; }
 
 	protected function decodePayload(PacketSerializer $in) : void {
@@ -46,7 +46,7 @@ class CreativeContentPacket extends PM_Packet{
 
 		$this->items = [];
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
-			$this->items[] = CreativeItemEntry::read($in);
+			$this->items[] = CustomCreativeItemEntry::read($in);
 		}
 	}
 

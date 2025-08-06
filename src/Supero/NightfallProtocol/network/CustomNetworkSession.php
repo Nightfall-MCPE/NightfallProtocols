@@ -52,13 +52,16 @@ use Supero\NightfallProtocol\network\chunk\CustomChunkCache;
 use Supero\NightfallProtocol\network\handlers\CustomLoginPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
-use Supero\NightfallProtocol\network\handlers\static\InGamePacketHandler as CustomInGamePacketHandler;
+use Supero\NightfallProtocol\network\handlers\static\CustomInGamePacketHandler;
+use Supero\NightfallProtocol\network\packets\BiomeDefinitionListPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\PacketConverter;
 use Supero\NightfallProtocol\utils\ProtocolUtils;
 use Supero\NightfallProtocol\utils\ReflectionUtils;
+use function array_filter;
+use function array_map;
 use function base64_encode;
 use function bin2hex;
 use function count;
@@ -135,7 +138,7 @@ class CustomNetworkSession extends NetworkSession
 	 */
 	private function onSessionStartSuccess() : void{
 		$this->getProperty("logger")->debug("Session start handshake completed, awaiting login packet");
-		$this->flushSendBuffer(true);
+		$this->flushGamePacketQueue();
 		$this->setProperty("enableCompression", true);
 		$this->setHandler(new CustomLoginPacketHandler(
 			Server::getInstance(),
@@ -272,14 +275,15 @@ class CustomNetworkSession extends NetworkSession
 		}));
 	}
 
-	private function flushSendBuffer(bool $immediate = false) : void{
+	/**
+	 * @throws ReflectionException
+	 */
+	private function flushGamePacketQueue() : void{
 		if(count($this->getProperty("sendBuffer")) > 0){
 			Timings::$playerNetworkSend->startTiming();
 			try{
 				$syncMode = null; //automatic
-				if($immediate){
-					$syncMode = true;
-				}elseif($this->getProperty("forceAsyncCompression")){
+				if($this->getProperty("forceAsyncCompression")){
 					$syncMode = false;
 				}
 
@@ -287,21 +291,14 @@ class CustomNetworkSession extends NetworkSession
 				PacketBatch::encodeRaw($stream, $this->getProperty("sendBuffer"));
 
 				if($this->getProperty("enableCompression")){
-					$batch = ProtocolUtils::prepareBatch(
-						$stream->getBuffer(),
-						$this->getProperty("compressor"),
-						$this->getProperty("server"),
-						$this->protocol,
-						$syncMode,
-						Timings::$playerNetworkSendCompressSessionBuffer
-					);
+					$batch = $this->getProperty("server")->prepareBatch($stream->getBuffer(), $this->getProperty("compressor"), $syncMode, Timings::$playerNetworkSendCompressSessionBuffer);
 				}else{
 					$batch = $stream->getBuffer();
 				}
 				$this->setProperty("sendBuffer", []);
 				$ackPromises = $this->getProperty("sendBufferAckPromises");
 				$this->setProperty("sendBufferAckPromises", []);
-				ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoBufferFlush", $batch, $immediate, $ackPromises);
+				ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoGamePacketFlush", $batch, true, $ackPromises);
 			}finally{
 				Timings::$playerNetworkSend->stopTiming();
 			}
@@ -491,8 +488,8 @@ class CustomNetworkSession extends NetworkSession
 	public function queueCompressed(CompressBatchPromise|string $payload, bool $immediate = false) : void{
 		Timings::$playerNetworkSend->startTiming();
 		try{
-			$this->flushSendBuffer($immediate); //Maintain ordering if possible
-			ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoBufferFlush", $payload, $immediate);
+			$this->flushGamePacketQueue();
+			ReflectionUtils::invoke(NetworkSession::class, $this, "queueCompressedNoGamePacketFlush", $payload, $immediate);
 		}finally{
 			Timings::$playerNetworkSend->stopTiming();
 		}
@@ -544,12 +541,21 @@ class CustomNetworkSession extends NetworkSession
 					return false;
 				}
 				//what the sigma?
-				$packets = [];
-				foreach ($ev->getPackets() as $label => $packet) {
-					$packets[$label] = PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
-				}
+				$packets = array_map(function ($packet) {
+					return PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this);
+				}, $ev->getPackets());
 			}else{
 				$packets = [(PacketConverter::handleClientbound($packet, $this->getProperty("typeConverter"), $this))];
+			}
+
+			foreach ($packets as $packet) {
+				if($packet::NETWORK_ID == BiomeDefinitionListPacket::NETWORK_ID){
+					//remove from $packets
+					$packets = array_filter($packets, function ($p) use ($packet) {
+						return $p::NETWORK_ID !== BiomeDefinitionListPacket::NETWORK_ID;
+					});
+				}
+				echo "\nSending " . $packet::class . " to " . $this->getDisplayName() . " (" . $packet->pid() . ")";
 			}
 
 			if($ackReceiptResolver !== null){
@@ -565,7 +571,7 @@ class CustomNetworkSession extends NetworkSession
 				$this->addToSendBuffer(self::encodePacketTimed($encoder, $evPacket));
 			}
 			if($immediate){
-				$this->flushSendBuffer(true);
+				$this->flushGamePacketQueue(true);
 			}
 
 			return true;
@@ -642,7 +648,7 @@ class CustomNetworkSession extends NetworkSession
 			Timings::$playerNetworkSendInventorySync->stopTiming();
 		}
 
-		$this->flushSendBuffer();
+		$this->flushGamePacketQueue();
 	}
 
 	private function getLogPrefix() : string{

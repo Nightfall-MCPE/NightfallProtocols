@@ -8,6 +8,8 @@ use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\camera\CameraPresetAimAssist;
+use pocketmine\network\mcpe\protocol\types\ControlScheme;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 
 final class CustomCameraPreset{
@@ -31,10 +33,13 @@ final class CustomCameraPreset{
 		private ?Vector2 $viewOffset,
 		private ?Vector3 $entityOffset,
 		private ?float $radius,
+		private ?float $yawLimitMin,
+		private ?float $yawLimitMax,
 		private ?int $audioListenerType,
 		private ?bool $playerEffects,
 		private ?bool $alignTargetAndCameraForward,
-		private ?bool $aimAssist,
+		private ?CameraPresetAimAssist $aimAssist,
+		private ?ControlScheme $controlScheme,
 	){}
 
 	public function getName() : string{ return $this->name; }
@@ -69,13 +74,19 @@ final class CustomCameraPreset{
 
 	public function getRadius() : ?float{ return $this->radius; }
 
+	public function getYawLimitMin() : ?float{ return $this->yawLimitMin; }
+
+	public function getYawLimitMax() : ?float{ return $this->yawLimitMax; }
+
 	public function getAudioListenerType() : ?int{ return $this->audioListenerType; }
 
 	public function getPlayerEffects() : ?bool{ return $this->playerEffects; }
 
 	public function getAlignTargetAndCameraForward() : ?bool{ return $this->alignTargetAndCameraForward; }
 
-	public function getAimAssist() : ?bool{ return $this->aimAssist; }
+	public function getAimAssist() : ?CameraPresetAimAssist{ return $this->aimAssist; }
+
+	public function getControlScheme() : ?ControlScheme{ return $this->controlScheme; }
 
 	public static function read(PacketSerializer $in) : self{
 		$name = $in->getString();
@@ -103,13 +114,26 @@ final class CustomCameraPreset{
 				$entityOffset = $in->readOptional($in->getVector3(...));
 			}
 			$radius = $in->readOptional($in->getLFloat(...));
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+				$yawLimitMin = $in->readOptional($in->getLFloat(...));
+				$yawLimitMax = $in->readOptional($in->getLFloat(...));
+			}
 		}
 		$audioListenerType = $in->readOptional($in->getByte(...));
 		$playerEffects = $in->readOptional($in->getBool(...));
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
-			$alignTargetAndCameraForward = $in->readOptional($in->getBool(...));
+			if($in->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_80){
+				$alignTargetAndCameraForward = $in->readOptional($in->getBool(...));
+			}
 			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
-				$aimAssist = $in->readOptional($in->getBool(...));
+				if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+					$aimAssist = $in->readOptional(fn() => CameraPresetAimAssist::read($in));
+					if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80){
+						$controlScheme = $in->readOptional(fn() => ControlScheme::fromPacket($in->getByte()));
+					}
+				}else{
+					$aimAssist = $in->readOptional(fn() => $in->getBool() ? new CameraPresetAimAssist(null, null, null, null) : null);
+				}
 			}
 		}
 
@@ -130,10 +154,13 @@ final class CustomCameraPreset{
 			$viewOffset ?? null,
 			$entityOffset ?? null,
 			$radius ?? null,
+			$yawLimitMin ?? null,
+			$yawLimitMax ?? null,
 			$audioListenerType,
 			$playerEffects,
 			$alignTargetAndCameraForward ?? null,
-			$aimAssist ?? null
+			$aimAssist ?? null,
+			$controlScheme ?? null,
 		);
 	}
 
@@ -155,12 +182,15 @@ final class CustomCameraPreset{
 			null,
 			null,
 			null,
-			$nbt->getTag("audio_listener_type") === null ? null : match($nbt->getString("audio_listener_type")){
+			null,
+			null,
+			$nbt->getTag("audio_listener_type") === null ? null : match ($nbt->getString("audio_listener_type")){
 				"camera" => self::AUDIO_LISTENER_TYPE_CAMERA,
 				"player" => self::AUDIO_LISTENER_TYPE_PLAYER,
 				default => throw new \InvalidArgumentException("Invalid audio listener type: " . $nbt->getString("audio_listener_type")),
 			},
 			$nbt->getTag("player_effects") === null ? null : $nbt->getByte("player_effects") !== 0,
+			null,
 			null,
 			null,
 		);
@@ -192,13 +222,26 @@ final class CustomCameraPreset{
 				$out->writeOptional($this->entityOffset, $out->putVector3(...));
 			}
 			$out->writeOptional($this->radius, $out->putLFloat(...));
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+				$out->writeOptional($this->yawLimitMin, $out->putLFloat(...));
+				$out->writeOptional($this->yawLimitMax, $out->putLFloat(...));
+			}
 		}
 		$out->writeOptional($this->audioListenerType, $out->putByte(...));
 		$out->writeOptional($this->playerEffects, $out->putBool(...));
 		if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
-			$out->writeOptional($this->alignTargetAndCameraForward, $out->putBool(...));
+			if($out->getProtocol() <= CustomProtocolInfo::PROTOCOL_1_21_80){
+				$out->writeOptional($this->alignTargetAndCameraForward, $out->putBool(...));
+			}
 			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_50){
-				$out->writeOptional($this->aimAssist, $out->putBool(...));
+				if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_60){
+					$out->writeOptional($this->aimAssist, fn(CameraPresetAimAssist $v) => $v->write($out));
+					if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80){
+						$out->writeOptional($this->controlScheme, fn(ControlScheme $v) => $out->putByte($v->value));
+					}
+				}else{
+					$out->writeOptional($this->aimAssist, fn(CameraPresetAimAssist $v) => $out->putBool(true));
+				}
 			}
 		}
 	}

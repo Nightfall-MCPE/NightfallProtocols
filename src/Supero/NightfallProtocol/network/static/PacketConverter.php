@@ -22,12 +22,11 @@ use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
-use Ramsey\Uuid\Uuid;
 use Supero\NightfallProtocol\network\caches\CustomCreativeInventoryCache;
 use Supero\NightfallProtocol\network\CustomNetworkSession;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\types\AbilitiesData;
-use Supero\NightfallProtocol\network\packets\types\AbilitiesLayer;
+use Supero\NightfallProtocol\network\packets\types\CustomAbilitiesData;
+use Supero\NightfallProtocol\network\packets\types\CustomAbilitiesLayer;
 use Supero\NightfallProtocol\network\packets\types\resourcepacks\CustomResourcePackInfoEntry;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use function dechex;
@@ -219,16 +218,17 @@ class PacketConverter
 					$packet->mustAccept,
 					$packet->hasAddons,
 					$packet->hasScripts,
-					Uuid::fromString(Uuid::NIL),
-					"",
 					false,
-					[]
+					[],
+					$packet->getWorldTemplateId(),
+					$packet->getWorldTemplateVersion(),
+					false,
 				);
 			case UpdateAbilitiesPacket::NETWORK_ID:
 				$data = $packet->getData();
 				$layers = [];
 				foreach($data->getAbilityLayers() as $layer){
-					$layers[] = new AbilitiesLayer(
+					$layers[] = new CustomAbilitiesLayer(
 						$layer->getLayerId(),
 						$layer->getBoolAbilities(),
 						$layer->getFlySpeed(),
@@ -236,7 +236,7 @@ class PacketConverter
 						$layer->getWalkSpeed()
 					);
 				}
-				$abilitiesData = new AbilitiesData(
+				$abilitiesData = new CustomAbilitiesData(
 					$data->getCommandPermission(),
 					$data->getPlayerPermission(),
 					$data->getTargetActorUniqueId(),

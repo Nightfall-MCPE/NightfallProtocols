@@ -8,13 +8,13 @@ use pocketmine\network\mcpe\protocol\InventorySlotPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\types\inventory\FullContainerName;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomFullContainerName;
 
 class InventorySlotPacket extends PM_Packet {
 
 	public int $windowId;
 	public int $inventorySlot;
-	public FullContainerName $customContainerName;
+	public CustomFullContainerName $customContainerName;
 	public int $dynamicContainerSize;
 	public ItemStackWrapper $item;
 	public ItemStackWrapper $storage;
@@ -22,7 +22,7 @@ class InventorySlotPacket extends PM_Packet {
 	/**
 	 * @generate-create-func
 	 */
-	public static function createPacket(int $windowId, int $inventorySlot, FullContainerName $containerName, int $dynamicContainerSize, ItemStackWrapper $item, ItemStackWrapper $storage) : self{
+	public static function createPacket(int $windowId, int $inventorySlot, CustomFullContainerName $containerName, int $dynamicContainerSize, ItemStackWrapper $item, ItemStackWrapper $storage) : self{
 		$result = new self();
 		$result->windowId = $windowId;
 		$result->inventorySlot = $inventorySlot;
@@ -37,14 +37,14 @@ class InventorySlotPacket extends PM_Packet {
 		$this->windowId = $in->getUnsignedVarInt();
 		$this->inventorySlot = $in->getUnsignedVarInt();
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30){
-			$this->customContainerName = FullContainerName::read($in);
+			$this->customContainerName = CustomFullContainerName::read($in);
 			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 				$this->storage = $in->getItemStackWrapper();
 			}else{
 				$this->dynamicContainerSize = $in->getUnsignedVarInt();
 			}
 		}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
-			$this->customContainerName = new FullContainerName(0, $in->getUnsignedVarInt());
+			$this->customContainerName = new CustomFullContainerName(0, $in->getUnsignedVarInt());
 		}
 		$this->item = $in->getItemStackWrapper();
 	}
@@ -65,7 +65,7 @@ class InventorySlotPacket extends PM_Packet {
 		$out->putItemStackWrapper($this->item);
 	}
 	public function getConstructorArguments(PM_Packet $packet) : array {
-		$customContainerName = new FullContainerName($packet->containerName->getContainerId(), $packet->containerName->getDynamicId());
+		$customContainerName = new CustomFullContainerName($packet->containerName->getContainerId(), $packet->containerName->getDynamicId());
 		return [
 			$packet->windowId,
 			$packet->inventorySlot,

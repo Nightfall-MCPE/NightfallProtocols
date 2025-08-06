@@ -81,6 +81,7 @@ class CustomLevelSettings
 	public string $serverIdentifier = "";
 	public string $worldIdentifier = "";
 	public string $scenarioIdentifier = "";
+	public string $ownerIdentifier = "";
 
 	/**
 	 * @throws BinaryDataException
@@ -151,6 +152,9 @@ class CustomLevelSettings
 			$this->serverIdentifier = $in->getString();
 			$this->worldIdentifier = $in->getString();
 			$this->scenarioIdentifier = $in->getString();
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_90){
+				$this->ownerIdentifier = $in->getString();
+			}
 		}
 	}
 
@@ -209,6 +213,9 @@ class CustomLevelSettings
 			$out->putString($this->serverIdentifier);
 			$out->putString($this->worldIdentifier);
 			$out->putString($this->scenarioIdentifier);
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_90){
+				$out->putString($this->ownerIdentifier);
+			}
 		}
 	}
 }

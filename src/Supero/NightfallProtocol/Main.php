@@ -17,7 +17,6 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use ReflectionException;
 use Supero\NightfallProtocol\network\CustomRaklibInterface;
-use Supero\NightfallProtocol\network\packets\PlayerAuthInputPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
 use Supero\NightfallProtocol\network\static\CustomPacketPool;
 use function dechex;

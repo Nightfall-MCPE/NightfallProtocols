@@ -9,6 +9,7 @@ use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryDataException;
+use Supero\NightfallProtocol\network\packets\BiomeDefinitionListPacket;
 use Supero\NightfallProtocol\network\packets\CameraAimAssistPacket;
 use Supero\NightfallProtocol\network\packets\CameraAimAssistPresetsPacket;
 use Supero\NightfallProtocol\network\packets\CameraInstructionPacket;
@@ -17,6 +18,7 @@ use Supero\NightfallProtocol\network\packets\ChangeDimensionPacket;
 use Supero\NightfallProtocol\network\packets\ClientMovementPredictionSyncPacket;
 use Supero\NightfallProtocol\network\packets\CodeBuilderSourcePacket;
 use Supero\NightfallProtocol\network\packets\ContainerClosePacket;
+use Supero\NightfallProtocol\network\packets\CorrectPlayerMovePredictionPacket;
 use Supero\NightfallProtocol\network\packets\DisconnectPacket;
 use Supero\NightfallProtocol\network\packets\EditorNetworkPacket;
 use Supero\NightfallProtocol\network\packets\EmotePacket;
@@ -37,9 +39,11 @@ use Supero\NightfallProtocol\network\packets\ResourcePacksInfoPacket;
 use Supero\NightfallProtocol\network\packets\ResourcePackStackPacket;
 use Supero\NightfallProtocol\network\packets\SetActorMotionPacket;
 use Supero\NightfallProtocol\network\packets\SetHudPacket;
+use Supero\NightfallProtocol\network\packets\SetMovementAuthorityPacket;
 use Supero\NightfallProtocol\network\packets\SetTitlePacket;
 use Supero\NightfallProtocol\network\packets\StartGamePacket;
 use Supero\NightfallProtocol\network\packets\StopSoundPacket;
+use Supero\NightfallProtocol\network\packets\SubChunkPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\packets\TickSyncPacket;
 use Supero\NightfallProtocol\network\packets\TransferPacket;
@@ -60,6 +64,7 @@ class CustomPacketPool extends PacketPool
 	{
 		parent::__construct();
 
+		$this->registerPacket(new BiomeDefinitionListPacket());
 		$this->registerPacket(new CameraAimAssistPacket());
 		$this->registerPacket(new CameraAimAssistPresetsPacket());
 		$this->registerPacket(new CameraInstructionPacket());
@@ -68,6 +73,7 @@ class CustomPacketPool extends PacketPool
 		$this->registerPacket(new ClientMovementPredictionSyncPacket());
 		$this->registerPacket(new CodeBuilderSourcePacket());
 		$this->registerPacket(new ContainerClosePacket());
+		$this->registerPacket(new CorrectPlayerMovePredictionPacket());
 		$this->registerPacket(new DisconnectPacket());
 		$this->registerPacket(new EditorNetworkPacket());
 		$this->registerPacket(new EmotePacket());
@@ -88,9 +94,11 @@ class CustomPacketPool extends PacketPool
 		$this->registerPacket(new ResourcePackStackPacket());
 		$this->registerPacket(new SetActorMotionPacket());
 		$this->registerPacket(new SetHudPacket());
+		$this->registerPacket(new SetMovementAuthorityPacket());
 		$this->registerPacket(new SetTitlePacket());
 		$this->registerPacket(new StartGamePacket());
 		$this->registerPacket(new StopSoundPacket());
+		$this->registerPacket(new SubChunkPacket());
 		$this->registerPacket(new TextPacket());
 		$this->registerPacket(new TickSyncPacket());
 		$this->registerPacket(new TransferPacket());

@@ -7,14 +7,16 @@ namespace Supero\NightfallProtocol\network\packets;
 use pocketmine\network\mcpe\protocol\ClientMovementPredictionSyncPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\BitSet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
+use Supero\NightfallProtocol\network\packets\serializer\CustomBitSet;
 
-class ClientMovementPredictionSyncPacket extends PM_Packet {
+class ClientMovementPredictionSyncPacket extends PM_Packet{
 
-	public const OLD_FLAG_LENGTH = 120;
-	public const FLAG_LENGTH = 123;
+	public const FLAG_LENGTH = EntityMetadataFlags::NUMBER_OF_FLAGS;
 
-	private BitSet $flags;
+	private CustomBitSet $flags;
 
 	private float $scale;
 	private float $width;
@@ -31,7 +33,7 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	private bool $actorFlyingState;
 
 	private static function internalCreate(
-		BitSet $flags,
+		CustomBitSet $flags,
 		float $scale,
 		float $width,
 		float $height,
@@ -61,7 +63,7 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	}
 
 	public static function createPacket(
-		BitSet $flags,
+		CustomBitSet $flags,
 		float $scale,
 		float $width,
 		float $height,
@@ -106,7 +108,12 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	public function getActorFlyingState() : bool{ return $this->actorFlyingState; }
 
 	protected function decodePayload(PacketSerializer $in) : void{
-		$this->flags = BitSet::read($in, $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : self::OLD_FLAG_LENGTH);
+		$this->flags = CustomBitSet::read($in, match(true) {
+			$in->getProtocol() === CustomProtocolInfo::CURRENT_PROTOCOL => self::FLAG_LENGTH,
+			$in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80 => 124,
+			$in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 => 123,
+			default => 120,
+		});
 		$this->scale = $in->getLFloat();
 		$this->width = $in->getLFloat();
 		$this->height = $in->getLFloat();
@@ -123,7 +130,12 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
-		$this->flags->write($out, $out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 ? self::FLAG_LENGTH : self::OLD_FLAG_LENGTH);
+		$this->flags->write($out, match(true) {
+			$out->getProtocol() === CustomProtocolInfo::CURRENT_PROTOCOL => self::FLAG_LENGTH,
+			$out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80 => 124,
+			$out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_70 => 123,
+			default => 120,
+		});
 		$out->putLFloat($this->scale);
 		$out->putLFloat($this->width);
 		$out->putLFloat($this->height);
@@ -138,7 +150,6 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 			$out->putBool($this->actorFlyingState);
 		}
 	}
-
 	public function getConstructorArguments(PM_Packet $packet) : array
 	{
 		return [
@@ -153,7 +164,7 @@ class ClientMovementPredictionSyncPacket extends PM_Packet {
 			$packet->getHealth(),
 			$packet->getHunger(),
 			$packet->getActorUniqueId(),
-			$packet->getActorFlyingState(),
+			$packet->getActorFlyingState()
 		];
 	}
 }

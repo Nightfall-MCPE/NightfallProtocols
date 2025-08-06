@@ -6,10 +6,14 @@ namespace Supero\NightfallProtocol\network;
 
 class CustomProtocolInfo {
 
-	public const CURRENT_PROTOCOL = self::PROTOCOL_1_21_70;
+	public const CURRENT_PROTOCOL = self::PROTOCOL_1_21_100;
 
 	public const ACCEPTED_PROTOCOLS = [
 		self::CURRENT_PROTOCOL,
+		self::PROTOCOL_1_21_93,
+		self::PROTOCOL_1_21_90,
+		self::PROTOCOL_1_21_80,
+		self::PROTOCOL_1_21_70,
 		self::PROTOCOL_1_21_60,
 		self::PROTOCOL_1_21_50,
 		self::PROTOCOL_1_21_40,
@@ -27,9 +31,13 @@ class CustomProtocolInfo {
 	//In case a version has no real protocol/item/block changes.
 	//If the latest has changed from the previous, only put the current protocol here
 	public const COMBINED_LATEST = [
-		self::CURRENT_PROTOCOL
+		self::CURRENT_PROTOCOL,
 	];
 
+	public const PROTOCOL_1_21_100 = 827;
+	public const PROTOCOL_1_21_93 = 819;
+	public const PROTOCOL_1_21_90 = 818;
+	public const PROTOCOL_1_21_80 = 800;
 	public const PROTOCOL_1_21_70 = 786;
 	public const PROTOCOL_1_21_60 = 776;
 	public const PROTOCOL_1_21_50 = 766;
@@ -44,5 +52,5 @@ class CustomProtocolInfo {
 	public const PROTOCOL_1_20_50 = 630;
 
 	public const TICK_SYNC_PACKET = 0x17;
-
+	public const SET_MOVEMENT_AUTHORITY_PACKET = 0x13f;
 }

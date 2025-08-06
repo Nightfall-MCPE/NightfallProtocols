@@ -8,21 +8,21 @@ use pocketmine\network\mcpe\protocol\InventoryContentPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
-use Supero\NightfallProtocol\network\packets\types\inventory\FullContainerName;
+use Supero\NightfallProtocol\network\packets\types\inventory\CustomFullContainerName;
 use function count;
 
 class InventoryContentPacket extends PM_Packet {
 	public int $windowId;
 	/** @var ItemStackWrapper[] */
 	public array $items = [];
-	public FullContainerName $customContainerName;
+	public CustomFullContainerName $customContainerName;
 	public int $dynamicContainerSize;
 	public ItemStackWrapper $storage;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function createPacket(int $windowId, array $items, FullContainerName $containerName, int $dynamicContainerSize, ItemStackWrapper $storage) : self {
+	public static function createPacket(int $windowId, array $items, CustomFullContainerName $containerName, int $dynamicContainerSize, ItemStackWrapper $storage) : self {
 		$result = new self();
 		$result->windowId = $windowId;
 		$result->items = $items;
@@ -38,14 +38,14 @@ class InventoryContentPacket extends PM_Packet {
 			$this->items[] = $in->getItemStackWrapper();
 		}
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_30){
-			$this->customContainerName = FullContainerName::read($in);
+			$this->customContainerName = CustomFullContainerName::read($in);
 			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_40){
 				$this->storage = $in->getItemStackWrapper();
 			}else{
 				$this->dynamicContainerSize = $in->getUnsignedVarInt();
 			}
 		}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
-			$this->customContainerName = new FullContainerName(0, $in->getUnsignedVarInt());
+			$this->customContainerName = new CustomFullContainerName(0, $in->getUnsignedVarInt());
 		}
 	}
 
@@ -68,7 +68,7 @@ class InventoryContentPacket extends PM_Packet {
 	}
 
 	public function getConstructorArguments(PM_Packet $packet) : array {
-		$customContainerName = new FullContainerName($packet->containerName->getContainerId(), $packet->containerName->getDynamicId());
+		$customContainerName = new CustomFullContainerName($packet->containerName->getContainerId(), $packet->containerName->getDynamicId());
 		return [
 			$packet->windowId,
 			$packet->items,

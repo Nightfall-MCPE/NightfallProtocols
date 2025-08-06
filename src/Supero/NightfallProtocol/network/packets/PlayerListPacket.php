@@ -4,38 +4,37 @@ declare(strict_types=1);
 
 namespace Supero\NightfallProtocol\network\packets;
 
+use pocketmine\color\Color;
 use pocketmine\network\mcpe\protocol\PlayerListPacket as PM_Packet;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+
 use Supero\NightfallProtocol\network\CustomProtocolInfo;
 use function count;
-
-class PlayerListPacket extends PM_Packet {
+class PlayerListPacket extends PM_Packet{
 
 	public const TYPE_ADD = 0;
 	public const TYPE_REMOVE = 1;
 
 	public int $type;
-	/** @var PlayerListEntry[] */
+
 	public array $entries = [];
 
-	/**
-	 * @generate-create-func
-	 */
-	public static function createPacket(int $type, array $entries) : self {
+	public static function createPacket(int $type, array $entries) : self{
 		$result = new self();
 		$result->type = $type;
 		$result->entries = $entries;
 		return $result;
 	}
-	protected function decodePayload(PacketSerializer $in) : void {
+
+	protected function decodePayload(PacketSerializer $in) : void{
 		$this->type = $in->getByte();
 		$count = $in->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
 			$entry = new PlayerListEntry();
 
-			$entry->uuid = $in->getUUID();
 			if($this->type === self::TYPE_ADD){
+				$entry->uuid = $in->getUUID();
 				$entry->actorUniqueId = $in->getActorUniqueId();
 				$entry->username = $in->getString();
 				$entry->xboxUserId = $in->getString();
@@ -44,9 +43,14 @@ class PlayerListPacket extends PM_Packet {
 				$entry->skinData = $in->getSkin();
 				$entry->isTeacher = $in->getBool();
 				$entry->isHost = $in->getBool();
-				if ($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60) {
+				if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
 					$entry->isSubClient = $in->getBool();
+					if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80){
+						$entry->color = Color::fromARGB($in->getLInt());
+					}
 				}
+			}else{
+				$entry->uuid = $in->getUUID();
 			}
 
 			$this->entries[$i] = $entry;
@@ -57,7 +61,8 @@ class PlayerListPacket extends PM_Packet {
 			}
 		}
 	}
-	protected function encodePayload(PacketSerializer $out) : void {
+
+	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putByte($this->type);
 		$out->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
@@ -71,8 +76,11 @@ class PlayerListPacket extends PM_Packet {
 				$out->putSkin($entry->skinData);
 				$out->putBool($entry->isTeacher);
 				$out->putBool($entry->isHost);
-				if ($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60) {
+				if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_60){
 					$out->putBool($entry->isSubClient);
+					if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_80){
+						$out->putLInt(($entry->color ?? new Color(255, 255, 255))->toARGB());
+					}
 				}
 			}else{
 				$out->putUUID($entry->uuid);
@@ -84,7 +92,9 @@ class PlayerListPacket extends PM_Packet {
 			}
 		}
 	}
-	public function getConstructorArguments(PM_Packet $packet) : array {
+
+	public function getConstructorArguments(PM_Packet $packet) : array
+	{
 		return [
 			$packet->type,
 			$packet->entries
