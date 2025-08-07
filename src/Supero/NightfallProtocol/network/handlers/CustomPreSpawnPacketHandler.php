@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Supero\NightfallProtocol\network\handlers;
 
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\handler\PacketHandler;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
