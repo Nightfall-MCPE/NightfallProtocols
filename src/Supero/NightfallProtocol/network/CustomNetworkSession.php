@@ -53,14 +53,13 @@ use Supero\NightfallProtocol\network\handlers\CustomLoginPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomPreSpawnPacketHandler;
 use Supero\NightfallProtocol\network\handlers\CustomSessionStartPacketHandler;
 use Supero\NightfallProtocol\network\handlers\static\CustomInGamePacketHandler;
-use Supero\NightfallProtocol\network\packets\BiomeDefinitionListPacket;
 use Supero\NightfallProtocol\network\packets\TextPacket;
 use Supero\NightfallProtocol\network\static\convert\CustomTypeConverter;
+use Supero\NightfallProtocol\network\static\CustomPacketBatch;
 use Supero\NightfallProtocol\network\static\CustomPacketSerializer;
 use Supero\NightfallProtocol\network\static\PacketConverter;
 use Supero\NightfallProtocol\utils\ProtocolUtils;
 use Supero\NightfallProtocol\utils\ReflectionUtils;
-use function array_filter;
 use function array_map;
 use function base64_encode;
 use function bin2hex;
@@ -288,10 +287,10 @@ class CustomNetworkSession extends NetworkSession
 				}
 
 				$stream = new BinaryStream();
-				PacketBatch::encodeRaw($stream, $this->getProperty("sendBuffer"));
+				CustomPacketBatch::encodeRaw($stream, $this->getProperty("sendBuffer"));
 
 				if($this->getProperty("enableCompression")){
-					$batch = $this->getProperty("server")->prepareBatch($stream->getBuffer(), $this->getProperty("compressor"), $syncMode, Timings::$playerNetworkSendCompressSessionBuffer);
+					$batch = ProtocolUtils::prepareBatch($stream->getBuffer(), $this->getProperty("compressor"), $this->getProperty("server"), $this->getProtocol(), $syncMode, Timings::$playerNetworkSendCompressSessionBuffer);
 				}else{
 					$batch = $stream->getBuffer();
 				}
@@ -307,6 +306,7 @@ class CustomNetworkSession extends NetworkSession
 
 	/**
 	 * @throws PacketHandlingException
+	 * @throws ReflectionException
 	 */
 	public function handleEncoded(string $payload) : void{
 		if(!$this->getProperty("connected")){
@@ -561,7 +561,7 @@ class CustomNetworkSession extends NetworkSession
 				$this->addToSendBuffer(self::encodePacketTimed($encoder, $evPacket));
 			}
 			if($immediate){
-				$this->flushGamePacketQueue(true);
+				$this->flushGamePacketQueue();
 			}
 
 			return true;

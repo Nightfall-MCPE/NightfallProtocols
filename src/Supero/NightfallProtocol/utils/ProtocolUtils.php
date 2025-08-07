@@ -41,7 +41,7 @@ class ProtocolUtils
 			$timings->startTiming();
 
 			$threshold = $compressor->getCompressionThreshold();
-			if($threshold === null || strlen($buffer) < $compressor->getCompressionThreshold() && $protocol >= CustomProtocolInfo::PROTOCOL_1_20_60){
+			if(($threshold === null || strlen($buffer) < $compressor->getCompressionThreshold()) && $protocol >= CustomProtocolInfo::PROTOCOL_1_20_60){
 				$compressionType = CompressionAlgorithm::NONE;
 				$compressed = $buffer;
 

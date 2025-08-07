@@ -22,7 +22,7 @@ class CorrectPlayerMovePredictionPacket extends PM_Packet{
 	private int $tick;
 	private int $predictionType;
 	private Vector2 $vehicleRotation;
-	private float $vehicleAngularVelocity;
+	private ?float $vehicleAngularVelocity;
 
 	public static function createPacket(
 		Vector3 $position,
@@ -31,7 +31,7 @@ class CorrectPlayerMovePredictionPacket extends PM_Packet{
 		int $tick,
 		int $predictionType,
 		Vector2 $vehicleRotation,
-		float $vehicleAngularVelocity,
+		?float $vehicleAngularVelocity,
 	) : self{
 		$result = new self();
 		$result->position = $position;
@@ -44,20 +44,6 @@ class CorrectPlayerMovePredictionPacket extends PM_Packet{
 		return $result;
 	}
 
-	public function getPosition() : Vector3{ return $this->position; }
-
-	public function getDelta() : Vector3{ return $this->delta; }
-
-	public function isOnGround() : bool{ return $this->onGround; }
-
-	public function getTick() : int{ return $this->tick; }
-
-	public function getPredictionType() : int{ return $this->predictionType; }
-
-	public function getVehicleRotation() : Vector2{ return $this->vehicleRotation; }
-
-	public function getVehicleAngularVelocity() : float{ return $this->vehicleAngularVelocity; }
-
 	protected function decodePayload(PacketSerializer $in) : void{
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80){
 			$this->predictionType = $in->getByte();
@@ -66,10 +52,8 @@ class CorrectPlayerMovePredictionPacket extends PM_Packet{
 		$this->delta = $in->getVector3();
 		if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_20_80 && ($this->predictionType === self::PREDICTION_TYPE_VEHICLE || $in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100)){
 			$this->vehicleRotation = new Vector2($in->getFloat(), $in->getFloat());
-			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100){
-				$this->vehicleAngularVelocity = $in->getFloat();
-			}elseif($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
-				$this->vehicleAngularVelocity = $in->readOptional($in->getFloat(...)) ?? 0.0;
+			if($in->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
+				$this->vehicleAngularVelocity = $in->readOptional($in->getFloat(...));
 			}
 		}
 		$this->onGround = $in->getBool();
@@ -89,9 +73,7 @@ class CorrectPlayerMovePredictionPacket extends PM_Packet{
 			$out->putFloat($this->vehicleRotation->getX());
 			$out->putFloat($this->vehicleRotation->getY());
 
-			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_100){
-				$out->putFloat($this->vehicleAngularVelocity);
-			}elseif($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
+			if($out->getProtocol() >= CustomProtocolInfo::PROTOCOL_1_21_20){
 				$out->writeOptional($this->vehicleAngularVelocity, $out->putFloat(...));
 			}
 		}

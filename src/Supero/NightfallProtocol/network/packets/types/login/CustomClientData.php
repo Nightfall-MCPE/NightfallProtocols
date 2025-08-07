@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace Supero\NightfallProtocol\network\packets\types\login;
 
-use pocketmine\network\mcpe\protocol\types\login\ClientDataAnimationFrame;
-use pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaPieceTintColor;
-use pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaSkinPiece;
-
 class CustomClientData{
 
 	/**
-	 * @var ClientDataAnimationFrame[]
+	 * @var \pocketmine\network\mcpe\protocol\types\login\ClientDataAnimationFrame[]
 	 * @required
 	 */
 	public array $AnimatedImageData;
@@ -79,7 +75,7 @@ class CustomClientData{
 	public bool $OverrideSkin;
 
 	/**
-	 * @var ClientDataPersonaSkinPiece[]
+	 * @var \pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaSkinPiece[]
 	 * @required
 	 */
 	public array $PersonaPieces;
@@ -88,7 +84,7 @@ class CustomClientData{
 	public bool $PersonaSkin;
 
 	/**
-	 * @var ClientDataPersonaPieceTintColor[]
+	 * @var \pocketmine\network\mcpe\protocol\types\login\ClientDataPersonaPieceTintColor[]
 	 * @required
 	 */
 	public array $PieceTintColors;
