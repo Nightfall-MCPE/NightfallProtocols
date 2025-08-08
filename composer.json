@@ -1,5 +1,5 @@
 {
-  "name": "nightfall-mcpe/nightfallprotocols",
+  "name": "nightfall-mcpe/multiversion",
   "description": "(not-so) Simple multi-version plugin",
   "minimum-stability": "dev",
   "authors": [

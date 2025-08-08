@@ -1,6 +1,6 @@
 ---
 name: Crash
-about: Report a crash in NightfallProtocol
+about: Report a crash in MultiVersion
 title: Server crashed
 labels: ''
 assignees: ''

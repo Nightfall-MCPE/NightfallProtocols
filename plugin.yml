@@ -1,7 +1,7 @@
 ---
-name: NightfallProtocol
+name: MultiVersion
 version: 1.0
-main: Supero\NightfallProtocol\Main
+main: Supero\MultiVersion\Main
 api: 5.0.0
 mcpe-protocol: 827
 ...

@@ -12,7 +12,7 @@
  */
 function generateCustomPacket($packetName, $additionalProperties = []): string
 {
-    $namespace = "Supero\\NightfallProtocol\\network\\packets";
+    $namespace = "Supero\\MultiVersion\\network\\packets";
     $basePacket = "pocketmine\\network\\mcpe\\protocol\\$packetName as PM_Packet";
     $customPacket = "$packetName extends PM_Packet";
 
@@ -46,7 +46,7 @@ function generateCustomPacket($packetName, $additionalProperties = []): string
         ];
     }
 
-    $classString = "<?php\n\nnamespace $namespace;\n\nuse $basePacket;\nuse pocketmine\\network\\mcpe\\protocol\\serializer\\PacketSerializer;\n\nuse Supero\\NightfallProtocol\\network\\CustomProtocolInfo;\n\nclass $customPacket {\n";
+    $classString = "<?php\n\nnamespace $namespace;\n\nuse $basePacket;\nuse pocketmine\\network\\mcpe\\protocol\\serializer\\PacketSerializer;\n\nuse Supero\\MultiVersion\\network\\CustomProtocolInfo;\n\nclass $customPacket {\n";
 
     // Add properties
     foreach ($properties as $property) {
@@ -134,7 +134,7 @@ try {
 
     $packetContent = generateCustomPacket($packetName);
 
-    $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'NightfallProtocol' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
+    $outputPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Supero' . DIRECTORY_SEPARATOR . 'MultiVersion' . DIRECTORY_SEPARATOR . "network" . DIRECTORY_SEPARATOR . "packets" .  DIRECTORY_SEPARATOR . $packetName . ".php";
 
     saveToFile($outputPath, $packetContent);
 
