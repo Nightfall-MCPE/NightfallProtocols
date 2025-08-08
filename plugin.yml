@@ -2,6 +2,6 @@
 name: MultiVersion
 version: 1.0
 main: Supero\MultiVersion\Main
-api: 5.0.0
+api: 5.32.0
 mcpe-protocol: 827
 ...
