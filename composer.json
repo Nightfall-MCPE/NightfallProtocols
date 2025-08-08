@@ -2,14 +2,8 @@
   "name": "nightfall-mcpe/multiversion",
   "description": "(not-so) Simple multi-version plugin",
   "minimum-stability": "dev",
-  "authors": [
-    {
-      "name": "superomarking",
-      "email": "superomarking@outlook.com"
-    }
-  ],
   "require-dev": {
-    "pocketmine/pocketmine-mp": "dev-bedrock-1.21.100",
+    "pocketmine/pocketmine-mp": "*",
     "friendsofphp/php-cs-fixer": "*"
   },
 
